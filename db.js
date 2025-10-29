@@ -7,7 +7,7 @@ const db = mysql.createConnection({
     user: 'root',
     password: '',
     database: 'RPEcoJourney',
-    port: 3316
+    
 });
 
 // Connecting to database
