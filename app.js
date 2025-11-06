@@ -1,5 +1,6 @@
 const express = require('express');
 const indexController = require('./controller/index');
+const db = require('./db');
 
 
 
@@ -66,6 +67,33 @@ app.get('/', indexController.getLogin);
 app.post('/', indexController.login);
 app.get('/register',indexController.getRegister);
 app.post('/register',validateRegistration,indexController.register);
+app.get('/forgot-password', indexController.getForgotPassword);
+app.post('/forgot-password', indexController.postForgotPassword);
+app.post('/reset-password', indexController.postResetPassword);
+
+
+
+//testing forget password route
+
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash.toString();
+}
+
+
+
+
+
+
+
+
+
+
+
 
 // Connect to PORT
 const PORT = process.env.PORT || 3000;
