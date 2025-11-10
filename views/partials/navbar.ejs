@@ -1,0 +1,61 @@
+<nav>
+  <h1>RPEcoJourney</h1>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/about">About Us</a></li>
+    <li><a href="/categories">Categories</a></li>
+    <li><a href="/quiz">Quiz Me!</a></li>
+  </ul>
+  <img src="/images/profile.jpg" alt="Profile" class="profile-pic" />
+</nav>
+
+<style>
+  nav {
+    background-color: #8bc34a; /* soft green */
+    color: #0b2535;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 2.5rem;
+  }
+
+  /* Title */
+  nav h1 {
+    margin: 0;
+    font-size: 2.3rem; /* larger title */
+    font-weight: 900;
+    letter-spacing: 1px;
+  }
+
+  /* Navigation links */
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 45px;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav ul li a {
+    color: #0b2535;
+    text-decoration: none;
+    font-style: italic;
+    font-size: 1.4rem; /* increased from 1.2rem */
+    font-weight: 700;
+    transition: all 0.25s ease-in-out;
+  }
+
+  nav ul li a:hover {
+    text-decoration: underline;
+    color: #1a1a1a;
+  }
+
+  /* Profile picture */
+  .profile-pic {
+    width: 75px; /* slightly bigger again */
+    height: 75px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0b2535;
+  }
+</style>
