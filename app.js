@@ -48,6 +48,12 @@ app.use(ses({
 
 app.use(flash());
 
+// Home page
+app.get('/', userController.getHomePage);
+
+// About Us page
+app.get('/aboutus', userController.getAboutPage);
+
 app.get('/', productController.getProduct);
 app.get('/products', productController.getProducts);
 app.get('/product/:id', productController.getproductId);
