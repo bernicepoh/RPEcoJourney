@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Sets | RPECOJOURNEY</title>
+  <style>
+    /* ===== RESET ===== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: url('/images/backgroundimage.jpg') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      color: #0b2535;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.85);
+      z-index: -1;
+    }
+
+    .container {
+      text-align: center;
+      margin: 100px auto;
+      max-width: 1600px;
+      padding: 0 40px;
+    }
+
+    h2 {
+      font-size: 2.8rem;
+      color: #0b2535;
+      margin-bottom: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    h2::after {
+      content: "🌿";
+      font-size: 2.2rem;
+    }
+
+    /* ===== QUIZ CARD GRID ===== */
+    .quiz-list {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 60px;
+    }
+
+    .quiz-card {
+      width: 370px;
+      height: 500px;
+      border-radius: 40px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding-bottom: 40px;
+      color: #f5fff0;
+      text-align: center;
+
+      /* ✨ Pattern + color background */
+      background: url('/images/leaf_pattern.png') no-repeat center center;
+      background-size: cover;
+      background-color: #2e7d32;
+      background-blend-mode: multiply;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .quiz-card:hover {
+      transform: translateY(-10px) scale(1.04);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .quiz-card h3 {
+      font-size: 1.8rem;
+      font-style: italic;
+      font-weight: 700;
+      margin-bottom: 25px;
+      z-index: 1;
+      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ===== BUTTON ===== */
+    .btn {
+      display: inline-block;
+      background-color: #91c77d;
+      color: #0b2535;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      padding: 15px 45px;
+      text-transform: uppercase;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn:hover {
+      background-color: #7bb565;
+      transform: scale(1.05);
+      box-shadow: 0 0 25px rgba(145, 199, 125, 0.9);
+    }
+
+    /* ===== BACK LINK ===== */
+    .back-link {
+      display: inline-block;
+      margin-top: 50px;
+      text-decoration: none;
+      color: #256b45;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+      color: #1a4b32;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1200px) {
+      .quiz-list {
+        flex-wrap: wrap;
+      }
+
+      .quiz-card {
+        width: 85%;
+        height: 460px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ✅ Include Navbar -->
+  <%- include('partials/navbar') %>
+
+  <div class="container">
+    <h2>Quiz Available</h2>
+
+    <div class="quiz-list">
+      <% if (sets.length > 0) { %>
+        <% sets.forEach((set) => { %>
+          <div class="quiz-card">
+            <h3>Set <%= set.set_number %></h3>
+            <a href="/quiz/category/<%= categoryId %>/set/<%= set.set_number %>" class="btn">Start Quiz</a>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p>No quiz sets available for this category yet.</p>
+      <% } %>
+    </div>
+
+    <a href="/quiz" class="back-link">← Back to Categories</a>
+  </div>
+</body>
+</html>
