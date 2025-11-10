@@ -69,11 +69,11 @@ app.use('/uploads', express.static('uploads'));
 // app.get('/', (req, res) => res.redirect('index'));  // redirect to real list
 
 // keep your existing root:
-app.get('/', (req, res) => {
-  res.render('about', { loggedIn: !!req.session.user });
-});
+// app.get('/', (req, res) => {
+//   res.render('home', { loggedIn: !!req.session.user });
+// });
 
-app.get('/about', (req, res) => res.redirect('/'));
+app.get('/', (req, res) => res.redirect('categories'));
 
 
 // ===============================
