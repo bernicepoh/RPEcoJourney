@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPEcoJourney | Categories</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+  
+  body {
+    background-color: #f8fdf7;
+    background-image: url('/images/background.png');
+    background-repeat: no-repeat;
+    background-position: bottom center;
+    background-size: 100% auto;
+    background-attachment: fixed;
+    margin: 0; 
+    padding: 0;
+    font-family: 'Georgia', serif; 
+    color: #123524;
+  }
+  
+
+  header h1 { 
+    font-size: 2.2em; 
+    font-weight: bold; 
+  }
+  nav a { 
+    color: white; 
+    text-decoration: none; 
+    margin: 0 20px; 
+    font-style: italic; 
+    font-weight: 500; 
+    font-size: 1.3em; 
+  }
+
+  main { 
+    padding: 60px 100px; 
+    text-align: center; 
+  }
+  h2 { 
+    font-style: italic; 
+    color: #1a4d2e; 
+    font-size: 2em; 
+  }
+  p { 
+    font-size: 1.2em; 
+    line-height: 1.7; 
+    max-width: 850px; 
+    margin: 0 auto; 
+  }
+  .intro { 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-wrap: wrap; 
+    text-align: left; 
+    margin-bottom: 40px; 
+  }
+  .intro-text { 
+    flex: 1; 
+    min-width: 320px; 
+  }
+  .intro img { 
+    width: 250px; 
+    border-radius: 10px; 
+    margin-left: 40px; 
+  }
+  hr { 
+    border: 0; 
+    border-top: 3px solid #1a4d2e; 
+    margin: 50px 0; }
+
+  /* Category row */
+  .category {
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    gap: 60px; 
+    margin: 60px auto; 
+    text-align: left;
+    width: 80%; 
+    max-width: 1100px;
+  }
+  .category div { 
+    flex: 1; 
+  }
+  .category img { 
+    width: 230px; 
+    height: 170px; 
+    object-fit: cover; 
+    border-radius: 12px; }
+  .category a { 
+    font-size: 2em; 
+    color: #1a4d2e; 
+    font-weight: bold; 
+    text-decoration: none; 
+  }
+  .category small { 
+    font-size: 1.2em; 
+    color: #2d6a4f; 
+  }
+
+  footer { 
+    text-align: center; 
+    padding: 25px; 
+    font-size: 1.1em; 
+    color: #555; 
+  }
+  </style>
+</head>
+<body>
+
+  <%- include('partials/navbar') %>
+
+  <!-- Main Content -->
+  <main>
+    <section class="intro">
+      <div class="intro-text">
+        <h2>RP Sustainability</h2>
+        <p>
+          At RP, we are committed to embracing sustainability, and our RP Green Plan lays out the roadmap for our sustainability journey.
+          The RP Green Plan is strategically designed to embed sustainability into everything we do 
+          whether it's our daily operations, practices, initiatives, or even what we teach in our classes.
+        </p>
+      </div>
+      <img src="/images/rp-green.png" alt="RP Green Plan">
+    </section>
+
+    <hr>
+
+    <% if (categories && categories.length) { %>
+      <% categories.forEach(c => { 
+           const imgSrc = c.categoryImage ? '/images/' + c.categoryImage : '/images/default.png';
+      %>
+        <section class="category">
+          <div>
+            <!-- Link to single category page by ID -->
+            <a href="/categories/<%= c.categoryId %>"><%= c.categoryName %></a><br>
+            <% if (c.catDescription) { %>
+              <small><%= c.catDescription %></small>
+            <% } %>
+          </div>
+          <img src="<%= imgSrc %>" alt="<%= c.categoryName %>" loading="lazy" onerror="this.src='/images/default.png'">
+        </section>
+      <% }) %>
+    <% } else { %>
+      <p>No categories yet. Please add some data.</p>
+    <% } %>
+  </main>
+
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
+</body>
+</html>
