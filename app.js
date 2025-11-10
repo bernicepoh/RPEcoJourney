@@ -1,5 +1,7 @@
 const express = require('express');
 
+const mainController = require('./controller/index');
+const quizController = require('./controller/quizController');
 const userController = require('./controllers/userController');
 const productController = require('./controllers/productController');
 const catController = require('./controllers/catController');
@@ -50,9 +52,16 @@ app.use(flash());
 
 // Home page
 app.get('/', userController.getHomePage);
-
 // About Us page
 app.get('/aboutus', userController.getAboutPage);
+
+
+// ==== QUIZ SECTION ====
+app.get('/quiz', (req, res) => quizController.getQuizCategories(req, res, connection));
+app.get('/quiz/category/:id', (req, res) => quizController.getQuizSets(req, res, connection));
+app.get('/quiz/category/:categoryId/set/:setNumber', (req, res) => quizController.getQuizPage(req, res, connection));
+app.post('/quiz/submit', (req, res) => quizController.submitQuiz(req, res, connection));
+app.get('/quiz/result', (req, res) => quizController.getResultPage(req, res, connection));
 
 app.get('/', productController.getProduct);
 app.get('/products', productController.getProducts);
