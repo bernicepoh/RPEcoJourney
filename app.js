@@ -1,4 +1,9 @@
 const express = require('express');
+const userController = require('./controller/userController');
+const contentController = require('./controller/contentController');
+const categoryController = require('./controllers/categoryController');
+const db = require('./db');
+
 const multer = require('multer');
 const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
 const session = require('express-session'); // ✅ Required before using flash
@@ -8,18 +13,6 @@ const app = express();
 // // Import middleware
 // const { checkAuthenticated, checkAdmin, checkUser } = require('./middleware/auth');
 // const { validateRegistration, validateLogin } = require('./middleware/validation');
-
-// // Set up multer for file uploads
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'public/images'); // Directory to save uploaded files
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, file.originalname);
-//     }
-// });
-
-// const upload = multer({ storage: storage });
 
 // Set up view engine
 app.set('view engine', 'ejs');
@@ -53,57 +46,64 @@ app.use((req, res, next) => {
 
 app.use('/uploads', express.static('uploads'));
 
-// Define routes here
-// app.get('/', (req, res) => {
 
-//     let loggedIn = false;
-//     if (req.session.user) {
-//         loggedIn = true;
-//     }
-//     res.render('index', { loggedIn });
-// });
+const upload = multer({ storage: storage });
 
-// ===== Routes =====
-// Routes
+app.use(flash());
 
-// app.get('/', (req, res) => res.redirect('index'));  // redirect to real list
-
-// keep your existing root:
-// app.get('/', (req, res) => {
-//   res.render('home', { loggedIn: !!req.session.user });
-// });
+app.get('/', (req, res) => {
+    res.render('index');
+});
 
 app.get('/', (req, res) => res.redirect('categories'));
 
+app.get('/category', (req, res) => {
+    res.render('category');
+});
 
-// ===============================
-// CATEGORY ROUTES
-// ===============================
-const categoryController = require('./controllers/categoryController');
-// const { checkAdmin } = require('./middleware/authMiddleware');
-// const upload = require('./middleware/uploadMiddleware'); // adjust if you have this
+const validateRegistration = (req,res, next) => {
+    const { userName, email, password, contactNo } = req.body;
+    
+    if (!userName || !email || !password || !contactNo) {
+        return res.status(400).send('All fields are required');
+    }
 
-// ===============================
-// Public Category routes (read-only)
-// ===============================
+    if (password.length < 6) {
+        req.flash('error', 'Password six characters long');
+        req.flash('formData',req.body);
+        return res.redirect('/register')
+    }
+    next()
+}
+ 
+//User Routes
+app.get('/', userController.getLogin);
+app.post('/', userController.login);
+app.get('/register',userController.getRegister);
+app.post('/register',validateRegistration,userController.register);
+app.get('/forgot-password', userController.getForgotPassword);
+app.post('/forgot-password', userController.postForgotPassword);
+app.post('/reset-password', userController.postResetPassword);
 
+//testing forget password route
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash.toString();
+}
+
+// Content Routes
+app.get('/category/:id/content', contentController.getContentByCategory);
+app.get('/content/:id', contentController.getContent);
+app.get('/addContent', contentController.addContentForm);
+app.post('/addContent', upload.single('contentFile'), contentController.addContent);
+
+// Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories
 app.get('/categories/:id', categoryController.getCategory);     // View single category
-
-// ===============================
-// // Admin/Manager restricted Category routes
-// ===============================
-
-// ADD CATEGORY (Not Needed for now since group have decided only 3 fixed categories)
-// app.get('/categories/add', checkAdmin, categoryController.addCategoryForm);   // Form to add category
-// app.post('/categories/add', checkAdmin, upload.single('categoryImage'), categoryController.addCategory);  // Add category
-
-// EDIT CATEGORY
-// app.get('/categories/edit/:id', checkAdmin, categoryController.editCategoryForm);   // Form to edit
-// app.post('/categories/edit/:id', checkAdmin, upload.single('categoryImage'), categoryController.editCategory);  // Update category
-
-// DELETE CATEGORY
-// app.get('/categories/delete/:id', checkAdmin, categoryController.deleteCategory);   // Delete category
 
 // Error route
 app.get('/401', (req, res) => {
