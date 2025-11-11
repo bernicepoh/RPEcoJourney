@@ -1,5 +1,7 @@
 const express = require('express');
+const indexController = require('./controller/index');
 const contentController = require('./controller/contentController');
+const db = require('./db');
 
 const multer = require('multer');
 const ses = require('express-session');
@@ -30,7 +32,6 @@ const upload = multer({ storage: storage });
 
 app.use(flash());
 
- 
 app.get('/', (req, res) => {
     res.render('index');
 });
@@ -38,6 +39,42 @@ app.get('/', (req, res) => {
 app.get('/category', (req, res) => {
     res.render('category');
 });
+
+const validateRegistration = (req,res, next) => {
+    const { userName, email, password, contactNo } = req.body;
+    
+    if (!userName || !email || !password || !contactNo) {
+        return res.status(400).send('All fields are required');
+    }
+
+    if (password.length < 6) {
+        req.flash('error', 'Password six characters long');
+        req.flash('formData',req.body);
+        return res.redirect('/register')
+    }
+    next()
+}
+ 
+//User Routes
+app.get('/', indexController.getLogin);
+app.post('/', indexController.login);
+app.get('/register',indexController.getRegister);
+app.post('/register',validateRegistration,indexController.register);
+app.get('/forgot-password', indexController.getForgotPassword);
+app.post('/forgot-password', indexController.postForgotPassword);
+app.post('/reset-password', indexController.postResetPassword);
+
+
+
+//testing forget password route
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash.toString();
+}
 
 // Content Routes
 app.get('/category/:id/content', contentController.getContentByCategory);
