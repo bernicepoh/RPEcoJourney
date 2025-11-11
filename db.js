@@ -1,6 +1,5 @@
 const mysql = require('mysql2');
 
-
 // Database connection details
 const db = mysql.createConnection({
     host: 'localhost',
@@ -9,7 +8,7 @@ const db = mysql.createConnection({
     database: 'rpecojourney'
 });
 
-// Connecting to database
+//Connecting to database
 db.connect((err) => {
     if (err) {
         console.error('Error connecting to MySQL:', err);
