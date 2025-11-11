@@ -6,13 +6,6 @@ const mainController = require('./controller/index');
 const quizController = require('./controller/quizController');
 const db = require('./db');
 
-
-const userController = require('./controllers/userController');
-const productController = require('./controllers/productController');
-const catController = require('./controllers/catController');
-const orderController = require('./controllers/orderController');
-const cartController = require('./controllers/cartController');
-
 const multer = require('multer');
 const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
 const session = require('express-session'); // ✅ Required before using flash
@@ -122,16 +115,6 @@ app.get('/quiz/category/:id', (req, res) => quizController.getQuizSets(req, res,
 app.get('/quiz/category/:categoryId/set/:setNumber', (req, res) => quizController.getQuizPage(req, res, connection));
 app.post('/quiz/submit', (req, res) => quizController.submitQuiz(req, res, connection));
 app.get('/quiz/result', (req, res) => quizController.getResultPage(req, res, connection));
-
-app.get('/', productController.getProduct);
-app.get('/products', productController.getProducts);
-app.get('/product/:id', productController.getproductId);
-app.get('/editproduct/:id', productController.editproduct);
-app.post('/editproduct/:id',upload.single('image'), productController.editproductForm);
-app.get('/addproduct', productController.getproductForm);
-app.get('/', (req, res) => {
-    res.render('index');
-});
 
 // Error route
 app.get('/401', (req, res) => {

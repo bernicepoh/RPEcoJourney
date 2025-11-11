@@ -1,7 +1,3 @@
-// ===============================
-// CATEGORY CONTROLLER
-// ===============================
-
 const db = require('../db');
 
 // Public — List all categories
