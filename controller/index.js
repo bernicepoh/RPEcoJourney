@@ -157,11 +157,6 @@ exports.postResetPassword = (req, res) => {
     });
 };
 
-
-
-
-
-
 exports.register = (req, res) => {
   const { userName, email, password, contactNo } = req.body;
 
@@ -213,4 +208,3 @@ exports.register = (req, res) => {
     });
   });
 };
-

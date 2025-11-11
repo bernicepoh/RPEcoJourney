@@ -1,8 +1,7 @@
 const express = require('express');
 const indexController = require('./controller/index');
+const contentController = require('./controller/contentController');
 const db = require('./db');
-
-
 
 const multer = require('multer');
 const ses = require('express-session');
@@ -20,7 +19,6 @@ const storage = multer.diskStorage({
     }
 });
 
-
 // Set up view engine
 app.set('view engine', 'ejs');
 //  enable static files
@@ -30,22 +28,17 @@ app.use(express.urlencoded({
     extended: false
 }));
 
-
-
 const upload = multer({ storage: storage });
-
-
-// Session Middleware
-app.use(ses({
-    secret: 'secret',
-    resave: false,
-    saveUninitialized: true,
-    // Cookies expires after 1 week of inactivity
-    cookie: {maxAge: 1000 * 60 *60 * 24 * 7}
-}));
 
 app.use(flash());
 
+app.get('/', (req, res) => {
+    res.render('index');
+});
+
+app.get('/category', (req, res) => {
+    res.render('category');
+});
 
 const validateRegistration = (req,res, next) => {
     const { userName, email, password, contactNo } = req.body;
@@ -62,7 +55,7 @@ const validateRegistration = (req,res, next) => {
     next()
 }
  
-
+//User Routes
 app.get('/', indexController.getLogin);
 app.post('/', indexController.login);
 app.get('/register',indexController.getRegister);
@@ -74,7 +67,6 @@ app.post('/reset-password', indexController.postResetPassword);
 
 
 //testing forget password route
-
 function simpleHash(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -84,16 +76,11 @@ function simpleHash(str) {
     return hash.toString();
 }
 
-
-
-
-
-
-
-
-
-
-
+// Content Routes
+app.get('/category/:id/content', contentController.getContentByCategory);
+app.get('/content/:id', contentController.getContent);
+app.get('/addContent', contentController.addContentForm);
+app.post('/addContent', upload.single('contentFile'), contentController.addContent);
 
 // Connect to PORT
 const PORT = process.env.PORT || 3000;
