@@ -1,7 +1,12 @@
 const express = require('express');
-
+const userController = require('./controller/userController');
+const contentController = require('./controller/contentController');
+const categoryController = require('./controllers/categoryController');
 const mainController = require('./controller/index');
 const quizController = require('./controller/quizController');
+const db = require('./db');
+
+
 const userController = require('./controllers/userController');
 const productController = require('./controllers/productController');
 const catController = require('./controllers/catController');
@@ -9,54 +14,109 @@ const orderController = require('./controllers/orderController');
 const cartController = require('./controllers/cartController');
 
 const multer = require('multer');
-const ses = require('express-session');
-const flash = require('connect-flash');
-
+const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
+const session = require('express-session'); // ✅ Required before using flash
+const path = require('path');
 const app = express();
 
-// Set up multer for file uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/images'); // Directory to save uploaded files
-    },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname); 
-    }
-});
-
+// // Import middleware
+// const { checkAuthenticated, checkAdmin, checkUser } = require('./middleware/auth');
+// const { validateRegistration, validateLogin } = require('./middleware/validation');
 
 // Set up view engine
 app.set('view engine', 'ejs');
-//  enable static files
-app.use(express.static('public'));
-// enable form processing
-app.use(express.urlencoded({
-    extended: false
+app.set('views', path.join(__dirname, 'views'));
+
+// Enable static files (for CSS, images, JS)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Enable form processing
+app.use(express.urlencoded({ 
+  extended: false 
 }));
 
+// ===== Sessions & flash =====
+app.use(session({
+  secret: 'secret-key', 
+  resave: false,
+  saveUninitialized: true,
+  // Session expires after 1 week of inactivity
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true }
+}));
+
+// Use connect-flash middleware
+app.use(flash());
+
+// Make session available in all EJS views
+app.use((req, res, next) => {
+    res.locals.session = req.session;
+    next();
+});
+
+app.use('/uploads', express.static('uploads'));
 
 
 const upload = multer({ storage: storage });
 
-
-// Session Middleware
-app.use(ses({
-    secret: 'secret',
-    resave: false,
-    saveUninitialized: true,
-    // Cookies expires after 1 week of inactivity
-    cookie: {maxAge: 1000 * 60 *60 * 24 * 7}
-}));
-
 app.use(flash());
+
+app.get('/', (req, res) => res.redirect('categories'));
+
+app.get('/category', (req, res) => {
+    res.render('category');
+});
+
+const validateRegistration = (req,res, next) => {
+    const { userName, email, password, contactNo } = req.body;
+    
+    if (!userName || !email || !password || !contactNo) {
+        return res.status(400).send('All fields are required');
+    }
+
+    if (password.length < 6) {
+        req.flash('error', 'Password six characters long');
+        req.flash('formData',req.body);
+        return res.redirect('/register')
+    }
+    next()
+}
+ 
+//User Routes
+app.get('/', userController.getLogin);
+app.post('/', userController.login);
+app.get('/register',userController.getRegister);
+app.post('/register',validateRegistration,userController.register);
+app.get('/forgot-password', userController.getForgotPassword);
+app.post('/forgot-password', userController.postForgotPassword);
+app.post('/reset-password', userController.postResetPassword);
+
+//testing forget password route
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+    }
+    return hash.toString();
+}
+
+// Content Routes
+app.get('/category/:id/content', contentController.getContentByCategory);
+app.get('/content/:id', contentController.getContent);
+app.get('/addContent', contentController.addContentForm);
+app.post('/addContent', upload.single('contentFile'), contentController.addContent);
+
+// Category routes
+app.get('/categories', categoryController.getCategories);       // List all categories
+app.get('/categories/:id', categoryController.getCategory);     // View single category
+
 
 // Home page
 app.get('/', userController.getHomePage);
 // About Us page
 app.get('/aboutus', userController.getAboutPage);
 
-
-// ==== QUIZ SECTION ====
+// Quiz Routes
 app.get('/quiz', (req, res) => quizController.getQuizCategories(req, res, connection));
 app.get('/quiz/category/:id', (req, res) => quizController.getQuizSets(req, res, connection));
 app.get('/quiz/category/:categoryId/set/:setNumber', (req, res) => quizController.getQuizPage(req, res, connection));
@@ -69,81 +129,15 @@ app.get('/product/:id', productController.getproductId);
 app.get('/editproduct/:id', productController.editproduct);
 app.post('/editproduct/:id',upload.single('image'), productController.editproductForm);
 app.get('/addproduct', productController.getproductForm);
-
-app.get('/categories', catController.getCat);
-app.post('/addReview',catController.addReview);
-app.get('/review/:productId', catController.getOrderItems);
-app.get('/categoriesAdmin', catController.getCatA);
-app.get('/editCategories/:categoryId', catController.Cat);
-app.post('/editCategories/:categoryId', upload.single('categoryImage'), catController.editCat);
-app.get('/deleteCategory/:categoryId', catController.delCat);
-app.get('/addCategories', catController.getAdd);
-app.post('/addCategories', upload.single('categoryImage'), catController.addCat);
-
-// Route to delete a specific item from the cart
-app.get('/DeleteCartItem/:id', cartController.DeleteCartItem);
-
-// Home route (Display Shopping Cart)
-app.get('/', cartController.GetCartItems);
-
-// Debugging: Logs for cartController
-console.log(cartController);
-console.log(cartController.GetCartItems);
-console.log(cartController.DeleteCartItem);
-app.get('/DeleteCartItem/:id', cartController.DeleteCartItem);
-
-// Home route (Display Shopping Cart)
-app.get('/shoppingcart', cartController.GetCartItems);
-
-// Define routes
-app.get('/order', orderController.getOrdersUser);
-
-app.get('/card', orderController.getCard);
-
-app.get('/paynow', orderController.getPaynow);
-
-app.get('/paypal', orderController.getPaypal);
-
-app.get('/orderPlaced', orderController.getorderPlaced);
-
-app.get('/cancelOrder/:id', orderController.cancelOrder);
-
-app.get('/deliveryStatus', orderController.getdeliveryStatus);
-
-app.get('/editAddress/:userId', orderController.editAddressForm);
-
-app.post('/editAddress/:userId', orderController.editAddress);
-
-
-// Define Login Page Route
-app.get('/', userController.getAboutPage);
-// Define Register Page Route
-app.get('/register', userController.getRegister);
-app.post('/register', userController.RegisterUser);
-// Login route to render login page
-app.get("/login", userController.getLoginPage);
-// Login route for form submission
-app.post("/login", userController.LoginUser);
-// User profile page route
-app.get('/profile', userController.getProfile);
-// Edit Profile Form routes
-app.get('/editProfile/:id', userController.getEditProfile);
-app.post('/editProfile/:id', upload.single("image"), userController.editProfile);
-// Logout route
-app.get('/logout', userController.Logout);
-// Users database page routes
-app.get('/user', userController.getUsers);
-app.get('/user/:id', userController.getUser);
-app.get('/user/:id/delete', userController.deleteUser);
-//  Admin database page routes
-app.get('/addAdmin', userController.getAddAdmin);
-app.post('/addAdmin', userController.addAdmin)
-app.get('/admin', userController.getAdmins);
-app.get('/admin/:id', userController.getAdmin);
-app.get('/admin/:id/delete', userController.deleteAdmin);
-
-// Connect to PORT
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+app.get('/', (req, res) => {
+    res.render('index');
 });
+
+// Error route
+app.get('/401', (req, res) => {
+    res.render('401', { errors: req.flash('error') });
+});
+
+// Start express server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

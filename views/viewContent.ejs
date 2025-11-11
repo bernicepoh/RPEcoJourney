@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPEcoJourney</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Georgia', serif;
+      font-size: larger;
+      margin: 0;
+      padding: 0;
+      background-image: url("/images/categoryBackground.png") !important;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: bottom center;
+      min-height: 100vh;
+    }
+    .desc-divider {
+      border: none;
+      border-top: 2px solid #d2c9c7;
+      margin: 32px auto 32px auto;
+      width: 80%;
+    }
+    .desc-text {
+      font-style: italic;
+      text-align: center;
+      margin: 0 auto;
+      max-width: 600px;
+      margin-bottom: 40px;
+    }
+    .main-image {
+      display: block;
+      margin: 24px auto 0 auto;
+      max-width: 96%;
+      border-radius: 8px;
+    }
+    /* .rate-label {
+      text-align: center;
+      font-size: 1rem;
+      font-style: italic;
+      margin-bottom: 8px;
+    }
+    .stars {
+      text-align: center;
+      font-size: 22px;
+      color: #c2b497;
+      margin-bottom: 18px;
+    }
+    .comment-area {
+      width: 100%;
+      max-width: 95%;
+      min-height: 55px;
+      margin: 0 auto;
+      border-radius: 7px;
+      padding: 8px 12px;
+      background: #a7c3bb42;
+      border: 1px solid #bddad1;
+      resize: vertical;
+    }
+    .publish-btn {
+      background: #c2d7bb;
+      color: white;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 6px 22px;
+      border: none;
+      margin-top: 8px;
+      float: right;
+    } */
+  </style>
+</head>
+<body>
+  <%- include ('partials/navbar.ejs') %>
+
+  <div class="container mt-3 mb-5">
+    <% if (content) { %>
+      <h3 class="text-center mt-2" style="font-style:italic;">
+        <%= content.contentTitle %>
+      </h3>
+
+      <img src="/images/<%= content.contentFile %>" alt="<%= content.contentTitle %>" class="main-image" style="width:100%; max-width:500px;">
+
+      <hr class="desc-divider">
+
+      <div class="desc-text">
+        <%= content.contentDescription %>
+      </div>
+
+      <a href="/" style="color: #000; text-decoration: none;">< Back</a>
+
+      <!-- Rating Section -->
+      <!-- <div class="rate-label">
+        Rate!
+      </div>
+      <div class="stars">
+        ★★★★☆
+      </div> -->
+
+      <!-- Comment box and button -->
+      <!-- <div>
+        <label for="commentBox" class="form-label" style="font-size:0.98em;">Write a comment:</label>
+        <textarea id="commentBox" class="comment-area"></textarea>
+        <button class="publish-btn">Publish</button>
+      </div> -->
+    <% } else { %>
+      <p>No content found.</p>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
