@@ -1,5 +1,5 @@
 const express = require('express');
-const indexController = require('./controller/index');
+const userController = require('./controller/userController');
 const contentController = require('./controller/contentController');
 const db = require('./db');
 
@@ -56,13 +56,13 @@ const validateRegistration = (req,res, next) => {
 }
  
 //User Routes
-app.get('/', indexController.getLogin);
-app.post('/', indexController.login);
-app.get('/register',indexController.getRegister);
-app.post('/register',validateRegistration,indexController.register);
-app.get('/forgot-password', indexController.getForgotPassword);
-app.post('/forgot-password', indexController.postForgotPassword);
-app.post('/reset-password', indexController.postResetPassword);
+app.get('/', userController.getLogin);
+app.post('/', userController.login);
+app.get('/register',userController.getRegister);
+app.post('/register',validateRegistration,userController.register);
+app.get('/forgot-password', userController.getForgotPassword);
+app.post('/forgot-password', userController.postForgotPassword);
+app.post('/reset-password', userController.postResetPassword);
 
 
 
