@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz Result | RPECOJOURNEY</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('/images/backgroundimage.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+      color: #0b2535;
+      text-align: center;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.9);
+      margin: 80px auto;
+      max-width: 850px;
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #2e8b57;
+    }
+
+    /* ✅ Horizontal Progress Bar */
+    .bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 30px auto 20px;
+      gap: 10px;
+    }
+
+    .bar-container {
+      width: 70%;
+      height: 30px;
+      background-color: #d3e3d1;
+      border-radius: 30px;
+      position: relative;
+      overflow: hidden;
+      border: 3px solid #2e8b57;
+    }
+
+    .bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0; /* JS sets this */
+      background: linear-gradient(90deg, #4caf50, #2e8b57);
+      border-radius: 30px;
+      transition: width 1.2s ease;
+    }
+
+    .percent-text {
+      font-weight: bold;
+      font-size: 1.5rem;
+      color: #2e8b57;
+    }
+
+    .message {
+      font-size: 1.1rem;
+      margin: 8px 0 28px;
+    }
+
+    /* Review section */
+    .review {
+      text-align: left;
+      margin-top: 30px;
+      background-color: #f5f5f5;
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .review h3 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #0b2535;
+    }
+
+    .question {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+
+    .correct {
+      color: #2e8b57;
+      font-weight: 700;
+    }
+
+    .wrong {
+      color: #c0392b;
+      font-weight: 700;
+    }
+
+    /* Recommendations */
+    .recommendations h3 {
+      margin: 30px 0 14px;
+      font-size: 1.4rem;
+    }
+
+    .category-links {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .category-links a {
+      background-color: #2e8b57;
+      color: white;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 700;
+      transition: 0.25s;
+    }
+
+    .category-links a:hover {
+      background-color: #1e6b40;
+    }
+
+    .btn-home {
+      display: inline-block;
+      background-color: #256b45;
+      color: white;
+      padding: 12px 22px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 700;
+      margin-top: 26px;
+    }
+
+    .btn-home:hover {
+      background-color: #1a4b32;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #4a90e2;
+      color: white;
+      padding: 12px 22px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 700;
+      margin-top: 26px;
+      margin-left: 10px;
+    }
+
+    .btn:hover {
+      background-color: #357ab8;
+    }
+  </style>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <!-- 🧠 Pass data safely as attributes -->
+  <div class="container" id="resultRoot"
+       data-score="<%= score %>"
+       data-total="<%= total %>">
+
+    <h2>Your Quiz Result 🌿</h2>
+
+    <!-- ✅ Horizontal progress bar -->
+    <div class="bar-wrap">
+      <div class="bar-container">
+        <div class="bar-fill" id="barFill"></div>
+      </div>
+      <div class="percent-text" id="percentText">0%</div>
+    </div>
+
+    <p>You scored <strong><%= score %></strong> out of <strong><%= total %></strong></p>
+
+    <% const pct = Math.round((Number(score) / Math.max(Number(total), 1)) * 100); %>
+    <% if (pct >= 80) { %>
+      <p class="message">🌟 Excellent! You’re a sustainability champion!</p>
+    <% } else if (pct >= 50) { %>
+      <p class="message">👍 Good effort! You’re learning fast!</p>
+    <% } else { %>
+      <p class="message">💪 Keep going — every quiz helps you improve!</p>
+    <% } %>
+
+    <!-- Review Answers -->
+    <div class="review">
+      <h3>Review Your Answers</h3>
+      <% const review = (typeof questions !== 'undefined' && Array.isArray(questions)) ? questions : []; %>
+      <% if (review.length) { %>
+        <% review.forEach((q, i) => { %>
+          <div class="question">
+            <p><strong>Q<%= i + 1 %>:</strong> <%= q.question %></p>
+            <p>Your answer:
+              <span class="<%= q.userAnswer == q.correct_option ? 'correct' : 'wrong' %>">
+                <%= q['option' + q.userAnswer] || "No answer selected" %>
+              </span>
+            </p>
+            <p>Correct answer:
+              <span class="correct"><%= q['option' + q.correct_option] %></span>
+            </p>
+
+            <% if (q.explanation) { %>
+            <p><em>Explanation:</em> <%= q.explanation %></p>
+          <% } %>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="message">No review available for this attempt yet.</p>
+      <% } %>
+    </div>
+
+    <!-- Category Recommendations -->
+    <div class="recommendations">
+      <h3>Try Another Category</h3>
+      <div class="category-links">
+        <% categories.forEach(cat => { %>
+          <a href="/quiz/category/<%= cat.id %>"><%= cat.name %></a>
+        <% }) %>
+      </div>
+    </div>
+
+    <a href="/quiz" class="btn-home">Back to Quiz Menu</a>
+  </div>
+
+  <!-- JS -->
+  <script>
+    const root = document.getElementById('resultRoot');
+    const score = Number(root.dataset.score || 0);
+    const total = Math.max(Number(root.dataset.total || 1), 1);
+    const percent = Math.round((score / total) * 100);
+
+    const bar  = document.getElementById('barFill');
+    const text = document.getElementById('percentText');
+
+    // ✅ Horizontal width fill animation
+    bar.style.width = percent + '%';
+
+    // Optional: change color by performance
+    if (percent < 50)      bar.style.background = '#d9534f'; // red
+    else if (percent < 80) bar.style.background = '#f0ad4e'; // yellow
+    else                   bar.style.background = 'linear-gradient(90deg, #4caf50, #2e8b57)'; // green gradient
+
+    // Count-up % text animation
+    let current = 0;
+    const step = Math.max(1, Math.round(percent / 50));
+    const timer = setInterval(() => {
+      current += step;
+      if (current >= percent) {
+        current = percent;
+        clearInterval(timer);
+      }
+      text.textContent = current + '%';
+    }, 20);
+  </script>
+</body>
+</html>

@@ -2,7 +2,16 @@ const express = require('express');
 const userController = require('./controller/userController');
 const contentController = require('./controller/contentController');
 const categoryController = require('./controllers/categoryController');
+const mainController = require('./controller/index');
+const quizController = require('./controller/quizController');
 const db = require('./db');
+
+
+const userController = require('./controllers/userController');
+const productController = require('./controllers/productController');
+const catController = require('./controllers/catController');
+const orderController = require('./controllers/orderController');
+const cartController = require('./controllers/cartController');
 
 const multer = require('multer');
 const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
@@ -50,10 +59,6 @@ app.use('/uploads', express.static('uploads'));
 const upload = multer({ storage: storage });
 
 app.use(flash());
-
-app.get('/', (req, res) => {
-    res.render('index');
-});
 
 app.get('/', (req, res) => res.redirect('categories'));
 
@@ -104,6 +109,29 @@ app.post('/addContent', upload.single('contentFile'), contentController.addConte
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories
 app.get('/categories/:id', categoryController.getCategory);     // View single category
+
+
+// Home page
+app.get('/', userController.getHomePage);
+// About Us page
+app.get('/aboutus', userController.getAboutPage);
+
+// Quiz Routes
+app.get('/quiz', (req, res) => quizController.getQuizCategories(req, res, connection));
+app.get('/quiz/category/:id', (req, res) => quizController.getQuizSets(req, res, connection));
+app.get('/quiz/category/:categoryId/set/:setNumber', (req, res) => quizController.getQuizPage(req, res, connection));
+app.post('/quiz/submit', (req, res) => quizController.submitQuiz(req, res, connection));
+app.get('/quiz/result', (req, res) => quizController.getResultPage(req, res, connection));
+
+app.get('/', productController.getProduct);
+app.get('/products', productController.getProducts);
+app.get('/product/:id', productController.getproductId);
+app.get('/editproduct/:id', productController.editproduct);
+app.post('/editproduct/:id',upload.single('image'), productController.editproductForm);
+app.get('/addproduct', productController.getproductForm);
+app.get('/', (req, res) => {
+    res.render('index');
+});
 
 // Error route
 app.get('/401', (req, res) => {
