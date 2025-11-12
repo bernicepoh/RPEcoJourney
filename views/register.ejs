@@ -6,13 +6,17 @@
   <link rel="stylesheet" href="/styles.css"> <!-- optional -->
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: beige;
+      font-family: 'Georgia', serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
+      background-image: url("/images/userBackground.png");
+      background-repeat: no-repeat;
+      background-size: contain; 
+      background-position: center;  
+      min-height: 100vh;
     }
 
     .card {
@@ -97,6 +101,13 @@
     .login-link a:hover {
       text-decoration: underline;
     }
+
+    footer {
+      text-align: center; 
+      padding: 25px; 
+      font-size: 1.1em; 
+      color: #555; 
+    }
   </style>
 </head>
 <body>
@@ -135,6 +146,11 @@
       </div>
 
       <div>
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+      </div>
+
+      <div>
         <label for="contactNo">Contact Number:</label>
         <input type="text" id="contactNo" name="contactNo" value="<%= formData?.contactNo || '' %>">
       </div>
@@ -150,6 +166,9 @@
     
   
   </div>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
 </body>
 </html>
 

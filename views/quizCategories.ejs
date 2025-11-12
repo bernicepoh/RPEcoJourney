@@ -13,11 +13,12 @@
     }
 
     body {
-      font-family: "Poppins", sans-serif;
-      background: url('/images/backgroundimage.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #0b2535;
-      overflow-x: hidden;
+      font-family: 'Georgia', serif;
+      background: url('/images/quizBackground.jpg') no-repeat center center fixed;
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;  
+      min-height: 100vh;
     }
 
     body::before {
@@ -127,8 +128,8 @@
     }
 
     /* ✅ Background images */
-    .environment .topic-image {
-      background-image: url('/images/Environment.png');
+    .environmental .topic-image {
+      background-image: url('/images/Environmental.png');
     }
 
     .social .topic-image {
@@ -151,6 +152,13 @@
       }
     }
 
+    footer {
+      text-align: center; 
+      padding: 25px; 
+      font-size: 1.1em; 
+      color: #555; 
+    }
+
   </style>
 </head>
 <body>
@@ -160,9 +168,9 @@
     <h2>Select a Quiz Topic 🌿</h2>
 
     <div class="topics">
-      <div class="topic-card environment">
+      <div class="topic-card environmental">
         <div class="topic-image"></div>
-        <a href="/quiz/category/1" class="topic-label">Environment</a>
+        <a href="/quiz/category/1" class="topic-label">Environmental</a>
       </div>
 
       <div class="topic-card social">
@@ -176,5 +184,8 @@
       </div>
     </div>
   </div>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
 </body>
 </html>

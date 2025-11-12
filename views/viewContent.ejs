@@ -36,6 +36,13 @@
       max-width: 96%;
       border-radius: 8px;
     }
+
+    footer {
+      text-align: center; 
+      padding: 25px; 
+      font-size: 1.1em; 
+      color: #555; 
+    }
     /* .rate-label {
       text-align: center;
       font-size: 1rem;
@@ -88,7 +95,7 @@
         <%= content.contentDescription %>
       </div>
 
-      <a href="/" style="color: #000; text-decoration: none;">< Back</a>
+      <a href="/category/<%=content.categoryID %>/content" style="color: #000; text-decoration: none;">< Back</a>
 
       <!-- Rating Section -->
       <!-- <div class="rate-label">
@@ -110,5 +117,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
 </body>
 </html>

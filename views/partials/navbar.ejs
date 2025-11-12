@@ -1,79 +1,71 @@
-<style>
-  body {
-    font-family: 'Georgia', serif;
-    font-size: larger;
-    margin: 0;
-    padding: 0;
-    background-image: url("/images/background.png");
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
-
-  .navbar {
-    background-color: #8dcc6b;
-  }
-
-  .navbar-brand {
-    font-weight: bold;
-    color: #003b2b;
-    font-size: 28px;
-    margin-left: 10px;
-  }
-
-  .navbar-nav .nav-link {
-    color: #0f3d2e;
-    font-style: italic;
-    font-size: 24px;
-    margin-right: 15px;
-  }
-
-  .navbar-nav .nav-link:hover {
-    text-decoration: underline;
-    color: #0d2f23;
-  }
-
-  /* footer {
-    position: fixed;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-    padding: 10px 0;
-    font-size: 18px;
-  } */
-</style>
-
-<nav class="navbar navbar-expand-lg">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/">RPECOJOURNEY</a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" href="/about">About Us</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/category">Categories</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/quiz">Quiz Me!</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/addContent">Publish Content</a>
-        </li>
-      </ul>
-    </div>
-
-    <div class="d-flex align-items-center">
-      <img src="/images/profile.png" alt="Profile">
-    </div>
-  </div>
+<nav>
+  <a href="/homepage">
+    <h1>RPEcoJourney</h1>
+  </a>
+  <ul>
+    <li><a href="/homepage">Home</a></li>
+    <li><a href="/aboutus">About Us</a></li>
+    <li><a href="/categories">Categories</a></li>
+    <li><a href="/addContent">Publish Content</a></li>
+    <li><a href="/quiz">Quiz Me!</a></li>
+  </ul>
+  <img src="/images/profile.jpg" alt="Profile" class="profile-pic" />
 </nav>
 
-<!-- <footer>
-  &copy; <%= new Date().getFullYear() %> RPEcoJourney. All Rights Reserved.
-</footer> -->
+<style>
+  nav {
+    background-color: #8bc34a; /* soft green */
+    color: #0b2535;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 2.5rem;
+    font-family: 'Georgia', serif;
+  }
+
+  /* Title */
+  nav h1 {
+    margin: 0;
+    font-size: 2.3rem; /* larger title */
+    font-weight: 900;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: #003b2b;
+  }
+
+  nav a {
+    text-decoration: none;
+  }
+
+  /* Navigation links */
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 45px;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav ul li a {
+    color: #0b2535;
+    text-decoration: none;
+    font-style: italic;
+    font-size: 1.4rem; /* increased from 1.2rem */
+    font-weight: 700;
+    transition: all 0.25s ease-in-out;
+  }
+
+  nav ul li a:hover {
+    text-decoration: underline;
+    color: #1a1a1a;
+  }
+
+  /* Profile picture */
+  .profile-pic {
+    width: 75px; /* slightly bigger again */
+    height: 75px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #0b2535;
+  }
+</style>

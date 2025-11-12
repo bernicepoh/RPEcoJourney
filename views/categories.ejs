@@ -9,7 +9,7 @@
   
   body {
     background-color: #f8fdf7;
-    background-image: url('/images/background.png');
+    background-image: url('/images/categoryBackground.png');
     background-repeat: no-repeat;
     background-position: bottom center;
     background-size: 100% auto;
@@ -19,19 +19,10 @@
     font-family: 'Georgia', serif; 
     color: #123524;
   }
-  
 
   header h1 { 
     font-size: 2.2em; 
     font-weight: bold; 
-  }
-  nav a { 
-    color: white; 
-    text-decoration: none; 
-    margin: 0 20px; 
-    font-style: italic; 
-    font-weight: 500; 
-    font-size: 1.3em; 
   }
 
   main { 
@@ -136,12 +127,12 @@
         <section class="category">
           <div>
             <!-- Link to single category page by ID -->
-            <a href="/categories/<%= c.categoryId %>"><%= c.categoryName %></a><br>
-            <% if (c.catDescription) { %>
-              <small><%= c.catDescription %></small>
+            <a href="/category/<%= c.categoryID %>/content"><%= c.categoryName %></a><br>
+            <% if (c.categoryDescription) { %>
+              <small><%= c.categoryDescription %></small>
             <% } %>
           </div>
-          <img src="<%= imgSrc %>" alt="<%= c.categoryName %>" loading="lazy" onerror="this.src='/images/default.png'">
+          <img src="/images/<%= c.categoryImage %>" alt="<%= c.categoryName %>" >
         </section>
       <% }) %>
     <% } else { %>

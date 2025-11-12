@@ -1,8 +1,8 @@
 const express = require('express');
 const userController = require('./controller/userController');
 const contentController = require('./controller/contentController');
-const categoryController = require('./controllers/categoryController');
-const mainController = require('./controller/index');
+const categoryController = require('./controller/categoryController');
+const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const db = require('./db');
 
@@ -11,6 +11,17 @@ const flash = require('connect-flash'); // ✅ You used flash() but didn’t imp
 const session = require('express-session'); // ✅ Required before using flash
 const path = require('path');
 const app = express();
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'public/images'); // Directory to save uploaded files
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname); 
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // // Import middleware
 // const { checkAuthenticated, checkAdmin, checkUser } = require('./middleware/auth');
@@ -48,16 +59,7 @@ app.use((req, res, next) => {
 
 app.use('/uploads', express.static('uploads'));
 
-
-const upload = multer({ storage: storage });
-
 app.use(flash());
-
-app.get('/', (req, res) => res.redirect('categories'));
-
-app.get('/category', (req, res) => {
-    res.render('category');
-});
 
 const validateRegistration = (req,res, next) => {
     const { userName, email, password, contactNo } = req.body;
@@ -105,16 +107,16 @@ app.get('/categories/:id', categoryController.getCategory);     // View single c
 
 
 // Home page
-app.get('/', userController.getHomePage);
+app.get('/homepage', homepageController.getHomePage);
 // About Us page
-app.get('/aboutus', userController.getAboutPage);
+app.get('/aboutus', homepageController.getAboutPage);
 
 // Quiz Routes
-app.get('/quiz', (req, res) => quizController.getQuizCategories(req, res, connection));
-app.get('/quiz/category/:id', (req, res) => quizController.getQuizSets(req, res, connection));
-app.get('/quiz/category/:categoryId/set/:setNumber', (req, res) => quizController.getQuizPage(req, res, connection));
-app.post('/quiz/submit', (req, res) => quizController.submitQuiz(req, res, connection));
-app.get('/quiz/result', (req, res) => quizController.getResultPage(req, res, connection));
+app.get('/quiz', quizController.getQuiz);
+app.get('/quiz/category/:id', quizController.getSetByCategory);
+app.get('/quiz/category/:categoryID/set/:setNumber', quizController.getQuestionBySets);
+app.post('/quiz/submit', quizController.postQuiz);
+app.get('/quiz/result', quizController.getQuizResult);
 
 // Error route
 app.get('/401', (req, res) => {

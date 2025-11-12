@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quiz | RPECOJOURNEY</title>
   <style>
-    body { font-family: "Arial", sans-serif; background: url('/images/backgroundimage.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 0; color: #0b2535; }
+    body { font-family: 'Georgia', serif; background: url('/images/backgroundimage.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 0; color: #0b2535; }
     body::before { content: ""; position: fixed; inset: 0; background-color: rgba(255,255,255,0.85); z-index: -1; }
     .quiz-container { max-width: 900px; margin: 100px auto; background: #a9c6d9; border-radius: 15px; padding: 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: relative; }
     .back-btn { position: absolute; top: 20px; left: 25px; background-color: #256b45; color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 1rem; transition: .3s; }
@@ -18,6 +18,7 @@
     .option { display: block; margin: 10px 0; background: #fff; border: 2px solid transparent; border-radius: 25px; padding: 10px 15px; font-size: 1rem; text-align: left; cursor: pointer; transition: .3s; }
     .option:hover { border-color: #2e8b57; background-color: #e9f5ef; }
     .btn-submit { display: block; margin: 40px auto 0; background-color: #256b45; color: #fff; padding: 15px 30px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: .3s; }
+    footer {text-align: center; padding: 25px; font-size: 1.1em; color: #555;}
     .btn-submit:hover { background-color: #1a4b32; }
   </style>
 </head>
@@ -33,7 +34,7 @@
     <div id="timer">⏳ Time left: <span id="timeLeft">0</span>s</div>
 
     <form id="quizForm" method="POST" action="/quiz/submit">
-      <input type="hidden" name="categoryId" value="<%= categoryId %>">
+      <input type="hidden" name="categoryID" value="<%= categoryID %>">
       <input type="hidden" name="setNumber" value="<%= setNumber %>">
 
       <% if (questions && questions.length > 0) { %>
@@ -43,16 +44,16 @@
             <p><%= q.question %></p>
 
             <label class="option">
-              <input type="radio" name="ans_<%= q.id %>" value="1" required> A) <%= q.option1 %>
+              <input type="radio" name="ans_<%= q.quizID %>" value="1" required> A) <%= q.option1 %>
             </label>
             <label class="option">
-              <input type="radio" name="ans_<%= q.id %>" value="2"> B) <%= q.option2 %>
+              <input type="radio" name="ans_<%= q.quizID %>" value="2"> B) <%= q.option2 %>
             </label>
             <label class="option">
-              <input type="radio" name="ans_<%= q.id %>" value="3"> C) <%= q.option3 %>
+              <input type="radio" name="ans_<%= q.quizID %>" value="3"> C) <%= q.option3 %>
             </label>
             <label class="option">
-              <input type="radio" name="ans_<%= q.id %>" value="4"> D) <%= q.option4 %>
+              <input type="radio" name="ans_<%= q.quizID %>" value="4"> D) <%= q.option4 %>
             </label>
           </div>
         <% }) %>
@@ -88,8 +89,9 @@
       const ok = confirm("⚠️ Submit your answers now?");
       if (ok) { clearInterval(timer); quizForm.submit(); }
     });
-
-    
   </script>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
 </body>
 </html>

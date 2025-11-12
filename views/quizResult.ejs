@@ -7,7 +7,7 @@
 
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Georgia', serif;
       background: url('/images/backgroundimage.jpg') no-repeat center center fixed;
       background-size: cover;
       margin: 0;
@@ -161,6 +161,13 @@
     .btn:hover {
       background-color: #357ab8;
     }
+
+    footer {
+      text-align: center; 
+      padding: 25px; 
+      font-size: 1.1em; 
+      color: #555; 
+    }
   </style>
 </head>
 <body>
@@ -201,12 +208,12 @@
           <div class="question">
             <p><strong>Q<%= i + 1 %>:</strong> <%= q.question %></p>
             <p>Your answer:
-              <span class="<%= q.userAnswer == q.correct_option ? 'correct' : 'wrong' %>">
+              <span class="<%= q.userAnswer == q.correctOption ? 'correct' : 'wrong' %>">
                 <%= q['option' + q.userAnswer] || "No answer selected" %>
               </span>
             </p>
             <p>Correct answer:
-              <span class="correct"><%= q['option' + q.correct_option] %></span>
+              <span class="correct"><%= q['option' + q.correctOption] %></span>
             </p>
 
             <% if (q.explanation) { %>
@@ -224,7 +231,7 @@
       <h3>Try Another Category</h3>
       <div class="category-links">
         <% categories.forEach(cat => { %>
-          <a href="/quiz/category/<%= cat.id %>"><%= cat.name %></a>
+          <a href="/quiz/category/<%= cat.categoryID %>"><%= cat.categoryName %></a>
         <% }) %>
       </div>
     </div>
@@ -262,5 +269,8 @@
       text.textContent = current + '%';
     }, 20);
   </script>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
 </body>
 </html>

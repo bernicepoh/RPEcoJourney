@@ -17,7 +17,7 @@ exports.login = (req,res) => {
     return res.redirect('/')
   }
 
-  const sql = 'SELECT * FROM users WHERE userName = ? AND password = SHA(?)'
+  const sql = 'SELECT * FROM user WHERE userName = ? AND password = SHA(?)'
   db.query(sql, [userName,password], (err, results) => {
     if (err) {
       console.error('Error during login:', err);
@@ -35,8 +35,6 @@ exports.login = (req,res) => {
     }
   }
   );
-
-
 };
 
 exports.getRegister = (req, res) => {
@@ -47,7 +45,6 @@ exports.getRegister = (req, res) => {
     user: req.session.user
   });
 };
-
 
 exports.getForgotPassword = (req, res) => {
     res.render('forgot_password', { 
@@ -75,7 +72,7 @@ exports.postForgotPassword = (req, res) => {
         return res.redirect('/forgot-password');
     }
 
-    db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+    db.query('SELECT * FROM user WHERE email = ?', [email], (err, results) => {
         if (err) throw err;
 
         if (results.length === 0) {
@@ -86,7 +83,7 @@ exports.postForgotPassword = (req, res) => {
         const tempPassword = generateTempPassword(8);
 
         
-        db.query('UPDATE users SET password = SHA(?) WHERE email = ?', [tempPassword, email], (err) => {
+        db.query('UPDATE user SET password = SHA(?) WHERE email = ?', [tempPassword, email], (err) => {
             if (err) throw err;
 
             // Configure mail
@@ -126,42 +123,111 @@ exports.postForgotPassword = (req, res) => {
 };
 
 exports.postResetPassword = (req, res) => {
-    const { email, tempPassword, newPassword } = req.body;
-
-    if (!email || !tempPassword || !newPassword) {
-        req.flash('error', 'All fields are required.');
-        return res.redirect('/forgot-password');
-    }
-
-    const sql = 'SELECT * FROM users WHERE email = ? AND password = SHA(?)';
-    db.query(sql, [email, tempPassword], (err, results) => {
-        if (err) throw err;
-
-        if (results.length === 0) {
-            // Temporary password incorrect
-            return res.render('forgot_password', { 
-                step: 2, 
-                email, 
-                errors: ['Temporary password is incorrect.'], 
-                success: [] 
-            });
-        }
-
-        // Update password with new password
-        db.query('UPDATE users SET password = SHA(?) WHERE email = ?', [newPassword, email], (err) => {
-            if (err) throw err;
-
-            req.flash('success', 'Password successfully reset. You can now log in.');
-            res.redirect('/');
-        });
+  const { email, tempPassword, newPassword, confirmPassword } = req.body;
+  const errors = [];
+ 
+ 
+  if (!email || !tempPassword || !newPassword || !confirmPassword) {
+    errors.push('All fields are required.');
+  }
+ 
+ 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if (!emailRegex.test(email)) {
+    errors.push('Please enter a valid Gmail address (example@gmail.com).');
+  }
+ 
+ 
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
+  if (!passwordRegex.test(newPassword)) {
+    errors.push(
+      'New password must be at least 8 characters long and include one uppercase letter, one number, and one special character.'
+    );
+  }
+ 
+ 
+  if (newPassword !== confirmPassword) {
+    errors.push('Passwords do not match.');
+  }
+ 
+ 
+  if (errors.length > 0) {
+    return res.render('forgot_password', {
+      step: 2,
+      email,
+      errors,
+      success: [],
     });
+  }
+ 
+ 
+  const sql = 'SELECT * FROM user WHERE email = ? AND password = SHA(?)';
+  db.query(sql, [email, tempPassword], (err, results) => {
+    if (err) throw err;
+ 
+    if (results.length === 0) {
+      return res.render('forgot_password', {
+        step: 2,
+        email,
+        errors: ['Temporary password is incorrect.'],
+        success: [],
+      });
+    }
+ 
+   
+    db.query('UPDATE user SET password = SHA(?) WHERE email = ?', [newPassword, email], (err) => {
+      if (err) throw err;
+ 
+      req.flash('success', 'Password successfully reset. You can now log in.');
+      res.redirect('/');
+    });
+  });
 };
 
 exports.register = (req, res) => {
-  const { userName, email, password, contactNo } = req.body;
-
-  
-  const checkEmailSql = 'SELECT * FROM users WHERE email = ?';
+  const { userName, email, password, confirmPassword, contactNo } = req.body;
+  const errors = [];
+ 
+ 
+  if (!userName || !email || !password || !confirmPassword || !contactNo) {
+    errors.push('All fields are required.');
+  }
+ 
+ 
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  if (!emailRegex.test(email)) {
+    errors.push('Please enter a valid Gmail address (example@gmail.com).');
+  }
+ 
+ 
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
+  if (!passwordRegex.test(password)) {
+    errors.push(
+      'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character.'
+    );
+  }
+ 
+ 
+  if (password !== confirmPassword) {
+    errors.push('Passwords do not match.');
+  }
+ 
+ 
+  const contactRegex = /^[0-9]{8}$/;
+  if (!contactRegex.test(contactNo)) {
+    errors.push('Please enter a valid 8-digit contact number.');
+  }
+ 
+ 
+  if (errors.length > 0) {
+    req.flash('error', errors);
+    req.flash('formData', req.body);
+    return res.redirect('/register');
+  }
+ 
+  const checkEmailSql = 'SELECT * FROM user WHERE email = ?';
   db.query(checkEmailSql, [email], (err, results) => {
     if (err) {
       console.error('Error checking email:', err);
@@ -169,15 +235,15 @@ exports.register = (req, res) => {
       req.flash('formData', req.body);
       return res.redirect('/register');
     }
-
+ 
     if (results.length > 0) {
-      req.flash('error', 'Email is already in use');
+      req.flash('error', 'Email is already in use.');
       req.flash('formData', req.body);
       return res.redirect('/register');
     }
-
-    
-    const checkContactSql = 'SELECT * FROM users WHERE contactNo = ?';
+ 
+   
+    const checkContactSql = 'SELECT * FROM user WHERE contactNo = ?';
     db.query(checkContactSql, [contactNo], (err, results) => {
       if (err) {
         console.error('Error checking contact number:', err);
@@ -185,26 +251,29 @@ exports.register = (req, res) => {
         req.flash('formData', req.body);
         return res.redirect('/register');
       }
-
+ 
       if (results.length > 0) {
-        req.flash('error', 'Contact number is already in use');
+        req.flash('error', 'Contact number is already in use.');
         req.flash('formData', req.body);
         return res.redirect('/register');
       }
-
-      
-      const insertSql = 'INSERT INTO users (userName, email, password, contactNo) VALUES (?, ?, SHA(?), ?)';
-      db.query(insertSql, [userName, email, password, contactNo], (err, results) => {
+ 
+     
+      const insertSql =
+        'INSERT INTO user (userName, email, password, contactNo) VALUES (?, ?, SHA(?), ?)';
+      db.query(insertSql, [userName, email, password, contactNo], (err) => {
         if (err) {
           console.error('Error registering user:', err);
           req.flash('error', 'An error occurred while registering. Please try again.');
           req.flash('formData', req.body);
           return res.redirect('/register');
         }
-
+ 
         req.flash('success', 'Registration successful. You can now log in.');
         res.redirect('/');
       });
     });
   });
 };
+ 
+ 

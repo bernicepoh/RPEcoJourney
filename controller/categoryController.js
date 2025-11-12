@@ -2,7 +2,7 @@ const db = require('../db');
 
 // Public — List all categories
 exports.getCategories = (req, res) => {
-    const sql = 'SELECT * FROM categories';
+    const sql = 'SELECT * FROM category';
 
     // Fetch data from MySQL
     db.query(sql, (error, results) => {
@@ -24,11 +24,11 @@ exports.getCategories = (req, res) => {
 
 // Public — Get single category by ID
 exports.getCategory = (req, res) => {
-    const categoryId = req.params.id;
-    const sql = 'SELECT * FROM categories WHERE categoryId = ?';
+    const categoryID = req.params.id;
+    const sql = 'SELECT * FROM category WHERE categoryID = ?';
     
     // Fetch data from MySQL
-    db.query(sql, [categoryId], (error, results) => {
+    db.query(sql, [categoryID], (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
             return res.status(500).send('Error retrieving category by ID');
@@ -61,7 +61,7 @@ exports.addCategory = (req, res) => {
         categoryImage = null;
     }
 
-    const sql = 'INSERT INTO categories (categoryName, categoryDescription, categoryImage) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO category (categoryName, categoryDescription, categoryImage) VALUES (?, ?, ?)';
     
     // Insert the new category into the database
     db.query(sql, [categoryName, categoryDescription, categoryImage], (error, results) => {
@@ -77,11 +77,11 @@ exports.addCategory = (req, res) => {
 
 // Admin — Render Edit Category Form
 exports.editCategoryForm = (req, res) => {
-    const categoryId = req.params.id;
-    const sql = 'SELECT * FROM categories WHERE categoryId = ?';
+    const categoryID = req.params.id;
+    const sql = 'SELECT * FROM category WHERE categoryID = ?';
     //const category = db.Category.findByPk(categoryId);
     
-    db.query(sql, [categoryId], (error, results) => {
+    db.query(sql, [categoryID], (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
             return res.status(500).send('Error retrieving category');
@@ -101,7 +101,7 @@ exports.editCategoryForm = (req, res) => {
 
 // Admin — Update existing category
 exports.editCategory = (req, res) => {
-    const categoryId = req.params.id;
+    const categoryID = req.params.id;
     const { categoryName, categoryDescription } = req.body;
     let categoryImage = req.body.currentImage; //retrieve current image filename
     if (req.file) { //if new image is uploaded
@@ -109,10 +109,10 @@ exports.editCategory = (req, res) => {
     }
     console.log("new file: " + categoryImage);
     
-    const sql = 'UPDATE categories SET categoryName = ?, categoryDescription = ?, categoryImage = ? WHERE categoryId = ?';
+    const sql = 'UPDATE category SET categoryName = ?, categoryDescription = ?, categoryImage = ? WHERE categoryID = ?';
     
     // Insert the new category into the database
-    db.query(sql, [categoryName, categoryDescription, categoryImage, categoryId], (error, results) => {
+    db.query(sql, [categoryName, categoryDescription, categoryImage, categoryID], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error('Error updating category:', error.message);
@@ -126,9 +126,9 @@ exports.editCategory = (req, res) => {
 
 // Admin — Delete category
 exports.deleteCategory = (req, res) => {
-    const categoryId = req.params.id;
-    const sql = 'DELETE FROM categories WHERE categoryId = ?';
-    db.query(sql, [categoryId], (error, results) => {
+    const categoryID = req.params.id;
+    const sql = 'DELETE FROM category WHERE categoryID = ?';
+    db.query(sql, [categoryID], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error('Error deleting category:', error.message);
