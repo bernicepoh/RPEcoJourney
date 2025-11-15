@@ -4,6 +4,7 @@ const contentController = require('./controller/contentController');
 const categoryController = require('./controller/categoryController');
 const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
+const checkinController = require('./controller/checkinController');
 const db = require('./db');
 
 const multer = require('multer');
@@ -51,6 +52,12 @@ app.use(session({
 // Use connect-flash middleware
 app.use(flash());
 
+// Make flash available in all EJS views
+app.use((req, res, next) => {
+    res.locals.flash = req.flash.bind(req);
+    next();
+});
+
 // Make session available in all EJS views
 app.use((req, res, next) => {
     res.locals.session = req.session;
@@ -59,7 +66,6 @@ app.use((req, res, next) => {
 
 app.use('/uploads', express.static('uploads'));
 
-app.use(flash());
 
 const validateRegistration = (req,res, next) => {
     const { userName, email, password, contactNo } = req.body;
@@ -117,6 +123,11 @@ app.get('/quiz/category/:id', quizController.getSetByCategory);
 app.get('/quiz/category/:categoryID/set/:setNumber', quizController.getQuestionBySets);
 app.post('/quiz/submit', quizController.postQuiz);
 app.get('/quiz/result', quizController.getQuizResult);
+
+//CHECK IN DASHBOARD ROUTES
+app.get('/checkin-board', checkinController.getCheckInBoard);
+app.post('/do-checkin', checkinController.doCheckIn);
+
 
 // Error route
 app.get('/401', (req, res) => {

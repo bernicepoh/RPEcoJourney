@@ -28,14 +28,24 @@ exports.login = (req,res) => {
     if (results.length > 0) {
       req.session.user = results[0];
       req.flash('success','Login successful');
-      res.redirect('/homepage')
+
+     
+          // ⭐ Automatically create progress row if missing
+    const initProgress = `
+        INSERT IGNORE INTO user_progress (userID, xp, level, streak, lastCheckinDate)
+        VALUES (?, 0, 1, 0, NULL)
+    `;
+    db.query(initProgress, [results[0].userID]);
+
+    return res.redirect('/homepage');
+
     } else {
       req.flash('error','Invalid email or password');
       res.redirect('/');
     }
-  }
-  );
+  });
 };
+
 
 exports.getRegister = (req, res) => {
   res.render('register', { 
@@ -188,19 +198,16 @@ exports.postResetPassword = (req, res) => {
 exports.register = (req, res) => {
   const { userName, email, password, confirmPassword, contactNo } = req.body;
   const errors = [];
- 
- 
+
   if (!userName || !email || !password || !confirmPassword || !contactNo) {
     errors.push('All fields are required.');
   }
- 
- 
+
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   if (!emailRegex.test(email)) {
     errors.push('Please enter a valid Gmail address (example@gmail.com).');
   }
- 
- 
+
   const passwordRegex =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
   if (!passwordRegex.test(password)) {
@@ -208,25 +215,22 @@ exports.register = (req, res) => {
       'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character.'
     );
   }
- 
- 
+
   if (password !== confirmPassword) {
     errors.push('Passwords do not match.');
   }
- 
- 
+
   const contactRegex = /^[0-9]{8}$/;
   if (!contactRegex.test(contactNo)) {
     errors.push('Please enter a valid 8-digit contact number.');
   }
- 
- 
+
   if (errors.length > 0) {
     req.flash('error', errors);
     req.flash('formData', req.body);
     return res.redirect('/register');
   }
- 
+
   const checkEmailSql = 'SELECT * FROM user WHERE email = ?';
   db.query(checkEmailSql, [email], (err, results) => {
     if (err) {
@@ -235,14 +239,13 @@ exports.register = (req, res) => {
       req.flash('formData', req.body);
       return res.redirect('/register');
     }
- 
+
     if (results.length > 0) {
       req.flash('error', 'Email is already in use.');
       req.flash('formData', req.body);
       return res.redirect('/register');
     }
- 
-   
+
     const checkContactSql = 'SELECT * FROM user WHERE contactNo = ?';
     db.query(checkContactSql, [contactNo], (err, results) => {
       if (err) {
@@ -251,14 +254,13 @@ exports.register = (req, res) => {
         req.flash('formData', req.body);
         return res.redirect('/register');
       }
- 
+
       if (results.length > 0) {
         req.flash('error', 'Contact number is already in use.');
         req.flash('formData', req.body);
         return res.redirect('/register');
       }
- 
-     
+
       const insertSql =
         'INSERT INTO user (userName, email, password, contactNo) VALUES (?, ?, SHA(?), ?)';
       db.query(insertSql, [userName, email, password, contactNo], (err) => {
@@ -268,12 +270,25 @@ exports.register = (req, res) => {
           req.flash('formData', req.body);
           return res.redirect('/register');
         }
- 
-        req.flash('success', 'Registration successful. You can now log in.');
-        res.redirect('/');
+
+        // ⭐ NEW: auto creates user_progress for new user
+        const getUserIDSql = 'SELECT userID FROM user WHERE email = ?';
+        db.query(getUserIDSql, [email], (err2, resultUser) => {
+          if (!err2 && resultUser.length > 0) {
+            const insertProgress = `
+              INSERT INTO user_progress (userID)
+              VALUES (?)
+            `;
+            db.query(insertProgress, [resultUser[0].userID]);
+          }
+
+          req.flash('success', 'Registration successful. You can now log in.');
+          res.redirect('/');
+        });
       });
     });
   });
 };
+
  
  

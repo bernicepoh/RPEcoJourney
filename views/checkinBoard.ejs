@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Progress Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        body {
+            background-color: #eef8ee;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0b2535;
+            margin-bottom: 25px;
+            font-size: 2.4rem;
+        }
+
+        /* GRID LAYOUT FOR TOP CARDS */
+        .top-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: 1.4rem;
+            color: #0b2535;
+            margin-bottom: 8px;
+        }
+
+        /* XP BAR */
+        .xp-bar {
+            width: 100%;
+            height: 12px;
+            background: #dcdcdc;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: #6bbf59;
+            border-radius: 10px;
+            transition: 0.4s ease;
+        }
+
+        /* CHECK-IN BUTTON */
+        .check-btn {
+            width: 100%;
+            background: #6bbf59;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .check-btn:hover {
+            background-color: #4fa34b;
+        }
+
+        /* ACTION BUTTONS */
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .action-card {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 600;
+            color: #0b2535;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            border: 1px solid #d9e6da;
+            transition: 0.2s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        /* MISSIONS BOX */
+        .missions {
+            background: white;
+            padding: 20px;
+            border-radius: 18px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .mission-item {
+            font-size: 1.1rem;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <%- include('partials/navbar') %>
+
+    <!-- ALERT POPUP -->
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('already') === 'true') {
+            alert("You have already checked in today!Click ok to return");
+        }
+    </script>
+
+    <div class="container">
+
+        <h1 style="text-align:center; font-size:2.4rem; color:#0b2535;">
+            <%= user.userName %>'s Sustainability Journey 🌿
+        </h1>
+
+        <p style="text-align:center; color:#4fa34b; margin-top:10px;">
+            Keep growing your green habits! 🌱
+        </p>
+
+        <!-- ⭐⭐⭐ PROFILE + BADGE SECTION ADDED HERE ⭐⭐⭐ -->
+        <div style="
+            background:white;
+            padding:25px;
+            border-radius:18px;
+            margin:30px auto;
+            width:85%;
+            display:flex;
+            align-items:center;
+            gap:20px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.1);
+        ">
+
+            <!-- Profile Photo -->
+            <img src="<%= user.profilePhoto %>" 
+                 style="width:110px; height:110px; border-radius:50%; border:4px solid #e6f7e6;">
+
+            <!-- Name + Badge -->
+            <div>
+                <h2 style="margin:0; font-size:1.8rem; color:#0b2535;">
+                    <%= user.userName %>
+                </h2>
+
+                <div style="
+                    margin-top:10px;
+                    background:#e8f6e8;
+                    padding:8px 12px;
+                    border-radius:10px;
+                    display:inline-flex;
+                    align-items:center;
+                    gap:8px;
+                    font-weight:600;
+                ">
+                    <img src="/images/levelbadge/<%= progress.levelBadge %>" style="width:30px;">
+                    <span>Level <%= progress.level %> – <%= progress.levelTitle %></span>
+                </div>
+            </div>
+
+        </div>
+        <!-- ⭐⭐⭐ END OF ADDED SECTION ⭐⭐⭐ -->
+
+        <!-- TOP CARDS (XP + STREAK) -->
+        <div class="top-grid">
+
+            <!-- XP Progress -->
+            <div class="card">
+                <h2>Level <%= progress.level %></h2>
+
+                <div class="xp-bar">
+                    <div class="xp-fill" style="width:<%= xpPercent %>%"></div>
+                </div>
+
+                <p><%= progress.xp %> / <%= xpNeeded %> XP</p>
+            </div>
+
+            <!-- Streak -->
+            <div class="card">
+                <h2>🔥 Streak: <%= progress.streak %> days</h2>
+                <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
+
+                <form action="/do-checkin" method="POST">
+                    <button class="check-btn">Check In Today</button>
+                </form>
+            </div>
+
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-grid">
+            <a href="/quiz" style="text-decoration:none;">
+                <div class="action-card">📘 Take a Quiz</div>
+            </a>
+
+            <a href="/categories" style="text-decoration:none;">
+                <div class="action-card">🌱 Explore Content</div>
+            </a>
+        </div>
+
+        <!-- DAILY MISSIONS -->
+        <div class="missions">
+            <h2>📋 Daily Missions</h2>
+
+            <div class="mission-item">
+                <span>Daily Check-In</span>
+                <span><%= missions.checkinDone ? "Completed" : "Not Completed" %></span>
+            </div>
+
+            <div class="mission-item">
+                <span>📗 Read 1 Content</span>
+                <span><%= missions.contentRead ? "Completed" : "Not Completed" %></span>
+            </div>
+
+            <div class="mission-item">
+                <span>📝 Complete 1 Quiz</span>
+                <span><%= missions.quizDone ? "Completed" : "Not Completed" %></span>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
+
+
+
