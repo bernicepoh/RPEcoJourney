@@ -1,276 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz Result | RPECOJOURNEY</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Result | RPEcoJourney</title>
 
   <style>
-    body {
-      font-family: 'Georgia', serif;
-      background: url('/images/backgroundimage.jpg') no-repeat center center fixed;
-      background-size: cover;
+    * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      color: #0b2535;
-      text-align: center;
+    }
+
+    body {
+      font-family: "Georgia", serif;
+      background: url('/images/quizBackground.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.85);
+      z-index: -1;
     }
 
     .container {
-      background-color: rgba(255, 255, 255, 0.9);
-      margin: 80px auto;
-      max-width: 850px;
-      border-radius: 15px;
-      padding: 40px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    }
-
-    h2 {
-      font-size: 2.2rem;
-      margin-bottom: 20px;
-      color: #2e8b57;
-    }
-
-    /* ✅ Horizontal Progress Bar */
-    .bar-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin: 30px auto 20px;
-      gap: 10px;
-    }
-
-    .bar-container {
-      width: 70%;
-      height: 30px;
-      background-color: #d3e3d1;
-      border-radius: 30px;
-      position: relative;
-      overflow: hidden;
-      border: 3px solid #2e8b57;
-    }
-
-    .bar-fill {
-      position: absolute;
-      left: 0;
-      top: 0;
-      height: 100%;
-      width: 0; /* JS sets this */
-      background: linear-gradient(90deg, #4caf50, #2e8b57);
-      border-radius: 30px;
-      transition: width 1.2s ease;
-    }
-
-    .percent-text {
-      font-weight: bold;
-      font-size: 1.5rem;
-      color: #2e8b57;
-    }
-
-    .message {
-      font-size: 1.1rem;
-      margin: 8px 0 28px;
-    }
-
-    /* Review section */
-    .review {
-      text-align: left;
-      margin-top: 30px;
-      background-color: #f5f5f5;
-      border-radius: 10px;
-      padding: 20px;
-    }
-
-    .review h3 {
+      max-width: 900px;
+      margin: 120px auto;
+      background: white;
+      padding: 50px;
+      border-radius: 25px;
+      box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
       text-align: center;
-      margin-bottom: 15px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
       color: #0b2535;
+      margin-bottom: 10px;
     }
 
-    .question {
-      margin-bottom: 15px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 10px;
+    .caption {
+      color: #277c37;
+      font-size: 1.1rem;
+      margin-bottom: 20px;
+      font-style: italic;
     }
 
-    .correct {
-      color: #2e8b57;
-      font-weight: 700;
+    .xp-earned {
+      font-size: 1.3rem;
+      margin: 15px 0;
+      font-weight: bold;
+      color: #1b4d2b;
     }
 
-    .wrong {
-      color: #c0392b;
-      font-weight: 700;
+    /* XP BAR */
+    .xp-bar-wrapper {
+      width: 70%;
+      height: 10px;
+      background: #d0e7cc;
+      border-radius: 10px;
+      margin: 10px auto 5px;
+      position: relative;
+      cursor: pointer;
+    }
+    .xp-bar-fill {
+      height: 100%;
+      background: #2d6a4f;
+      border-radius: 10px;
     }
 
-    /* Recommendations */
-    .recommendations h3 {
-      margin: 30px 0 14px;
-      font-size: 1.4rem;
-    }
-
-    .category-links {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    .category-links a {
-      background-color: #2e8b57;
+    /* Tooltip */
+    .xp-bar-wrapper:hover::after {
+      content: attr(title);
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2d6a4f;
       color: white;
-      text-decoration: none;
-      padding: 10px 16px;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-weight: 700;
-      transition: 0.25s;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
     }
 
-    .category-links a:hover {
-      background-color: #1e6b40;
-    }
-
-    .btn-home {
-      display: inline-block;
-      background-color: #256b45;
-      color: white;
-      padding: 12px 22px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 700;
-      margin-top: 26px;
-    }
-
-    .btn-home:hover {
-      background-color: #1a4b32;
+    .xp-bar-wrapper:hover::before {
+      content: "";
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #2d6a4f transparent transparent transparent;
     }
 
     .btn {
-      display: inline-block;
-      background-color: #4a90e2;
+      background: #1b4d2b;
       color: white;
-      padding: 12px 22px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 700;
-      margin-top: 26px;
-      margin-left: 10px;
+      border: none;
+      padding: 10px 35px;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 25px;
+      font-size: 1.1rem;
+      transition: 0.3s;
     }
 
     .btn:hover {
-      background-color: #357ab8;
+      transform: scale(1.05);
+      background: #103c20;
     }
 
-    footer {
-      text-align: center; 
-      padding: 25px; 
-      font-size: 1.1em; 
-      color: #555; 
-    }
   </style>
+
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
+
 <body>
   <%- include('partials/navbar') %>
 
-  <!-- 🧠 Pass data safely as attributes -->
-  <div class="container" id="resultRoot"
-       data-score="<%= score %>"
-       data-total="<%= total %>">
+  <div class="container">
 
-    <h2>Your Quiz Result 🌿</h2>
-
-    <!-- ✅ Horizontal progress bar -->
-    <div class="bar-wrap">
-      <div class="bar-container">
-        <div class="bar-fill" id="barFill"></div>
-      </div>
-      <div class="percent-text" id="percentText">0%</div>
-    </div>
-
-    <p>You scored <strong><%= score %></strong> out of <strong><%= total %></strong></p>
-
-    <% const pct = Math.round((Number(score) / Math.max(Number(total), 1)) * 100); %>
-    <% if (pct >= 80) { %>
-      <p class="message">🌟 Excellent! You’re a sustainability champion!</p>
-    <% } else if (pct >= 50) { %>
-      <p class="message">👍 Good effort! You’re learning fast!</p>
-    <% } else { %>
-      <p class="message">💪 Keep going — every quiz helps you improve!</p>
-    <% } %>
-
-    <!-- Review Answers -->
-    <div class="review">
-      <h3>Review Your Answers</h3>
-      <% const review = (typeof questions !== 'undefined' && Array.isArray(questions)) ? questions : []; %>
-      <% if (review.length) { %>
-        <% review.forEach((q, i) => { %>
-          <div class="question">
-            <p><strong>Q<%= i + 1 %>:</strong> <%= q.question %></p>
-            <p>Your answer:
-              <span class="<%= q.userAnswer == q.correctOption ? 'correct' : 'wrong' %>">
-                <%= q['option' + q.userAnswer] || "No answer selected" %>
-              </span>
-            </p>
-            <p>Correct answer:
-              <span class="correct"><%= q['option' + q.correctOption] %></span>
-            </p>
-
-            <% if (q.explanation) { %>
-            <p><em>Explanation:</em> <%= q.explanation %></p>
-          <% } %>
-          </div>
-        <% }) %>
+    <!-- Title -->
+    <h1>
+      <% if (alreadyDone) { %>
+        💡 Quiz Already Completed
       <% } else { %>
-        <p class="message">No review available for this attempt yet.</p>
+        🎉 Quiz Completed!
       <% } %>
-    </div>
+    </h1>
 
-    <!-- Category Recommendations -->
-    <div class="recommendations">
-      <h3>Try Another Category</h3>
-      <div class="category-links">
-        <% categories.forEach(cat => { %>
-          <a href="/quiz/category/<%= cat.categoryID %>"><%= cat.categoryName %></a>
-        <% }) %>
+    <!-- Dynamic Caption -->
+    <p class="caption">
+      <% if (sessionXP < 50) { %>
+        🌱 Keep trying! Every step helps the planet!
+      <% } else if (sessionXP < 200) { %>
+        🌿 Great job! You're growing greener every day!
+      <% } else { %>
+        ✨ Excellent! You’re a sustainability champion!
+      <% } %>
+    </p>
+
+    <!-- XP Earned for this quiz -->
+    <p class="xp-earned">
+      XP Earned for this Quiz: <%= sessionXP %> ✨
+    </p>
+
+    <!-- Level section -->
+    <p><strong>Current Level:</strong> <%= level %></p>
+
+    <!-- XP BAR -->
+    <div 
+      class="xp-bar-wrapper"
+      title="You need <%= 500 - (totalXP % 500) %> XP to reach the next level">
+      
+      <div 
+        class="xp-bar-fill" 
+        style="width: <%= progressPercent %>%">
       </div>
     </div>
 
-    <a href="/quiz" class="btn-home">Back to Quiz Menu</a>
+    <p><strong>Total XP:</strong> <%= totalXP %></p>
+
+    <a href="/categories">
+      <button class="btn">Back to Categories</button>
+    </a>
+
   </div>
 
-  <!-- JS -->
+  <!-- Confetti trigger -->
+  <% if (!alreadyDone) { %>
   <script>
-    const root = document.getElementById('resultRoot');
-    const score = Number(root.dataset.score || 0);
-    const total = Math.max(Number(root.dataset.total || 1), 1);
-    const percent = Math.round((score / total) * 100);
-
-    const bar  = document.getElementById('barFill');
-    const text = document.getElementById('percentText');
-
-    // ✅ Horizontal width fill animation
-    bar.style.width = percent + '%';
-
-    // Optional: change color by performance
-    if (percent < 50)      bar.style.background = '#d9534f'; // red
-    else if (percent < 80) bar.style.background = '#f0ad4e'; // yellow
-    else                   bar.style.background = 'linear-gradient(90deg, #4caf50, #2e8b57)'; // green gradient
-
-    // Count-up % text animation
-    let current = 0;
-    const step = Math.max(1, Math.round(percent / 50));
-    const timer = setInterval(() => {
-      current += step;
-      if (current >= percent) {
-        current = percent;
-        clearInterval(timer);
-      }
-      text.textContent = current + '%';
-    }, 20);
+    confetti({
+      particleCount: 180,
+      spread: 80,
+      startVelocity: 45,
+      origin: { y: 0.2 }
+    });
   </script>
-  <footer>
-    &copy; 2025 RPEcoJourney. All Rights Reserved.
-  </footer>
+  <% } %>
+
 </body>
 </html>
+
+
+

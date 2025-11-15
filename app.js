@@ -120,9 +120,11 @@ app.get('/aboutus', homepageController.getAboutPage);
 // Quiz Routes
 app.get('/quiz', quizController.getQuiz);
 app.get('/quiz/category/:id', quizController.getSetByCategory);
-app.get('/quiz/category/:categoryID/set/:setNumber', quizController.getQuestionBySets);
-app.post('/quiz/submit', quizController.postQuiz);
-app.get('/quiz/result', quizController.getQuizResult);
+app.get('/quiz/game/start/:categoryID/:setNumber',quizController.startGame);
+app.post('/quiz/game/answer', quizController.answerGame);
+app.get('/quiz/game/next/:currentID/:categoryID/:setNumber', quizController.nextGameQuestion);
+app.get("/quiz/game/complete/:categoryID/:setNumber", quizController.completeGame);
+
 
 //CHECK IN DASHBOARD ROUTES
 app.get('/checkin-board', checkinController.getCheckInBoard);
