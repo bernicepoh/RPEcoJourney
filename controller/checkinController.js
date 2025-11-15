@@ -18,45 +18,71 @@ exports.getCheckInBoard = (req, res) => {
         const progress = rows[0];
 
         // ===============================
-// ASSIGN LEVEL TITLE + BADGE
-// ===============================
+        // ASSIGN LEVEL TITLE + BADGE
+        // ===============================
+        let levelTitle = "";
+        let levelBadge = "";
 
-let levelTitle = "";
-let levelBadge = "";
+        switch (progress.level) {
+            case 1:
+                levelTitle = "Eco Novice";
+                levelBadge = "eco-novice.png";
+                break;
 
-// Choose based on level number
-switch (progress.level) {
-    case 1:
-        levelTitle = "Eco Novice";
-        levelBadge = "eco-novice.png";
-        break;
+            case 2:
+                levelTitle = "Eco Learner";
+                levelBadge = "eco-learner.png";
+                break;
 
-    case 2:
-        levelTitle = "Eco Learner";
-        levelBadge = "eco-learner.png";
-        break;
+            case 3:
+                levelTitle = "Eco Seeker";
+                levelBadge = "eco-seeker.png";
+                break;
 
-    case 3:
-        levelTitle = "Eco Explorer";
-        levelBadge = "eco-explorer.png";
-        break;
+            case 4:
+                levelTitle = "Eco Explorer";
+                levelBadge = "eco-explorer.png";
+                break;
 
-    case 4:
-        levelTitle = "Eco Hero";
-        levelBadge = "eco-hero.png";
-        break;
+            case 5:
+                levelTitle = "Eco Ranger";
+                levelBadge = "eco-ranger.png";
+                break;
 
-    default:
-        levelTitle = "Eco Master";
-        levelBadge = "eco-master.png";
-}
+            case 6:
+                levelTitle = "Eco Guardian";
+                levelBadge = "eco-guardian.png";
+                break;
 
-// Attach to progress object so EJS can use it
-progress.levelTitle = levelTitle;
-progress.levelBadge = levelBadge;
+            case 7:
+                levelTitle = "Eco Warrior";
+                levelBadge = "eco-warrior.png";
+                break;
 
+            case 8:
+                levelTitle = "Eco Champion";
+                levelBadge = "eco-champion.png";
+                break;
 
+            case 9:
+                levelTitle = "Eco Hero";
+                levelBadge = "eco-hero.png";
+                break;
 
+            case 10:
+                levelTitle = "Eco Master";
+                levelBadge = "eco-master.png";
+                break;
+
+            default:
+                levelTitle = "Eco Legend"; 
+                levelBadge = "eco-legend.png";
+        }
+
+        progress.levelTitle = levelTitle;
+        progress.levelBadge = levelBadge;
+
+        // XP calculations
         const xpNeeded = 500;
         const xpPercent = Math.min((progress.xp / xpNeeded) * 100, 100);
 
@@ -80,7 +106,7 @@ progress.levelBadge = levelBadge;
                 progress,
                 xpPercent,
                 xpNeeded,
-                missions ,
+                missions,
                 user: req.session.user
             });
         });
@@ -88,10 +114,6 @@ progress.levelBadge = levelBadge;
 };
 
 
-
-// =======================
-// DO CHECK-IN
-// =======================
 // =======================
 // DO CHECK-IN
 // =======================
@@ -105,12 +127,11 @@ exports.doCheckIn = (req, res) => {
 
     db.query(checkSql, [userID, today], (err, rows) => {
         if (rows.length > 0) {
-            // ⭐ Instead of redirect, reload page with popup flag
             req.flash("checkedIn", "You have already checked in today!");
             return res.redirect('/checkin-board?already=true');
-        }    
+        }
 
-        // Insert today check-in
+        // INSERT new check-in
         const insertSql = `
             INSERT INTO user_checkin (userID, checkinDate)
             VALUES (?, ?)
@@ -125,30 +146,34 @@ exports.doCheckIn = (req, res) => {
         db.query(getProgress, [userID], (err2, row) => {
             const p = row[0];
 
-            let last = p.lastCheckinDate 
-                ? new Date(p.lastCheckinDate).toDateString() 
+            let last = p.lastCheckinDate
+                ? new Date(p.lastCheckinDate).toDateString()
                 : null;
 
             let yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
             yesterday = yesterday.toDateString();
 
+            // STREAK LOGIC
             let streak = 1;
             if (last === yesterday) streak = p.streak + 1;
 
+            // XP CALCULATION
             let baseXP = 3;
             let streakBonus = Math.min(streak, 7);
             let xpGain = baseXP + streakBonus;
 
             let newXP = p.xp + xpGain;
             let newLevel = p.level;
-
             const xpNeeded = 500;
+
+            // LEVEL UP
             if (newXP >= xpNeeded) {
                 newLevel++;
                 newXP -= xpNeeded;
             }
 
+            // UPDATE progress
             const updateSql = `
                 UPDATE user_progress
                 SET xp=?, level=?, streak=?, lastCheckinDate=?
@@ -156,21 +181,19 @@ exports.doCheckIn = (req, res) => {
             `;
             db.query(updateSql, [newXP, newLevel, streak, today, userID]);
 
-            // Update mission
+            // UPDATE mission progress
             const updateMission = `
-                INSERT INTO daily_missions (userID , missionDate , checkinDone) 
+                INSERT INTO daily_missions (userID, missionDate, checkinDone)
                 VALUES (?, ?, 1)
                 ON DUPLICATE KEY UPDATE checkinDone=1
             `;
-            db.query(updateMission, [userID, today], (err3) => {
-                if (err3) console.log("MISSION ERROR:",err3)
-            });
+            db.query(updateMission, [userID, today]);
 
-            // 🔥🔥 FINAL FIX: RELOAD PAGE WITH NEW DATA
             return res.redirect('/checkin-board');
         });
     });
 };
+
 
 
 
