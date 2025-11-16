@@ -1,27 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RPEcoJourney | Home</title>
   <link rel="stylesheet" href="/css/style.css">
 
   <style>
-    body {
+    /* Reset */
+    * {
+      box-sizing: border-box;
       margin: 0;
+      padding: 0;
+    }
+
+    body {
       font-family: 'Georgia', serif;
-      background: url("/images/backgroundimage.jpg") no-repeat center center fixed;
-      background-size: cover;
-      color: #0b2535;
+
+      /* 🔥 SAME MEASUREMENT AS QUIZ TOPIC PAGE */
+      background: url('/images/quizBackground.jpg') no-repeat center center fixed;
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;  
+      min-height: 100vh;
+      position: relative;
       overflow-x: hidden;
     }
 
-    .overlay {
-      background-color: rgba(255, 255, 255, 0.3);
-      backdrop-filter: blur(8px);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+    /* 🔥 SAME OVERLAY STYLE AS YOUR SAMPLE */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.85);
+      z-index: -1;
     }
 
     .hero {
@@ -73,7 +88,8 @@
     }
 
     .feature-card {
-      flex: 1 1 300px;
+      width: 320px;               /* FIXED CARD SIZE */
+      max-width: 320px;           /* PREVENT STRETCHING */
       background: rgba(255, 255, 255, 0.8);
       border-radius: 20px;
       padding: 35px 25px;
@@ -82,6 +98,7 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
       transition: all 0.3s ease;
     }
+
 
     .feature-card:hover {
       transform: translateY(-8px);
@@ -121,36 +138,36 @@
 <body>
   <%- include('partials/navbar') %>
 
-  <div class="overlay">
-    <section class="hero">
-      <h1>Welcome to RPEcoJourney 🌿</h1>
-      <p>Empowering green living through awareness and fun quizzes.</p>
-      <a href="/quiz" class="btn">Get Started</a>
-    </section>
+  <section class="hero">
+    <h1>Welcome to RPEcoJourney 🌿</h1>
+    <p>Empowering green living through awareness and fun quizzes.</p>
+    <a href="/categories" class="btn">Get Started</a>
+  </section>
 
-    <section class="features">
-      <div class="feature-card">
-        <img src="/images/leaf-icon.png" alt="Eco Awareness">
-        <h3>Learn Sustainability</h3>
-        <p>Explore quizzes that raise awareness about environmental, social, and governance topics.</p>
-      </div>
+  <section class="features">
+    <div class="feature-card">
+      <img src="/images/leaderboard.png" alt="leaderboard">
+      <h3>🌍 Join the Journey</h3>
+      <p>Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
+    </div>
 
-      <div class="feature-card">
-        <img src="/images/quiz-icon.png" alt="Take Quizzes">
-        <h3><a href="/quiz" style="color:inherit; text-decoration:none;">Challenge Yourself</a></h3>
-        <p>Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
-      </div>
+    <div class="feature-card">
+      <img src="/images/quiz.png" alt="Take Quizzes">
+      <h3><a href="/quiz" style="color:inherit; text-decoration:none;">🎯 Challenge Yourself</a></h3>
+      <p>Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
+    </div>
 
-      <div class="feature-card">
-        <img src="/images/dashboard.png" alt="Dashboard">
-        <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;">Join the Journey</a></h3>
-        <p>Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
-      </div>
-    </section>
+    <div class="feature-card">
+      <img src="/images/dashboard.png" alt="Dashboard">
+      <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;">🧭 Your Sustainability Dashboard</a></h3>
+      <p>Track your personal growth in sustainability</p>
+    </div>
+  </section>
 
-    <footer>
-      &copy; 2025 RPEcoJourney. All Rights Reserved.
-    </footer>
-  </div>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
+
 </body>
 </html>
+
