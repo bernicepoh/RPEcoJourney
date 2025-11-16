@@ -98,9 +98,10 @@
         <div class="set-title">Quiz Set <%= set.setNumber %></div>
 
         <!-- Start Kahoot-style game -->
-        <a href="/quiz/game/start/<%= categoryID %>/<%= set.setNumber %>" class="btn-start">
-          Start Quiz
+        <a href="/startGame/<%= categoryID %>/<%= set.setNumber %>">
+          <button class="start-btn">Start Quiz</button>
         </a>
+
       </div>
     <% }) %>
   </div>

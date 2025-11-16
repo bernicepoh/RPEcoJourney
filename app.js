@@ -5,6 +5,7 @@ const categoryController = require('./controller/categoryController');
 const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
+const quizDisplayController = require('./controller/quizDisplayController');
 const db = require('./db');
 
 const multer = require('multer');
@@ -23,8 +24,8 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
 // // Import middleware
+
 // const { checkAuthenticated, checkAdmin, checkUser } = require('./middleware/auth');
 // const { validateRegistration, validateLogin } = require('./middleware/validation');
 
@@ -48,6 +49,12 @@ app.use(session({
   // Session expires after 1 week of inactivity
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true }
 }));
+
+// Make user session available in ALL EJS files
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+});
 
 // Use connect-flash middleware
 app.use(flash());
@@ -117,13 +124,46 @@ app.get('/homepage', homepageController.getHomePage);
 // About Us page
 app.get('/aboutus', homepageController.getAboutPage);
 
-// Quiz Routes
+/* =======================
+      QUIZ ROUTES
+======================== */
+
+// Main quiz page
 app.get('/quiz', quizController.getQuiz);
+
+// Category → sets
 app.get('/quiz/category/:id', quizController.getSetByCategory);
-app.get('/quiz/game/start/:categoryID/:setNumber',quizController.startGame);
+
+// Start game (handles guest + real user logic)
+app.get('/startGame/:categoryID/:setNumber', quizController.startGame);
+
+// Actual quiz page (first question)
+app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
+
+// Submit answer
 app.post('/quiz/game/answer', quizController.answerGame);
+
+// Next question
 app.get('/quiz/game/next/:currentID/:categoryID/:setNumber', quizController.nextGameQuestion);
-app.get("/quiz/game/complete/:categoryID/:setNumber", quizController.completeGame);
+
+// Completed quiz
+app.get('/quiz/game/complete/:categoryID/:setNumber', quizController.completeGame);
+
+/* =======================
+      QR QUIZ ROUTES
+======================== */
+
+app.get('/quiz-start', quizDisplayController.showQuizStart);     // TV QR screen
+app.get('/quiz-access', quizDisplayController.showQuizAccess);   // Phone: choose guest/login
+app.get('/guest-start', quizDisplayController.startAsGuest);     // Create guest session
+
+// Guest welcome screen (reuse quiz-access.ejs)
+app.get('/guest-welcome', (req, res) => {
+    res.render("quiz-access", { guestMode: true });
+});
+
+
+
 
 
 //CHECK IN DASHBOARD ROUTES
