@@ -3,6 +3,7 @@ const nodemailer = require('nodemailer');
 
 exports.getContentByCategory = (req, res) => {
     const categoryID = req.params.id;
+    const user = req.session.user 
     const sql = `SELECT 
                     c.contentID, 
                     c.contentTitle, 
@@ -25,7 +26,7 @@ exports.getContentByCategory = (req, res) => {
 
         if (results.length > 0) {
             console.log('All content:', results[0].contentName);
-            res.render('viewContentByCategory', { category: results });
+            res.render('viewContentByCategory', { user, category: results });
         } else {
             // If no product with the given ID was found, 
             //render a 404 page or handle it accordingly
@@ -35,6 +36,8 @@ exports.getContentByCategory = (req, res) => {
 };
 
 exports.getContent = (req, res) => {
+
+    const user = req.session.user 
     const contentID = req.params.id;
     const sql = 'SELECT * FROM content WHERE contentID = ?';
     // Fetch data from MySQL
@@ -48,7 +51,7 @@ exports.getContent = (req, res) => {
         // Check if any content with the given ID was found
         if (results.length > 0) {
             // Render HTML page with the category data
-            res.render('viewContent', { content: results[0] });
+            res.render('viewContent', { user, content: results[0] });
         } else {
             // If no product with the given ID was found, 
             //render a 404 page or handle it accordingly
@@ -59,13 +62,14 @@ exports.getContent = (req, res) => {
 
 exports.addContentForm = (req, res) => {
     const sql = 'SELECT * FROM category';
+    const user = req.session.user 
     db.query(sql, (error, results) => {
         if (error) {
             console.error("Error fetching categories:", error);
             res.status(500).send('Error loading page');
         } else {
             // pass the categories to the EJS template
-            res.render('addContent', { categories: results });
+            res.render('addContent', { user, categories: results });
         }
     });
 };
@@ -80,6 +84,7 @@ exports.addContent = (req, res) => {
     }
 
     const sql = 'INSERT INTO content (categoryID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
+   
 
     // Insert the new content into the database
     db.query(sql, [categoryID, contentTitle, contentDescription, contentFile], (error, results) => {

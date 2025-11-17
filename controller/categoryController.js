@@ -3,6 +3,7 @@ const db = require('../db');
 // Public — List all categories
 exports.getCategories = (req, res) => {
     const sql = 'SELECT * FROM category';
+    const user = req.session.user 
 
     // Fetch data from MySQL
     db.query(sql, (error, results) => {
@@ -13,7 +14,7 @@ exports.getCategories = (req, res) => {
 
         if (results.length > 0) {
             console.log('All categories:', results[0].categoryName);
-            res.render('categories', { categories: results });
+            res.render('categories', { user, categories: results });
         } else {
             // If no category with the given ID was found, 
             //render a 404 page or handle it accordingly
@@ -26,6 +27,7 @@ exports.getCategories = (req, res) => {
 exports.getCategory = (req, res) => {
     const categoryID = req.params.id;
     const sql = 'SELECT * FROM category WHERE categoryID = ?';
+    const user = req.session.user 
     
     // Fetch data from MySQL
     db.query(sql, [categoryID], (error, results) => {
@@ -37,7 +39,7 @@ exports.getCategory = (req, res) => {
         // Check if any category with the given ID was found
         if (results.length > 0) {
             // Render HTML page with the category data
-            res.render('category', { category: results[0] });
+            res.render('category', { user, category: results[0] });
         } else {
             // If no category with the given ID was found, 
             //render a 404 page or handle it accordingly

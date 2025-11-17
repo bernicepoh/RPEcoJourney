@@ -4,6 +4,7 @@ const contentController = require('./controller/contentController');
 const categoryController = require('./controller/categoryController');
 const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
+const profileController = require('./controller/profileController');
 const db = require('./db');
 
 const multer = require('multer');
@@ -61,6 +62,15 @@ app.use('/uploads', express.static('uploads'));
 
 app.use(flash());
 
+const checkAdmin = (req, res, next) => {
+    if (req.session.user.userType === 'Admin') {
+        return next();
+    } else {
+        req.flash('error', 'Access denied');
+        res.redirect('/homepage');
+    }
+};
+
 const validateRegistration = (req,res, next) => {
     const { userName, email, password, contactNo } = req.body;
     
@@ -75,6 +85,14 @@ const validateRegistration = (req,res, next) => {
     }
     next()
 }
+
+
+//Profile Routes 
+app.get('/editProfile/:id', profileController.getProfile);
+app.post('/editProfile/:id', profileController.updateProfile);
+app.get('/editUserRole/:id', checkAdmin, profileController.getProfileAdmin);
+app.post('/editUserRole/:id', checkAdmin, profileController.updateUserRole);
+
  
 //User Routes
 app.get('/', userController.getLogin);
@@ -84,6 +102,13 @@ app.post('/register',validateRegistration,userController.register);
 app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
+
+
+//Admin Routes 
+app.get('/adminDashboard', checkAdmin, userController.getAdminDashboard);
+app.get('/adminUsers', checkAdmin, userController.getAllUsers);
+
+
 
 //testing forget password route
 function simpleHash(str) {
