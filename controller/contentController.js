@@ -1,61 +1,266 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
 
+// ============================
+// GET CONTENT BY CATEGORY
+// ============================
 exports.getContentByCategory = (req, res) => {
     const categoryID = req.params.id;
-    const sql = `SELECT 
-                    c.contentID, 
-                    c.contentTitle, 
-                    c.contentDescription, 
-                    c.contentFile,
-                    cat.categoryName 
-                FROM 
-                    content c
-                JOIN 
-                    category cat
-                ON 
-                    c.categoryID = cat.categoryID
-                WHERE 
-                    cat.categoryID = ?;`;
-    // Fetch data from MySQL
-    db.query(sql, [categoryID], (error, results) => {
+    const userID = req.session.user ? req.session.user.userID : null;
+
+    const sql = `
+        SELECT 
+            c.contentID,
+            c.contentTitle,
+            c.contentDescription,
+            c.contentFile,
+            cat.categoryName,
+            cat.categoryDescription,
+            cat.categoryImage,
+            COUNT(l.likeID) AS likeCount,
+            SUM(CASE WHEN l.userID = ? THEN 1 ELSE 0 END) AS userLiked
+        FROM content c
+        JOIN category cat ON c.categoryID = cat.categoryID
+        LEFT JOIN likes l ON l.contentID = c.contentID
+        WHERE cat.categoryID = ?
+        GROUP BY 
+            c.contentID,
+            c.contentTitle,
+            c.contentDescription,
+            c.contentFile,
+            cat.categoryName,
+            cat.categoryDescription,
+            cat.categoryImage
+        ORDER BY c.contentID ASC;
+    `;
+
+    db.query(sql, [userID, categoryID], (error, results) => {
         if (error) {
+            console.error("Error retrieving content:", error);
             return res.status(500).send('Error retrieving content');
         }
 
         if (results.length > 0) {
-            console.log('All content:', results[0].contentName);
-            res.render('viewContentByCategory', { category: results });
+            const cat = {
+                categoryName: results[0].categoryName,
+                categoryDescription: results[0].categoryDescription,
+                categoryImage: results[0].categoryImage
+            };
+
+            return res.render('viewContentByCategory', { 
+                cat,
+                contentList: results,
+                user: req.session.user || null
+            });
         } else {
-            // If no product with the given ID was found, 
-            //render a 404 page or handle it accordingly
-            res.status(404).send('No content');
+            // No content yet – still show category banner
+            const catSql = 'SELECT * FROM category WHERE categoryID = ?';
+            db.query(catSql, [categoryID], (err2, catRows) => {
+                if (err2 || catRows.length === 0) {
+                    return res.status(404).send('Category not found');
+                }
+
+                const cat = catRows[0];
+
+                return res.render('viewContentByCategory', { 
+                    cat,
+                    contentList: [],
+                    user: req.session.user || null
+                });
+            });
         }
+    });
+};
+
+// ============================
+// TOGGLE LIKE
+// ============================
+exports.toggleLike = (req, res) => {
+    if (!req.session.user) {
+        // Not logged in
+        return res.status(401).json({ success: false, notLoggedIn: true });
+    }
+
+    const userID = req.session.user.userID;
+    const contentID = req.params.contentID;
+
+    // 1) Check if user already liked this content
+    const checkSql = 'SELECT likeID FROM likes WHERE userID = ? AND contentID = ?';
+
+    db.query(checkSql, [userID, contentID], (err, rows) => {
+        if (err) {
+            console.error('Error checking like:', err);
+            return res.status(500).json({ success: false });
+        }
+
+        if (rows.length > 0) {
+            // Already liked → UNLIKE (delete row)
+            const deleteSql = 'DELETE FROM likes WHERE userID = ? AND contentID = ?';
+            db.query(deleteSql, [userID, contentID], (delErr) => {
+                if (delErr) {
+                    console.error('Error deleting like:', delErr);
+                    return res.status(500).json({ success: false });
+                }
+
+                // Get updated like count
+                const countSql = 'SELECT COUNT(*) AS likeCount FROM likes WHERE contentID = ?';
+                db.query(countSql, [contentID], (countErr, countRows) => {
+                    if (countErr) {
+                        console.error('Error counting likes:', countErr);
+                        return res.status(500).json({ success: false });
+                    }
+
+                    return res.json({
+                        success: true,
+                        liked: false,
+                        likeCount: countRows[0].likeCount
+                    });
+                });
+            });
+
+        } else {
+            // Not liked yet → LIKE (insert row)
+            const insertSql = 'INSERT INTO likes (userID, contentID) VALUES (?, ?)';
+            db.query(insertSql, [userID, contentID], (insErr) => {
+                if (insErr) {
+                    console.error('Error inserting like:', insErr);
+                    return res.status(500).json({ success: false });
+                }
+
+                // Get updated like count
+                const countSql = 'SELECT COUNT(*) AS likeCount FROM likes WHERE contentID = ?';
+                db.query(countSql, [contentID], (countErr, countRows) => {
+                    if (countErr) {
+                        console.error('Error counting likes:', countErr);
+                        return res.status(500).json({ success: false });
+                    }
+
+                    return res.json({
+                        success: true,
+                        liked: true,
+                        likeCount: countRows[0].likeCount
+                    });
+                });
+            });
+        }
+    });
+};
+
+// ============================
+// POSTING OF COMMENT 
+// ============================
+exports.postComment = (req, res) => {
+    const contentID = req.params.id;
+    const userID = req.session.user.userID;  // user must be logged in
+    const commentText = req.body.commentText;
+
+    const sql = `
+        INSERT INTO comments (userID, contentID, commentText) 
+        VALUES (?, ?, ?)
+    `;
+
+    db.query(sql, [userID, contentID, commentText], (err) => {
+        if (err) {
+            console.error("Error inserting comment:", err);
+            return res.status(500).send("Failed to post comment");
+        }
+
+        // Redirect back to same content page
+        res.redirect(`/content/${contentID}`);
     });
 };
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
-    const sql = 'SELECT * FROM content WHERE contentID = ?';
-    // Fetch data from MySQL
-    db.query(sql, [contentID], (error, results) => {
 
-        if (error) {
-            console.error('Database query error:', error.message);
-            return res.status(500).send('Error retrieving category by ID');
+    const sqlContent = `SELECT * FROM content WHERE contentID = ?`;
+    const sqlComments = `
+        SELECT c.commentID, c.commentText, c.createdAt, u.userName, u.userImage, u.userID
+        FROM comments c
+        JOIN user u ON c.userID = u.userID
+        WHERE c.contentID = ?
+        ORDER BY c.createdAt DESC
+    `;
+
+    db.query(sqlContent, [contentID], (err, contentResults) => {
+        if (err) {
+            console.error('Error retrieving content:', err.message);
+            return res.status(500).send('Error retrieving content');
         }
 
-        // Check if any content with the given ID was found
-        if (results.length > 0) {
-            // Render HTML page with the category data
-            res.render('viewContent', { content: results[0] });
-        } else {
-            // If no product with the given ID was found, 
-            //render a 404 page or handle it accordingly
-            res.status(404).send('Content not found');
+        if (contentResults.length === 0) {
+            return res.status(404).send('Content not found');
         }
+
+        db.query(sqlComments, [contentID], (err, commentResults) => {
+            if (err) {
+                console.error('Error retrieving comments:', err.message);
+                return res.status(500).send('Error retrieving comments');
+            }
+
+            res.render('viewContent', { 
+                content: contentResults[0],   // for main post data
+                comments: commentResults,     // for ALL comments
+                sessionUser: req.session.user   
+            });
+        });
     });
 };
+
+exports.editComment = (req, res) => {
+    const commentID = req.params.commentID;
+    const userID = req.session.user.userID;
+    const { updatedText } = req.body;
+
+    if (!updatedText || updatedText.trim() === "") {
+        return res.redirect('back'); 
+    }
+
+    // Step 1: Get the related contentID first
+    const getContentSQL = "SELECT contentID FROM comments WHERE commentID = ? AND userID = ?";
+
+    db.query(getContentSQL, [commentID, userID], (err, result) => {
+        if (err || result.length === 0) {
+            return res.redirect('back');
+        }
+
+        const contentID = result[0].contentID;
+
+        // Step 2: Update comment
+        const updateSQL = `
+            UPDATE comments SET commentText = ?
+            WHERE commentID = ? AND userID = ?
+        `;
+
+        db.query(updateSQL, [updatedText.trim(), commentID, userID], (err) => {
+            if (err) return res.status(500).send('Failed to edit comment');
+            
+            // Step 3: Redirect back to main post page
+            res.redirect(`/content/${contentID}`);
+        });
+    });
+};
+
+exports.deleteComment = (req, res) => {
+    const commentID = req.params.commentID;
+    const userID = req.session.user.userID;
+
+    const sqlGet = `SELECT contentID FROM comments WHERE commentID = ? AND userID = ?`;
+
+    db.query(sqlGet, [commentID, userID], (err, result) => {
+        if (err || result.length === 0) return res.redirect('back');
+
+        const contentID = result[0].contentID;
+
+        const sqlDelete = `DELETE FROM comments WHERE commentID = ? AND userID = ?`;
+
+        db.query(sqlDelete, [commentID, userID], (err) => {
+            if (err) return res.status(500).send('Failed to delete comment');
+            res.redirect(`/content/${contentID}`);
+        });
+    });
+};
+
 
 exports.addContentForm = (req, res) => {
     const sql = 'SELECT * FROM category';

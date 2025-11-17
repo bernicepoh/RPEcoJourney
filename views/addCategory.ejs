@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RPEcoJourney - Add Category</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+  body {
+    font-family: 'Georgia', serif;
+    background: #e8f5e9;
+  }
+
+  .form-card {
+    max-width: 620px;
+    margin: 60px auto;
+    padding: 32px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.13);
+    border: 3px solid #2d6a4f;
+  }
+
+  h2 {
+    color: #145a32;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
+  label {
+    font-weight: 600;
+    color: #145a32;
+  }
+
+  input[type="text"], textarea {
+    width: 100%;
+    border: 2px solid #a3c9a8;
+    border-radius: 8px;
+    padding: 10px;
+    transition: 0.2s;
+  }
+
+  input[type="text"]:focus, textarea:focus {
+    border-color: #2d6a4f;
+    outline: none;
+    background: #f4fff6;
+  }
+
+  #addPreviewImg {
+    border-radius: 10px;
+    max-width: 300px;
+    display: none;
+    margin-top: 6px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.18);
+  }
+
+  .save-btn {
+    background: #2d6a4f;
+    color: white;
+    padding: 10px 26px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.05em;
+    transition: 0.2s;
+    width: 100%;
+  }
+
+  .save-btn:hover {
+    background: #1b472f;
+    transform: translateY(-2px);
+  }
+
+  .file-text {
+    font-size: 0.9em;
+    color: #2d6a4f;
+  }
+
+</style>
+</head>
+
+<body>
+  <%- include ('partials/navbar.ejs') %>
+
+  <div class="form-card">
+    <h2 class="text-center">Add New Category</h2>
+
+    <form action="/addCategory" method="POST" enctype="multipart/form-data">
+
+      <label>Category Name:</label>
+      <input type="text" id="categoryName" name="categoryName" required>
+
+      <br>
+
+      <label>Category Description:</label>
+      <textarea id="categoryDescription" name="categoryDescription" rows="3" required></textarea>
+
+      <br>
+
+      <label>Image Preview:</label> <br>
+      <img id="addPreviewImg" src="/images/default.png">
+
+      <br>
+
+      <label>Upload Image:</label>
+      <input type="file" id="addCategoryImage" name="categoryImage" accept="image/*" onchange="addPreviewImage(event)">
+      <span id="addFileName" class="file-text"></span>
+
+      <br><br>
+
+      <button type="submit" class="save-btn">Add Category</button>
+
+    </form>
+  </div>
+
+<script>
+function addPreviewImage(event) {
+  const fileInput = event.target;
+  const preview = document.getElementById("addPreviewImg");
+  const fileNameLabel = document.getElementById("addFileName");
+
+  if (fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+    fileNameLabel.textContent = file.name;
+  }
+}
+</script>
+
+</body>
+</html>
+
