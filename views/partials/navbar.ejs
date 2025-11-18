@@ -11,13 +11,8 @@
   </ul>
 
   <ul>
-    <% if (user) { %>
-      <li><a href="/editProfile/<%= user.userID %>">Profile</a></li>
-      <li><a href="/">Logout</a></li>
-    <% } else { %>
-      <li><a href="/">Login</a></li>
-      <li><a href="/register">Register</a></li>
-    <% } %>
+    <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
+    <li><a href="/logout">Logout</a></li>
   </ul>
 </nav>
 

@@ -25,10 +25,11 @@ exports.getProfile = (req, res) => {
 
 exports.updateProfile = (req, res) => {
   const userId = req.session.user.userID; 
-  const { userName, email, password, confirmPassword, contactNo } = req.body;
+  const { userName, email, contactNo } = req.body;
 
   const errors = [];
 
+  // Required fields
   if (!userName || !email || !contactNo) {
     errors.push("Username, email and contact number are required.");
   }
@@ -45,32 +46,13 @@ exports.updateProfile = (req, res) => {
     errors.push("Please enter a valid 8-digit contact number.");
   }
 
-  // Password validation only if user changed password
-  let updatePassword = false;
-  if (password || confirmPassword) {
-    updatePassword = true;
-
-    const passwordRegex =
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
-
-    if (!passwordRegex.test(password)) {
-      errors.push(
-        "Password must be at least 8 characters long and include one uppercase letter, one number, and one special character."
-      );
-    }
-
-    if (password !== confirmPassword) {
-      errors.push("Passwords do not match.");
-    }
-  }
-
   if (errors.length > 0) {
     req.flash("error", errors);
     req.flash("formData", req.body);
     return res.redirect("/editProfile/" + userId);
   }
 
-  // Check for duplicate email
+  // Check email duplicate
   const checkEmailSql = "SELECT * FROM user WHERE email = ? AND userID != ?";
   db.query(checkEmailSql, [email, userId], (err, emailResults) => {
     if (err) {
@@ -84,7 +66,7 @@ exports.updateProfile = (req, res) => {
       return res.redirect("/editProfile/" + userId);
     }
 
-    // Check duplicate contact
+    // Check contact duplicate
     const checkContactSql = "SELECT * FROM user WHERE contactNo = ? AND userID != ?";
     db.query(checkContactSql, [contactNo, userId], (err, contactResults) => {
       if (err) {
@@ -98,36 +80,57 @@ exports.updateProfile = (req, res) => {
         return res.redirect("/editProfile/" + userId);
       }
 
-      // Build SQL Update query
-      let updateSql = "UPDATE user SET userName = ?, email = ?, contactNo = ?";
-      let params = [userName, email, contactNo];
-
-      if (updatePassword) {
-        updateSql += ", password = SHA(?)";
-        params.push(password);
-      }
-
-      updateSql += " WHERE userID = ?";
-      params.push(userId);
-
-      db.query(updateSql, params, (err) => {
+      // Get existing image
+      const getImageSql = "SELECT Image FROM user WHERE userID = ?";
+      db.query(getImageSql, [userId], (err, imageResults) => {
         if (err) {
-          console.error("Error updating profile:", err);
+          console.error("Error fetching image:", err);
           req.flash("error", "An error occurred. Please try again.");
           return res.redirect("/editProfile/" + userId);
         }
 
-        // Update session info
-        req.session.user.userName = userName;
-        req.session.user.email = email;
-        req.session.user.contactNo = contactNo;
+        let Image = imageResults[0].Image; // keep old image by default
 
-        
-        res.redirect("/homepage"); 
+        // If a new image is uploaded, replace it
+        if (req.file) {
+          // Delete old image file
+          if (Image) {
+            const fs = require("fs");
+            const oldPath = "./public/uploads/" + Image;
+            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+          }
+          Image = req.file.filename; // use new image
+        }
+
+        // Update profile
+        const updateSql = `
+          UPDATE user 
+          SET userName = ?, email = ?, contactNo = ?, Image = ?
+          WHERE userID = ?
+        `;
+        const params = [userName, email, contactNo, Image, userId];
+
+        db.query(updateSql, params, (err) => {
+          if (err) {
+            console.error("Error updating profile:", err);
+            req.flash("error", "An error occurred. Please try again.");
+            return res.redirect("/editProfile/" + userId);
+          }
+
+          
+          req.session.user.userName = userName;
+          req.session.user.email = email;
+          req.session.user.contactNo = contactNo;
+          req.session.user.Image = Image;
+
+          req.flash("success", "Profile updated successfully!");
+          res.redirect("/viewProfile/" + userId);
+        });
       });
     });
   });
 };
+
 
 exports.getProfileAdmin = (req, res) => {
      const userID = req.params.id;
@@ -169,3 +172,27 @@ exports.updateUserRole = (req, res) => {
   }) ;
 
 };
+
+exports.getViewProfile = (req, res) => {
+    const userID = req.session.user.userID;
+    const image = req.session.user.Image;
+    const sql = 'SELECT * FROM user WHERE userID = ?';
+
+    db.query(sql, [userID, image], (err, results) => {
+        if (err) {
+            console.error('Error fetching user profile:', err);
+            return res.status(500).send('Database error');
+        }
+
+        if (results.length > 0) {
+            res.render('viewProfile', { 
+                user: results[0],
+                error: req.flash("error") || [],
+                success: req.flash("success") || []
+            });
+        } else {
+            res.status(404).send('User not found');
+        }
+    });
+};
+

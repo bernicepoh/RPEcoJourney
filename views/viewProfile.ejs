@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;          /* Whole page is white */
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .profile-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 120px;
+        }
+
+        .profile-title {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            background: #7d9cad;        /* Card is blue */
+            padding: 40px 60px;
+            border-radius: 20px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .profile-card img {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid rgba(255,255,255,0.7);
+        }
+
+        .profile-info {
+            text-align: left;
+            font-size: 20px;
+            line-height: 32px;
+        }
+
+         .edit-btn {
+            padding: 10px 20px;
+            background: white;
+            color: #7d9cad;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .edit-btn:hover {
+            background: #e6e6e6;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('partials/navbar') %>
+
+<div class="profile-wrapper">
+
+    <div class="profile-title">Profile</div>
+
+    <div class="profile-card">
+
+        <!-- Profile Image -->
+        <% if (user.Image) { %>
+            <img src="/images/<%= user.Image %>" alt="Profile Picture">
+        <% } else { %>
+            <img src="/images/default.png" alt="Profile Picture">
+        <% } %>
+
+      
+        <div class="profile-info">
+            <div><b>Username</b>: <%= user.userName %></div>
+            <div><b>Email</b>: <%= user.email %></div>
+            <div><b>Contact Number</b>: <%= user.contactNo %></div>
+
+            <a href="/editProfile/<%= user.userID %>">
+                <button class="edit-btn">Edit Profile</button>
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

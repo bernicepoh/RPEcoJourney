@@ -195,6 +195,14 @@ exports.postResetPassword = (req, res) => {
 exports.register = (req, res) => {
   const { userName, email, password, confirmPassword, contactNo } = req.body;
   const errors = [];
+
+  let Image;
+
+  if (req.file) {
+    Image = req.file.filename;
+  } else {
+    Image = null;
+  }
  
  
   if (!userName || !email || !password || !confirmPassword || !contactNo) {
@@ -267,8 +275,8 @@ exports.register = (req, res) => {
  
      
       const insertSql =
-        'INSERT INTO user (userName, email, password, contactNo) VALUES (?, ?, SHA(?), ?)';
-      db.query(insertSql, [userName, email, password, contactNo], (err) => {
+        'INSERT INTO user (userName, email, password, contactNo, Image) VALUES (?, ?, SHA(?), ?, ?)';
+      db.query(insertSql, [userName, email, password, contactNo, Image], (err) => {
         if (err) {
           console.error('Error registering user:', err);
           req.flash('error', 'An error occurred while registering. Please try again.');
