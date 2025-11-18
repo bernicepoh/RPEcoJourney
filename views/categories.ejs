@@ -238,8 +238,7 @@
             <!-- Link to single category page by ID -->
             <a href="/category/<%= c.categoryID %>/content"><%= c.categoryName %></a><br>
             <% if (c.categoryDescription) { %>
-              <% const shortDesc = c.categoryDescription.split('-')[0]; %>
-              <small><%= shortDesc.trim() %></small>
+              <%= c.categoryDescription.split('.')[0] %>
             <% } %>
 
             <!-- EDIT & DELETE BUTTONS HERE -->

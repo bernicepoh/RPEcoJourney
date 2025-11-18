@@ -4,7 +4,7 @@ const checkAuthenticated = (req, res, next) => {
         return next();
     } else {
         req.flash('error', 'Please log in to view this resource');
-        res.redirect('/login');
+        res.redirect('/');
     }
 };
 

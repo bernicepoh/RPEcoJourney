@@ -37,27 +37,6 @@
       border-radius: 8px;
     }
 
-    .comment-area {
-      width: 100%;
-      min-height: 55px;
-      border-radius: 7px;
-      padding: 8px 12px;
-      background: #a7c3bb42;
-      border: 1px solid #bddad1;
-      resize: vertical;
-    }
-
-    .publish-btn {
-      background: #2a7e4e;
-      color: white;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 6px 22px;
-      border: none;
-      margin-top: 8px;
-      float: right;
-    }
-
     footer {
       text-align: center; 
       padding: 25px; 
@@ -79,31 +58,41 @@
       text-decoration: underline;
       color: #1a4b32;
     }
-    /* .rate-label {
-      text-align: center;
-      font-size: 1rem;
-      font-style: italic;
-      margin-bottom: 8px;
-    }
-    .stars {
-      text-align: center;
-      font-size: 22px;
-      color: #c2b497;
-      margin-bottom: 18px;
-    }
-    .comment-area {
+
+.file-box {
+  width: 350px;              /* all previews share SAME width */
+  height: 260px;             /* adjust height if needed */
+  display: flex;
+  align-items: center;       /* center vertically */
+  justify-content: center;   /* center horizontally */
+  margin: 40px auto 16px auto; /* centers horizontally with bottom space */
+}
+
+.file-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.file-box video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.comment-area {
       width: 100%;
-      max-width: 95%;
       min-height: 55px;
-      margin: 0 auto;
       border-radius: 7px;
       padding: 8px 12px;
       background: #a7c3bb42;
       border: 1px solid #bddad1;
       resize: vertical;
     }
+
     .publish-btn {
-      background: #c2d7bb;
+      background: #2a7e4e;
       color: white;
       font-weight: 600;
       border-radius: 10px;
@@ -111,7 +100,7 @@
       border: none;
       margin-top: 8px;
       float: right;
-    } */
+    }
   </style>
 </head>
 <body>
@@ -123,7 +112,32 @@
         <%= content.contentTitle %>
       </h3>
 
-      <img src="/images/<%= content.contentFile %>" alt="<%= content.contentTitle %>" class="main-image" style="width:100%; max-width:500px;">
+      <div class="file-box">
+        <% const ext = content.contentFile.split('.').pop().toLowerCase(); %>
+        <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
+          <img src="/uploads/<%= content.contentFile %>">
+        <% } else if (ext === 'pdf') { %>
+          <a href="/uploads/<%= content.contentFile %>" target="_blank">
+            <img class="file-icon" src="/images/pdf.png" style="width: 150px;">
+          </a>
+        <% } else if (['doc','docx'].includes(ext)) { %>
+          <a href="/uploads/<%= content.contentFile %>" target="_blank">
+            <img class="file-icon" src="/images/word.png" style="width: 150px;">
+          </a>
+        <% } else if (['ppt','pptx'].includes(ext)) { %>
+          <a href="/uploads/<%= content.contentFile %>" target="_blank">
+            <img class="file-icon" src="/images/ppt.png" style="width: 150px;">
+          </a>
+        <% } else if (['mp4','mov','avi'].includes(ext)) { %>
+          <video autoplay loop muted playsinline>
+            <source src="/uploads/<%= content.contentFile %>">
+          </video>
+        <% } else { %>
+          <a href="/uploads/<%= content.contentFile %>" target="_blank">
+            <img class="file-icon" src="/images/file.png">
+          </a>
+        <% } %>
+      </div>
 
       <hr class="desc-divider">
 
@@ -131,11 +145,10 @@
         <%= content.contentDescription %>
       </div>
 
-      <a href="/category/<%= content.categoryID %>/content" class="back-link">← Back to <%= content.categoryName %></a>
 
-            <!-- ====================== COMMENTS SECTION ====================== -->
+      
 
-<hr class="desc-divider" style="margin-top:45px;">
+      <hr class="desc-divider" style="margin-top:45px;">
 
 <div style="display:flex; justify-content:space-between; align-items:center; max-width:750px; margin:auto;">
   <h4 style="font-weight:600; color:#145a32;">Comments</h4>
@@ -207,34 +220,17 @@
 </form>
 
 
-      <!-- Rating Section -->
-      <!-- <div class="rate-label">
-        Rate!
-      </div>
-      <div class="stars">
-        ★★★★☆
-      </div> -->
 
-      <!-- Comment box and button -->
-      <!-- <div>
-        <label for="commentBox" class="form-label" style="font-size:0.98em;">Write a comment:</label>
-        <textarea id="commentBox" class="comment-area"></textarea>
-        <button class="publish-btn">Publish</button>
-      </div> -->
+      <a href="/category/<%= content.categoryID %>/content" class="back-link">← Back to <%= content.categoryName %></a>
+
     <% } else { %>
       <p>No content found.</p>
     <% } %>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <footer>
-    &copy; 2025 RPEcoJourney. All Rights Reserved.
-  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <!-- SweetAlert + Edit Toggle JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<script>
+  <script>
 function enableEdit(id) {
   document.getElementById("commentText-" + id).style.display = "none";
   document.getElementById("editForm-" + id).style.display = "block";
@@ -261,8 +257,10 @@ function confirmDelete(id) {
   });
 }
 
-</script>
-
-
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <footer>
+    &copy; 2025 RPEcoJourney. All Rights Reserved.
+  </footer>
 </body>
 </html>

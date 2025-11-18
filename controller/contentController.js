@@ -6,14 +6,14 @@ const nodemailer = require('nodemailer');
 // ============================
 exports.getContentByCategory = (req, res) => {
     const categoryID = req.params.id;
-    const user = req.session.user 
     const sql = `SELECT 
                     c.contentID, 
                     c.contentTitle, 
                     c.contentDescription, 
                     c.contentFile,
                     cat.categoryName,
-                    cat.categoryDescription
+                    cat.categoryDescription,
+                    cat.categoryImage
                 FROM 
                     content c
                 JOIN 
@@ -22,37 +22,37 @@ exports.getContentByCategory = (req, res) => {
                     c.categoryID = cat.categoryID
                 WHERE 
                     cat.categoryID = ?;`;
-    // Fetch data from MySQL
+
     db.query(sql, [categoryID], (error, results) => {
         if (error) {
-            console.error("Error retrieving content:", error);
             return res.status(500).send('Error retrieving content');
         }
-
         if (results.length > 0) {
-            const cat = {
+            // Use data from first item for category info
+            const categoryInfo = {
                 categoryName: results[0].categoryName,
                 categoryDescription: results[0].categoryDescription,
                 categoryImage: results[0].categoryImage
             };
-
-            return res.render('viewContentByCategory', { 
-                cat,
+            res.render('viewContentByCategory', {
+                category: categoryInfo,
                 contentList: results,
                 user: req.session.user || null
             });
         } else {
-            // No content yet – still show category banner
+            // No content, but still try to get category info for banner, etc.
             const catSql = 'SELECT * FROM category WHERE categoryID = ?';
-            db.query(catSql, [categoryID], (err2, catRows) => {
-                if (err2 || catRows.length === 0) {
+            db.query(catSql, [categoryID], (catError, catRows) => {
+                if (catError || catRows.length === 0) {
                     return res.status(404).send('Category not found');
                 }
-
-                const cat = catRows[0];
-
-                return res.render('viewContentByCategory', { 
-                    cat,
+                const categoryInfo = {
+                    categoryName: catRows[0].categoryName,
+                    categoryDescription: catRows[0].categoryDescription,
+                    categoryImage: catRows[0].categoryImage
+                };
+                res.render('viewContentByCategory', {
+                    category: categoryInfo,
                     contentList: [],
                     user: req.session.user || null
                 });
@@ -74,7 +74,7 @@ exports.toggleLike = (req, res) => {
     const contentID = req.params.contentID;
 
     // 1) Check if user already liked this content
-    const checkSql = 'SELECT likeID FROM likes WHERE userID = ? AND contentID = ?';
+    const checkSql = 'SELECT engagementID FROM engagement WHERE userID = ? AND contentID = ?';
 
     db.query(checkSql, [userID, contentID], (err, rows) => {
         if (err) {
@@ -84,7 +84,7 @@ exports.toggleLike = (req, res) => {
 
         if (rows.length > 0) {
             // Already liked → UNLIKE (delete row)
-            const deleteSql = 'DELETE FROM likes WHERE userID = ? AND contentID = ?';
+            const deleteSql = 'DELETE FROM engagement WHERE userID = ? AND contentID = ?';
             db.query(deleteSql, [userID, contentID], (delErr) => {
                 if (delErr) {
                     console.error('Error deleting like:', delErr);
@@ -92,7 +92,7 @@ exports.toggleLike = (req, res) => {
                 }
 
                 // Get updated like count
-                const countSql = 'SELECT COUNT(*) AS likeCount FROM likes WHERE contentID = ?';
+                const countSql = 'SELECT COUNT(*) AS likeCount FROM engagement WHERE contentID = ?';
                 db.query(countSql, [contentID], (countErr, countRows) => {
                     if (countErr) {
                         console.error('Error counting likes:', countErr);
@@ -109,7 +109,7 @@ exports.toggleLike = (req, res) => {
 
         } else {
             // Not liked yet → LIKE (insert row)
-            const insertSql = 'INSERT INTO likes (userID, contentID) VALUES (?, ?)';
+            const insertSql = 'INSERT INTO engagement (userID, contentID) VALUES (?, ?)';
             db.query(insertSql, [userID, contentID], (insErr) => {
                 if (insErr) {
                     console.error('Error inserting like:', insErr);
@@ -117,7 +117,7 @@ exports.toggleLike = (req, res) => {
                 }
 
                 // Get updated like count
-                const countSql = 'SELECT COUNT(*) AS likeCount FROM likes WHERE contentID = ?';
+                const countSql = 'SELECT COUNT(*) AS likeCount FROM engagement WHERE contentID = ?';
                 db.query(countSql, [contentID], (countErr, countRows) => {
                     if (countErr) {
                         console.error('Error counting likes:', countErr);
@@ -144,11 +144,11 @@ exports.postComment = (req, res) => {
     const commentText = req.body.commentText;
 
     const sql = `
-        INSERT INTO comments (userID, contentID, commentText) 
-        VALUES (?, ?, ?)
+        INSERT INTO engagement (userID, contentID, comments, share) 
+        VALUES (?, ?, ?, ?)
     `;
 
-    db.query(sql, [userID, contentID, commentText], (err) => {
+    db.query(sql, [userID, contentID, commentText, 0], (err) => {
         if (err) {
             console.error("Error inserting comment:", err);
             return res.status(500).send("Failed to post comment");
@@ -160,44 +160,25 @@ exports.postComment = (req, res) => {
 };
 
 exports.getContent = (req, res) => {
-
-    const user = req.session.user 
     const contentID = req.params.id;
     const sql = 'SELECT * FROM content c JOIN category cat ON c.categoryID = cat.categoryID WHERE contentID = ?';
     // Fetch data from MySQL
     db.query(sql, [contentID], (error, results) => {
 
-    const sqlContent = `SELECT * FROM content WHERE contentID = ?`;
-    const sqlComments = `
-        SELECT c.commentID, c.commentText, c.createdAt, u.userName, u.userImage, u.userID
-        FROM comments c
-        JOIN user u ON c.userID = u.userID
-        WHERE c.contentID = ?
-        ORDER BY c.createdAt DESC
-    `;
-
-    db.query(sqlContent, [contentID], (err, contentResults) => {
-        if (err) {
-            console.error('Error retrieving content:', err.message);
-            return res.status(500).send('Error retrieving content');
+        if (error) {
+            console.error('Database query error:', error.message);
+            return res.status(500).send('Error retrieving category by ID');
         }
 
-        if (contentResults.length === 0) {
-            return res.status(404).send('Content not found');
+        // Check if any content with the given ID was found
+        if (results.length > 0) {
+            // Render HTML page with the category data
+            res.render('viewContent', { content: results[0] });
+        } else {
+            // If no product with the given ID was found, 
+            //render a 404 page or handle it accordingly
+            res.status(404).send('Content not found');
         }
-
-        db.query(sqlComments, [contentID], (err, commentResults) => {
-            if (err) {
-                console.error('Error retrieving comments:', err.message);
-                return res.status(500).send('Error retrieving comments');
-            }
-
-            res.render('viewContent', { 
-                content: contentResults[0],   // for main post data
-                comments: commentResults,     // for ALL comments
-                sessionUser: req.session.user   
-            });
-        });
     });
 };
 
@@ -222,8 +203,8 @@ exports.editComment = (req, res) => {
 
         // Step 2: Update comment
         const updateSQL = `
-            UPDATE comments SET commentText = ?
-            WHERE commentID = ? AND userID = ?
+            UPDATE engagement SET comments = ?
+            WHERE engagementID = ? AND userID = ?
         `;
 
         db.query(updateSQL, [updatedText.trim(), commentID, userID], (err) => {
@@ -239,14 +220,14 @@ exports.deleteComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
 
-    const sqlGet = `SELECT contentID FROM comments WHERE commentID = ? AND userID = ?`;
+    const sqlGet = `SELECT engagementID FROM engagement WHERE engagementID = ? AND userID = ?`;
 
     db.query(sqlGet, [commentID, userID], (err, result) => {
         if (err || result.length === 0) return res.redirect('back');
 
         const contentID = result[0].contentID;
 
-        const sqlDelete = `DELETE FROM comments WHERE commentID = ? AND userID = ?`;
+        const sqlDelete = `DELETE FROM engagement WHERE engagementID = ? AND userID = ?`;
 
         db.query(sqlDelete, [commentID, userID], (err) => {
             if (err) return res.status(500).send('Failed to delete comment');
