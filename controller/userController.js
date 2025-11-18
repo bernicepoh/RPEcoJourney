@@ -329,6 +329,3 @@ exports.getAllUsers = (req, res) => {
 
 
 };
-
- 
- 
