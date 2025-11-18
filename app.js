@@ -184,7 +184,7 @@ app.get('/quiz/category/:id', quizController.getSetByCategory);
 app.get('/startGame/:categoryID/:setNumber', quizController.startGame);
 
 // Actual quiz page (first question)
-app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
+// app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
 
 // Submit answer
 app.post('/quiz/game/answer', quizController.answerGame);

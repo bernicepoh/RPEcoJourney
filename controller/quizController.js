@@ -357,10 +357,3 @@ exports.completeGame = (req, res) => {
     });
   });
 };
-
-
-
-
-
-
-
