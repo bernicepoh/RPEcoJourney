@@ -1,8 +1,11 @@
 const db = require('../db');
+const fs = require('fs');
+const path = require('path');
 
 // Public — List all categories
 exports.getCategories = (req, res) => {
     const sql = 'SELECT * FROM category';
+    const user = req.session.user 
 
     // Fetch data from MySQL
     db.query(sql, (error, results) => {
@@ -13,7 +16,10 @@ exports.getCategories = (req, res) => {
 
         if (results.length > 0) {
             console.log('All categories:', results[0].categoryName);
-            res.render('categories', { categories: results });
+            res.render('categories', { 
+                categories: results,
+                user: req.session.user || null,
+            });
         } else {
             // If no category with the given ID was found, 
             //render a 404 page or handle it accordingly
@@ -26,6 +32,7 @@ exports.getCategories = (req, res) => {
 exports.getCategory = (req, res) => {
     const categoryID = req.params.id;
     const sql = 'SELECT * FROM category WHERE categoryID = ?';
+    const user = req.session.user 
     
     // Fetch data from MySQL
     db.query(sql, [categoryID], (error, results) => {
@@ -37,7 +44,10 @@ exports.getCategory = (req, res) => {
         // Check if any category with the given ID was found
         if (results.length > 0) {
             // Render HTML page with the category data
-            res.render('category', { category: results[0] });
+            res.render('category', { 
+                category: results[0],
+            user: req.session.user || null  
+         });
         } else {
             // If no category with the given ID was found, 
             //render a 404 page or handle it accordingly
@@ -46,12 +56,12 @@ exports.getCategory = (req, res) => {
     });
 };
 
-// Admin — Render Add Category Form
+// Admin/Manager — Render Add Category Form
 exports.addCategoryForm = (req, res) => {
     res.render('addCategory');
 };
 
-// Admin — Add new category (IF NEED, but in this case no since only fixed to 3 categories)
+// Admin/Manager — Add new category (IF NEED, but in this case no since only fixed to 3 categories)
 exports.addCategory = (req, res) => {
     const { categoryName, categoryDescription } = req.body;
     let categoryImage;
@@ -70,12 +80,13 @@ exports.addCategory = (req, res) => {
             return res.status(500).send('Error adding category');
         } else {
             // Send a success response
+            req.flash('success', 'Category added successfully!');
             res.redirect('/categories');
         }
     });
 };
 
-// Admin — Render Edit Category Form
+// Admin/Manager — Render Edit Category Form
 exports.editCategoryForm = (req, res) => {
     const categoryID = req.params.id;
     const sql = 'SELECT * FROM category WHERE categoryID = ?';
@@ -90,7 +101,11 @@ exports.editCategoryForm = (req, res) => {
         // Check if any category with the given ID was found
         if (results.length > 0) {
             // Render HTML page with the category data
-            res.render('editCategory', { category: results[0] });
+            console.log("CATEGORY OBJECT:", results[0]);
+            res.render('editCategory', { 
+                category: results[0],
+                user: req.session.user
+             });
         } else {
             // If no category with the given ID was found, 
             //render a 404 page or handle it accordingly
@@ -99,8 +114,8 @@ exports.editCategoryForm = (req, res) => {
     });
 };
 
-// Admin — Update existing category
-exports.editCategory = (req, res) => {
+// Admin/Manager — Update existing category
+exports.updateCategory = (req, res) => {
     const categoryID = req.params.id;
     const { categoryName, categoryDescription } = req.body;
     let categoryImage = req.body.currentImage; //retrieve current image filename
@@ -119,23 +134,86 @@ exports.editCategory = (req, res) => {
             return res.status(500).send('Error updating category');
         } else {
             // Send a success response
+            req.flash('success', 'Category updated successfully!');
             res.redirect('/categories');
         }
     });
 };
 
-// Admin — Delete category
+// Admin/Manager — Delete Category (Enhanced)
 exports.deleteCategory = (req, res) => {
     const categoryID = req.params.id;
-    const sql = 'DELETE FROM category WHERE categoryID = ?';
-    db.query(sql, [categoryID], (error, results) => {
-        if (error) {
-            // Handle any error that occurs during the database operation
-            console.error('Error deleting category:', error.message);
-            return res.status(500).send('Error deleting category');
-        } else {
-            // Send a success response
-            res.redirect('/categories');
+
+    // 1️⃣ Safety Check: Validate ID
+    if (!categoryID) {
+        req.flash('error', 'Invalid category ID');
+        return res.redirect('/categories');
+    }
+
+    // 2️⃣ Check if category contains related content before deletion
+    const contentSql = 'SELECT * FROM content WHERE categoryID = ?';
+    db.query(contentSql, [categoryID], (err, contentResults) => {
+        if (err) {
+            console.error('Content check error:', err.message);
+            req.flash('error', 'Server error');
+            return res.redirect('/categories');
         }
+
+        if (contentResults.length > 0) {
+            req.flash('error', 'Unable to delete — category contains content.');
+            return res.redirect('/categories');
+        }
+
+        // 3️⃣ Get category image for deletion
+        const getCategorySql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
+        db.query(getCategorySql, [categoryID], (err, imageResults) => {
+            if (err) {
+                console.error('Image lookup error:', err.message);
+                req.flash('error', 'Server error');
+                return res.redirect('/categories');
+            }
+
+            const imageFile = imageResults[0]?.categoryImage;
+            const imagePath = path.join(__dirname, '../public/images', imageFile);
+
+            // 4️⃣ Delete category record
+            const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
+            db.query(deleteSql, [categoryID], (err) => {
+                if (err) {
+                    console.error('Delete error:', err.message);
+                    req.flash('error', 'Server error');
+                    return res.redirect('/categories');
+                }
+
+                // 5️⃣ Delete image if exists & it's not null/default
+                if (imageFile && imageFile !== 'default.png') {
+                    fs.unlink(imagePath, (unlinkErr) => {
+                        if (unlinkErr) {
+                            console.warn('Failed to remove image:', unlinkErr.message);
+                        }
+                    });
+                }
+
+                req.flash('success', 'Category deleted successfully!');
+                res.redirect('/categories');
+            });
+        });
     });
 };
+
+
+// // Admin/Manager — Delete category
+// exports.deleteCategory = (req, res) => {
+//     const categoryID = req.params.id;
+//     const sql = 'DELETE FROM category WHERE categoryID = ?';
+//     db.query(sql, [categoryID], (error, results) => {
+//         if (error) {
+//             // Handle any error that occurs during the database operation
+//             console.error('Error deleting category:', error.message);
+//             return res.status(500).send('Error deleting category');
+//         } else {
+//             // Send a success response
+//             res.redirect('/categories');
+//         }
+//     });
+// };

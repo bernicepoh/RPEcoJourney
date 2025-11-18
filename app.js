@@ -6,6 +6,7 @@ const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
 const quizDisplayController = require('./controller/quizDisplayController');
+const profileController = require('./controller/profileController');
 const db = require('./db');
 
 const multer = require('multer');
@@ -16,18 +17,41 @@ const app = express();
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'public/images'); // Directory to save uploaded files
+        cb(null, 'public/uploads'); // Directory to save uploaded files
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname); 
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
 const upload = multer({ storage: storage });
 // // Import middleware
+const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser } = require('./middleware/auth');
 
-// const { checkAuthenticated, checkAdmin, checkUser } = require('./middleware/auth');
-// const { validateRegistration, validateLogin } = require('./middleware/validation');
+
+const validateRegistration = (req,res, next) => {
+    const { userName, email, password, contactNo } = req.body;
+    
+    if (!userName || !email || !password || !contactNo) {
+        return res.status(400).send('All fields are required');
+    }
+
+    if (password.length < 6) {
+        req.flash('error', 'Password six characters long');
+        req.flash('formData',req.body);
+        return res.redirect('/register')
+    }
+    next()
+}
+
+// const checkAdmin = (req, res, next) => {
+//     if (req.session.user.userType === 'Admin') {
+//         return next();
+//     } else {
+//         req.flash('error', 'Access denied');
+//         res.redirect('/homepage');
+//     }
+// };
 
 // Set up view engine
 app.set('view engine', 'ejs');
@@ -40,6 +64,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ 
   extended: false 
 }));
+
+app.use(express.json());
 
 // ===== Sessions & flash =====
 app.use(session({
@@ -73,30 +99,31 @@ app.use((req, res, next) => {
 
 app.use('/uploads', express.static('uploads'));
 
+app.use((req, res, next) => {
+  res.locals.user = req.session.user || null;
+  next();
+});
 
-const validateRegistration = (req,res, next) => {
-    const { userName, email, password, contactNo } = req.body;
-    
-    if (!userName || !email || !password || !contactNo) {
-        return res.status(400).send('All fields are required');
-    }
+//Profile Routes 
+app.get('/editProfile/:id', profileController.getProfile);
+app.post('/editProfile/:id',upload.single('Image'), profileController.updateProfile);
+app.get('/editUserRole/:id', checkAdmin, profileController.getProfileAdmin);
+app.post('/editUserRole/:id', checkAdmin, profileController.updateUserRole);
+app.get('/viewProfile/:id', profileController.getViewProfile);
 
-    if (password.length < 6) {
-        req.flash('error', 'Password six characters long');
-        req.flash('formData',req.body);
-        return res.redirect('/register')
-    }
-    next()
-}
- 
+
 //User Routes
 app.get('/', userController.getLogin);
 app.post('/', userController.login);
 app.get('/register',userController.getRegister);
-app.post('/register',validateRegistration,userController.register);
+app.post('/register',upload.single('Image'),validateRegistration,userController.register);
 app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
+
+//Admin Routes 
+app.get('/adminDashboard', checkAdmin, userController.getAdminDashboard);
+app.get('/adminUsers', checkAdmin, userController.getAllUsers);
 
 //testing forget password route
 function simpleHash(str) {
@@ -111,13 +138,32 @@ function simpleHash(str) {
 // Content Routes
 app.get('/category/:id/content', contentController.getContentByCategory);
 app.get('/content/:id', contentController.getContent);
-app.get('/addContent', contentController.addContentForm);
-app.post('/addContent', upload.single('contentFile'), contentController.addContent);
+app.get('/addContent', checkAdmin, contentController.addContentForm);
+app.post('/addContent', checkAdmin, upload.single('contentFile'), contentController.addContent);
+app.get('/editContent/:id', checkAdmin, contentController.editContentForm);
+app.post('/editContent/:id', checkAdmin, upload.single('contentFile'), contentController.editContent);
+app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
+
+
+// Like toggle route
+app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);
+
+// Comment route
+app.post('/content/:id/comment', checkAuthenticated, contentController.postComment);
+app.post("/comment/edit/:commentID", checkAuthenticated, contentController.editComment);
+app.get("/comment/delete/:commentID", checkAdmin, contentController.deleteComment);
 
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories
 app.get('/categories/:id', categoryController.getCategory);     // View single category
-
+// ADD Category
+app.get('/addCategory', allowAdminOrManager, categoryController.addCategoryForm);
+app.post('/addCategory', allowAdminOrManager, upload.single('categoryImage'), categoryController.addCategory);
+// EDIT Category
+app.get('/editCategory/:id', allowAdminOrManager, categoryController.editCategoryForm);
+app.post('/editCategory/:id', allowAdminOrManager, upload.single('categoryImage'), categoryController.updateCategory);
+// DELETE Category
+app.post('/deleteCategory/:id', allowAdminOrManager, categoryController.deleteCategory);
 
 // Home page
 app.get('/homepage', homepageController.getHomePage);

@@ -4,6 +4,7 @@ const db = require('../db');
    1) SHOW CATEGORY LIST
 ======================================================== */
 exports.getQuiz = (req, res) => {
+  const user = req.session.user 
   const sql = 'SELECT * FROM category';
 
   db.query(sql, (err, categories) => {
@@ -17,6 +18,7 @@ exports.getQuiz = (req, res) => {
 ======================================================== */
 exports.getSetByCategory = (req, res) => {
   const categoryID = req.params.id;
+  const user = req.session.user 
 
   const categorySql = 'SELECT categoryName FROM category WHERE categoryID = ?';
 
@@ -36,7 +38,7 @@ exports.getSetByCategory = (req, res) => {
     db.query(setSql, [categoryID], (err, sets) => {
       if (err) return res.status(500).send('Database error');
 
-      res.render('quizSets', { sets, categoryID, categoryName });
+      res.render('quizSets', { user, sets, categoryID, categoryName });
     });
   });
 };
@@ -135,11 +137,6 @@ exports.startGame = (req, res) => {
 
 /* =======================================================
    4) SHOW QUIZ PAGE — First Question
-======================================================== */
-exports.showQuizPage = (req, res) => {
-  const { categoryID, setNumber } = req.params;
-
-  const firstQsql = `
     SELECT * FROM quiz
     WHERE categoryID = ?
       AND setNumber = ?

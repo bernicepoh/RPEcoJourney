@@ -9,38 +9,43 @@ exports.getLogin = (req,res) => {
   });
 };
 
-exports.login = (req,res) => {
-  const { userName, password} = req.body;
+exports.login = (req, res) => {
+  const { userName, password } = req.body;
 
   if (!userName || !password) {
-    req.flash('error','All fields are required.');
-    return res.redirect('/')
+    req.flash('error', 'All fields are required.');
+    return res.redirect('/');
   }
 
-  const sql = 'SELECT * FROM user WHERE userName = ? AND password = SHA(?)'
-  db.query(sql, [userName,password], (err, results) => {
+  const sql = 'SELECT * FROM user WHERE userName = ? AND password = SHA(?)';
+  db.query(sql, [userName, password], (err, results) => {
     if (err) {
       console.error('Error during login:', err);
-      req.flash('error','An error occured. Please try again');
-      return res.redirect('/')
+      req.flash('error', 'An error occurred. Please try again.');
+      return res.redirect('/');
     }
 
     if (results.length > 0) {
-      req.session.user = results[0];
-      req.flash('success','Login successful');
-
-     
-          // ⭐ Automatically create progress row if missing
+      const user = results[0];
+      req.session.user = user;
+      req.flash('success', 'Login successful');
+      
+      // ⭐ Automatically create progress row if missing
     const initProgress = `
         INSERT IGNORE INTO user_progress (userID, xp, level, streak, lastCheckinDate)
         VALUES (?, 0, 1, 0, NULL)
     `;
     db.query(initProgress, [results[0].userID]);
 
-    return res.redirect('/homepage');
+      
+      if (user.userType === 'User') {
+        res.redirect('/homepage');
+      } else {
+        res.redirect('/adminDashboard');
+      }
 
     } else {
-      req.flash('error','Invalid email or password');
+      req.flash('error', 'Invalid username or password');
       res.redirect('/');
     }
   });
@@ -199,6 +204,15 @@ exports.register = (req, res) => {
   const { userName, email, password, confirmPassword, contactNo } = req.body;
   const errors = [];
 
+  let Image;
+
+  if (req.file) {
+    Image = req.file.filename;
+  } else {
+    Image = null;
+  }
+ 
+ 
   if (!userName || !email || !password || !confirmPassword || !contactNo) {
     errors.push('All fields are required.');
   }
@@ -262,8 +276,8 @@ exports.register = (req, res) => {
       }
 
       const insertSql =
-        'INSERT INTO user (userName, email, password, contactNo) VALUES (?, ?, SHA(?), ?)';
-      db.query(insertSql, [userName, email, password, contactNo], (err) => {
+        'INSERT INTO user (userName, email, password, contactNo, Image) VALUES (?, ?, SHA(?), ?, ?)';
+      db.query(insertSql, [userName, email, password, contactNo, Image], (err) => {
         if (err) {
           console.error('Error registering user:', err);
           req.flash('error', 'An error occurred while registering. Please try again.');
@@ -290,5 +304,40 @@ exports.register = (req, res) => {
   });
 };
 
- 
- 
+exports.getAdminDashboard = (req,res) => {
+
+  const username = req.session.user ? req.session.user.userName : 'Guest'; 
+  const user = req.session.user 
+
+  
+
+  res.render('adminDashboard', {
+    user: req.session.user,
+    userName: username,
+    user
+
+  })
+  
+  
+
+};
+
+exports.getAllUsers = (req, res) => {
+  const sql = 'SELECT * FROM user';
+  const user = req.session.user 
+
+  db.query(sql,   (error, results) => {
+
+       if (error) {
+            console.error('Database Query Error', error.message);
+            return res.status(500).send('Error Retrieving users');
+        }
+
+        res.render('adminUsers', {
+            users: results,
+            user
+        });
+    });
+
+
+};
