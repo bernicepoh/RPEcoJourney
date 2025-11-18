@@ -4,21 +4,31 @@
   </a>
 
   <ul>
-    <li><a href="/homepage">Home</a></li>
-    <li><a href="/aboutus">About Us</a></li>
-    <li><a href="/categories">Categories</a></li>
+
+    <% if (user && user.userType !== "Guest") { %>  
+      <!-- NORMAL USER NAV LINKS -->
+      <li><a href="/homepage">Home</a></li>
+      <li><a href="/aboutus">About Us</a></li>
+      <li><a href="/categories">Categories</a></li>
+    <% } %>
+
+    <!-- BOTH user + guest can see Quiz -->
     <li><a href="/quiz">Quiz Me!</a></li>
+
   </ul>
 
-  <ul>
-    <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
-    <li><a href="/logout">Logout</a></li>
-  </ul>
+  <% if (user && user.userType !== "Guest") { %>
+    <ul>
+      <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
+      <li><a href="/logout">Logout</a></li>
+    </ul>
+  <% } %>
+
 </nav>
 
 <style>
   nav {
-    background-color: #8bc34a; /* soft green */
+    background-color: #8bc34a;
     color: #0b2535;
     display: flex;
     justify-content: space-between;
@@ -27,13 +37,11 @@
     font-family: 'Georgia', serif;
   }
 
-  
   nav h1 {
     margin: 0;
-    font-size: 2.3rem; 
+    font-size: 2.3rem;
     font-weight: 900;
     letter-spacing: 1px;
-    font-weight: bold;
     color: #003b2b;
   }
 
@@ -41,7 +49,6 @@
     text-decoration: none;
   }
 
-  /* Navigation links */
   nav ul {
     list-style: none;
     display: flex;
@@ -54,7 +61,7 @@
     color: #0b2535;
     text-decoration: none;
     font-style: italic;
-    font-size: 1.4rem; /* increased from 1.2rem */
+    font-size: 1.4rem;
     font-weight: 700;
     transition: all 0.25s ease-in-out;
   }
@@ -64,9 +71,8 @@
     color: #1a1a1a;
   }
 
-  /* Profile picture */
   .profile-pic {
-    width: 75px; /* slightly bigger again */
+    width: 75px;
     height: 75px;
     border-radius: 50%;
     object-fit: cover;

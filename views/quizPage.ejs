@@ -1,97 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz | RPECOJOURNEY</title>
+  <meta charset="UTF-8">
+  <title>Sustainability Quiz</title>
+
   <style>
-    body { font-family: 'Georgia', serif; background: url('/images/backgroundimage.jpg') no-repeat center center fixed; background-size: cover; margin: 0; padding: 0; color: #0b2535; }
-    body::before { content: ""; position: fixed; inset: 0; background-color: rgba(255,255,255,0.85); z-index: -1; }
-    .quiz-container { max-width: 900px; margin: 100px auto; background: #a9c6d9; border-radius: 15px; padding: 40px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: relative; }
-    .back-btn { position: absolute; top: 20px; left: 25px; background-color: #256b45; color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 1rem; transition: .3s; }
-    .back-btn:hover { background-color: #1a4b32; }
-    h2 { text-align: center; font-size: 2.6rem; margin-bottom: 20px; color: #0b2535; }
-    p.intro { text-align: center; font-size: 1.2rem; color: #333; margin-bottom: 30px; }
-    #timer { font-size: 1.6rem; font-weight: 700; color: #256b45; background: rgba(255,255,255,.8); width: fit-content; margin: 0 auto 20px; padding: 10px 24px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,.18); }
-    .question-block { margin-bottom: 30px; background: rgba(255,255,255,.6); padding: 25px; border-radius: 10px; }
-    .question-block h3 { font-size: 1.4rem; margin-bottom: 10px; font-style: italic; }
-    .option { display: block; margin: 10px 0; background: #fff; border: 2px solid transparent; border-radius: 25px; padding: 10px 15px; font-size: 1rem; text-align: left; cursor: pointer; transition: .3s; }
-    .option:hover { border-color: #2e8b57; background-color: #e9f5ef; }
-    .btn-submit { display: block; margin: 40px auto 0; background-color: #256b45; color: #fff; padding: 15px 30px; border-radius: 10px; border: 0; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: .3s; }
-    footer {text-align: center; padding: 25px; font-size: 1.1em; color: #555;}
-    .btn-submit:hover { background-color: #1a4b32; }
+    /* =============================
+       GLOBAL STYLES + BACKGROUND
+    ============================== */
+    body {
+      font-family: 'Poppins', system-ui, sans-serif;
+      margin: 0;
+      padding: 0;
+
+      /* Background image */
+      background: url("/images/quizBackground.jpg") no-repeat center center fixed;
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* White overlay but transparent so background shows */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.35); /* LOWER OPACITY */
+      z-index: -1;
+    }
+
+    /* =============================
+       QUIZ CARD
+    ============================== */
+    .quiz-container {
+      max-width: 900px;
+      margin: 60px auto;
+      background: rgba(255, 255, 255, 0.82); /* Slight see-through */
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #0d3c3d;
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      color: #305e5f;
+      margin-bottom: 30px;
+    }
+
+    /* =============================
+       QUESTION BOX
+    ============================== */
+    .question-box {
+      background: #d2e5f0;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: inset 0px 0px 8px rgba(0,0,0,0.05);
+    }
+
+    .question-number {
+      font-style: italic;
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: #0d3c3d;
+    }
+
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: 500;
+      margin-bottom: 25px;
+      color: #0d3c3d;
+    }
+
+    /* =============================
+       OPTIONS
+    ============================== */
+    .option {
+      margin: 10px 0;
+      padding: 12px 16px;
+      border-radius: 30px;
+      background: #ffffff;
+      display: block;
+      border: 1px solid #ced7df;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .option:hover {
+      background: #eef7ee;
+    }
+
+    /* Correct / Incorrect styling */
+    .correct {
+      background: #8dc47c !important;
+      border-color: #477d4d !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .incorrect {
+      background: #df7c7c !important;
+      border-color: #8a2f2f !important;
+      color: white !important;
+      font-weight: 600;
+    }
+
+    .explanation {
+      font-style: italic;
+      margin-top: 20px;
+      text-align: center;
+      color: #2f4f4f;
+      font-size: 0.95rem;
+    }
+
+    /* =============================
+       BUTTONS
+    ============================== */
+    .btn-primary {
+      padding: 12px 25px;
+      background: #198754;
+      color: white;
+      border-radius: 25px;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary:hover {
+      background: #146c43;
+    }
+
+    .btn-next {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #85b36d;
+      color: white;
+      text-decoration: none;
+      border-radius: 25px;
+      margin-top: 20px;
+      font-weight: 600;
+      float: right;
+      transition: 0.2s;
+    }
+
+    .btn-next:hover {
+      background: #6f945a;
+    }
+
+    .timer-badge {
+      display: inline-block;
+      background: #ffffffcc;
+      padding: 8px 14px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+      font-weight: 600;
+      color: #305e5f;
+    }
+
+    /* =============================
+       MOBILE FIXES
+    ============================== */
+    @media (max-width: 768px) {
+      body {
+        background-attachment: scroll; /* Fix for iOS background zoom bug */
+      }
+
+      .quiz-container {
+        margin: 20px;
+        padding: 25px;
+      }
+    }
   </style>
 </head>
+
 <body>
-  <%- include('partials/navbar') %>
 
-  <div class="quiz-container">
-    <a href="/quiz" class="back-btn">← Back to Topics</a>
+<div class="quiz-container">
 
-    <h2>Sustainability Quiz 🌿</h2>
-    <p class="intro">You have <strong>20 seconds per question</strong> — the timer will submit automatically when time runs out.</p>
+  <h2>Sustainability Quiz</h2>
+  <p class="subtitle">Test your knowledge about sustainability!</p>
 
-    <div id="timer">⏳ Time left: <span id="timeLeft">0</span>s</div>
+  <div class="question-box">
 
-    <form id="quizForm" method="POST" action="/quiz/submit">
-      <input type="hidden" name="categoryID" value="<%= categoryID %>">
-      <input type="hidden" name="setNumber" value="<%= setNumber %>">
+    <!-- Timer -->
+    <% if (!feedback) { %>
+    <div class="timer-badge">
+      Time left: <span id="countdown">20</span>s
+    </div>
+    <% } %>
 
-      <% if (questions && questions.length > 0) { %>
-        <% questions.forEach((q, index) => { %>
-          <div class="question-block">
-            <h3><em>Question <%= index + 1 %> of <%= questions.length %></em></h3>
-            <p><%= q.question %></p>
+    <div class="question-number">
+      Question <%= question.quizID %> of <%= totalQuestions %>
+    </div>
 
-            <label class="option">
-              <input type="radio" name="ans_<%= q.quizID %>" value="1" required> A) <%= q.option1 %>
-            </label>
-            <label class="option">
-              <input type="radio" name="ans_<%= q.quizID %>" value="2"> B) <%= q.option2 %>
-            </label>
-            <label class="option">
-              <input type="radio" name="ans_<%= q.quizID %>" value="3"> C) <%= q.option3 %>
-            </label>
-            <label class="option">
-              <input type="radio" name="ans_<%= q.quizID %>" value="4"> D) <%= q.option4 %>
-            </label>
-          </div>
-        <% }) %>
-      <% } else { %>
-        <p>No questions found for this set.</p>
+    <div class="question-text"><%= question.question %></div>
+
+    <!-- ANSWER MODE -->
+    <% if (!feedback) { %>
+
+      <form id="quizForm" action="/quiz/game/answer" method="POST">
+
+        <input type="hidden" name="quizID" value="<%= question.quizID %>">
+        <input type="hidden" name="categoryID" value="<%= categoryID %>">
+        <input type="hidden" name="setNumber" value="<%= setNumber %>">
+        <input type="hidden" name="timeTaken" id="timeTaken">
+
+        <label class="option">
+          <input type="radio" name="answer" value="1" required>
+          A) <%= question.option1 %>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="answer" value="2">
+          B) <%= question.option2 %>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="answer" value="3">
+          C) <%= question.option3 %>
+        </label>
+
+        <label class="option">
+          <input type="radio" name="answer" value="4">
+          D) <%= question.option4 %>
+        </label>
+
+        <button type="button" class="btn-primary" onclick="submitAnswer()">Submit</button>
+      </form>
+
+    <% } else { %>
+
+      <!-- FEEDBACK MODE -->
+      <% for (let i = 1; i <= 4; i++) { %>
+        <div class="option 
+          <% if (i === question.correctOption) { %> correct 
+          <% } else if (i === userAnswer) { %> incorrect <% } %>">
+          <%= String.fromCharCode(64 + i) %>) <%= question["option" + i] %>
+        </div>
       <% } %>
 
-      <button type="button" id="confirmSubmit" class="btn-submit">Submit Quiz</button>
-    </form>
+      <div class="explanation">
+        <%= question.explanation %>
+      </div>
+
+      <a href="/quiz/game/next/<%= question.quizID %>/<%= categoryID %>/<%= setNumber %>"
+         class="btn-next">
+         Next Question →
+      </a>
+
+    <% } %>
+
   </div>
+</div>
 
-  <script>
-    const totalQuestions = <%= questions && questions.length ? questions.length : 0 %>;
-    let timeLeft = totalQuestions * 20;
-    const timerDisplay = document.getElementById("timeLeft");
-    const quizForm = document.getElementById("quizForm");
-    const confirmBtn = document.getElementById("confirmSubmit");
+<!-- TIMER SCRIPT -->
+<script>
+  <% if (!feedback) { %>
+    let timeLimit = 20;
+    let startTime = Date.now();
+    const countdownEl = document.getElementById('countdown');
 
-    timerDisplay.textContent = timeLeft;
+    const countdownInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, timeLimit - elapsed);
+      countdownEl.textContent = remaining;
 
-    const timer = setInterval(() => {
-      timeLeft--;
-      timerDisplay.textContent = timeLeft;
-      if (timeLeft <= 15) timerDisplay.parentElement.style.color = "#d9534f";
-      if (timeLeft <= 0) {
-        clearInterval(timer);
-        alert("⏰ Time's up! Submitting your quiz...");
-        quizForm.submit();
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+        submitAnswer();
       }
     }, 1000);
 
-    confirmBtn.addEventListener("click", () => {
-      const ok = confirm("⚠️ Submit your answers now?");
-      if (ok) { clearInterval(timer); quizForm.submit(); }
-    });
-  </script>
-  <footer>
-    &copy; 2025 RPEcoJourney. All Rights Reserved.
-  </footer>
+    function submitAnswer() {
+      const endTime = Date.now();
+      const timeTaken = Math.floor((endTime - startTime) / 1000);
+      document.getElementById('timeTaken').value = timeTaken;
+      document.getElementById('quizForm').submit();
+    }
+  <% } %>
+</script>
+
 </body>
 </html>
+
+
+

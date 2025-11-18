@@ -1,25 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quiz Sets | RPECOJOURNEY</title>
+  <meta charset="UTF-8">
+  <title><%= categoryName %> – Quiz Sets</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    /* ===== RESET ===== */
+    /* RESET */
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
+    }
+
+    /* MATCH QUIZ CATEGORY PAGE MEASUREMENT */
+    body {
+      font-family: 'Georgia', serif;
+      background: url('/images/quizBackground.jpg') no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100vh;
       margin: 0;
       padding: 0;
     }
 
-    body {
-      font-family: 'Georgia', serif;
-      background: url('/images/backgroundimage.jpg') no-repeat center center fixed;
-      background-size: cover;
-      overflow-x: hidden;
-      color: #0b2535;
-    }
-
+    /* SAME WHITE SOFT OVERLAY */
     body::before {
       content: "";
       position: fixed;
@@ -27,160 +31,138 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.85);
       z-index: -1;
     }
 
-    .container {
+    /* SPACE BELOW NAVBAR */
+    .nav-spacer {
+      height: 40px; /* same spacing type as categories page */
+    }
+
+    /* TITLE */
+    h1 {
       text-align: center;
-      margin: 100px auto;
-      max-width: 1600px;
-      padding: 0 40px;
-    }
-
-    h2 {
-      font-size: 2.8rem;
       color: #0b2535;
-      margin-bottom: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      font-size: 2.4rem;  /* match style of categories page title */
+      margin-bottom: 10px;
     }
 
-    h2::after {
-      content: "🌿";
-      font-size: 2.2rem;
+    p.subtitle {
+      text-align: center;
+      color: #4f665a;
+      font-size: 1.1rem;
+      margin-bottom: 45px; /* increased because category page has bigger spacing */
     }
 
-    /* ===== QUIZ CARD GRID ===== */
-    .quiz-list {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 60px;
-    }
-
-    .quiz-card {
-      width: 370px;
-      height: 500px;
-      border-radius: 40px;
-      overflow: hidden;
-      position: relative;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+    /* CARD GRID – centered + consistent spacing */
+    .sets-wrapper {
       display: flex;
       flex-direction: column;
-      justify-content: flex-end;
       align-items: center;
+      gap: 35px;   /* match spacing style */
       padding-bottom: 40px;
-      color: #f5fff0;
+    }
+
+    /* CARD */
+    .set-card {
+      width: 100%;
+      max-width: 420px; /* match your category card proportions */
+      border-radius: 25px;
+      padding: 30px 25px;
       text-align: center;
-
-      /* ✨ Pattern + color background */
-      background: url('/images/leaf_pattern.png') no-repeat center center;
-      background-size: cover;
-      background-color: #2e7d32;
-      background-blend-mode: multiply;
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.20);
+      transition: transform 0.3s ease;
     }
 
-    .quiz-card:hover {
-      transform: translateY(-10px) scale(1.04);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.35);
+    .set-card:hover {
+      transform: translateY(-8px);
     }
 
-    .quiz-card h3 {
-      font-size: 1.8rem;
-      font-style: italic;
-      font-weight: 700;
-      margin-bottom: 25px;
-      z-index: 1;
-      text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+    /* ICON */
+    .quiz-icon {
+      width: 90px;
+      height: 90px;
+      margin-bottom: 18px;
     }
 
-    /* ===== BUTTON ===== */
-    .btn {
-      display: inline-block;
-      background-color: #91c77d;
+    /* TITLE INSIDE CARD */
+    .set-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 15px;
       color: #0b2535;
-      font-weight: 700;
-      font-size: 1.1rem;
-      border-radius: 50px;
-      padding: 15px 45px;
-      text-transform: uppercase;
-      text-decoration: none;
-      letter-spacing: 1px;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
     }
 
-    .btn:hover {
-      background-color: #7bb565;
-      transform: scale(1.05);
-      box-shadow: 0 0 25px rgba(145, 199, 125, 0.9);
-    }
-
-    /* ===== BACK LINK ===== */
-    .back-link {
-      display: inline-block;
-      margin-top: 50px;
-      text-decoration: none;
-      color: #256b45;
-      font-weight: 700;
+    /* BUTTON */
+    .start-btn {
+      background: #2d7a31;
+      padding: 12px 26px;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
       font-size: 1rem;
-      transition: color 0.3s ease;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .start-btn:hover {
+      background: #256628;
+    }
+
+    /* Back Link */
+    .back-link {
+      display: block;
+      text-align: center;
+      margin: 40px 0;
+      color: #0b2535;
+      font-size: 1rem;
+      text-decoration: none;
     }
 
     .back-link:hover {
       text-decoration: underline;
-      color: #1a4b32;
     }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1200px) {
-      .quiz-list {
-        flex-wrap: wrap;
-      }
-
-      .quiz-card {
-        width: 85%;
-        height: 460px;
-      }
-    }
-
-    footer {
-      text-align: center; 
-      padding: 25px; 
-      font-size: 1.1em; 
-      color: #555; 
-    }
   </style>
 </head>
+
 <body>
-  <!-- ✅ Include Navbar -->
-  <%- include('partials/navbar') %>
 
-  <div class="container">
-    <h2>Quiz Available</h2>
+  <!-- NAVBAR -->
+  <%- include ('partials/navbar.ejs') %>
 
-    <div class="quiz-list">
-      <% if (sets.length > 0) { %>
-        <% sets.forEach((set) => { %>
-          <div class="quiz-card">
-            <h3>Set <%= set.setNumber %></h3>
-            <a href="/quiz/category/<%= categoryID %>/set/<%= set.setNumber %>" class="btn">Start Quiz</a>
-          </div>
-        <% }) %>
-      <% } else { %>
-        <p>No quiz sets available for this category yet.</p>
-      <% } %>
-    </div>
+  <!-- SPACING BELOW NAVBAR -->
+  <div class="nav-spacer"></div>
 
-    <a href="/quiz" class="back-link">← Back to Categories</a>
+  <!-- PAGE HEADER -->
+  <h1><%= categoryName %> Quiz Sets</h1>
+  <p class="subtitle">Choose a set to begin your sustainability quiz 🌿</p>
+
+  <!-- QUIZ SETS -->
+  <div class="sets-wrapper">
+    <% sets.forEach(set => { %>
+
+      <% 
+        const colors = ["#b7e4c7", "#a8dadc", "#ffd6a5", "#ffadad", "#c1d3fe"];
+        const cardColor = colors[set.setNumber % colors.length];
+      %>
+
+      <div class="set-card" style="background:<%= cardColor %>;">
+        <img class="quiz-icon" src="/images/default-eco-icon.png" alt="icon">
+        <div class="set-title">Quiz Set <%= set.setNumber %></div>
+
+        <a href="/startGame/<%= categoryID %>/<%= set.setNumber %>">
+          <button class="start-btn">Start Quiz</button>
+        </a>
+      </div>
+
+    <% }) %>
   </div>
-  <footer>
-    &copy; 2025 RPEcoJourney. All Rights Reserved.
-  </footer>
+
+  <a class="back-link" href="/quiz">← Back to Categories</a>
+
 </body>
 </html>
+
+
