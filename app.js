@@ -13,6 +13,9 @@ const session = require('express-session'); // ✅ Required before using flash
 const path = require('path');
 const app = express();
 
+// Import middleware
+const { checkAuthenticated, checkAdmin, checkManager, checkUser } = require('./middleware/auth');
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/images'); // Directory to save uploaded files
@@ -40,6 +43,8 @@ app.use(express.urlencoded({
   extended: false 
 }));
 
+app.use(express.json());
+
 // ===== Sessions & flash =====
 app.use(session({
   secret: 'secret-key', 
@@ -51,6 +56,12 @@ app.use(session({
 
 // Use connect-flash middleware
 app.use(flash());
+
+// GLOBAL FLASH MIDDLEWARE
+app.use((req, res, next) => {
+  res.locals.messages = req.flash(); 
+  next();
+});
 
 // Make session available in all EJS views
 app.use((req, res, next) => {
@@ -85,7 +96,6 @@ const validateRegistration = (req,res, next) => {
     }
     next()
 }
-
 
 //Profile Routes 
 app.get('/editProfile/:id', profileController.getProfile);
@@ -130,10 +140,28 @@ app.post('/editContent/:id', upload.single('contentFile'), contentController.edi
 app.get('/deleteContent/:id', contentController.deleteContent);
 
 
+// Like toggle route
+app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);
+
+// Comment route
+app.post('/content/:id/comment', checkAuthenticated, contentController.postComment);
+app.post("/comment/edit/:commentID", checkAuthenticated, contentController.editComment);
+app.get("/comment/delete/:commentID", checkAuthenticated, contentController.deleteComment);
+
+
+const { allowAdminOrManager } = require('./middleware/auth');
+
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories
 app.get('/categories/:id', categoryController.getCategory);     // View single category
-
+// ADD Category
+app.get('/addCategory', allowAdminOrManager, categoryController.addCategoryForm);
+app.post('/addCategory', allowAdminOrManager, upload.single('categoryImage'), categoryController.addCategory);
+// EDIT Category
+app.get('/editCategory/:id', allowAdminOrManager, categoryController.editCategoryForm);
+app.post('/editCategory/:id', allowAdminOrManager, upload.single('categoryImage'), categoryController.updateCategory);
+// DELETE Category
+app.post('/deleteCategory/:id', allowAdminOrManager, categoryController.deleteCategory);
 
 // Home page
 app.get('/homepage', homepageController.getHomePage);
