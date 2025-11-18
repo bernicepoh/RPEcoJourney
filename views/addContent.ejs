@@ -19,6 +19,12 @@
       min-height: 100vh;
     }
 
+    h2 {
+      font-size: 2.8rem;
+      color: #0b2535;
+      margin-bottom: 60px;
+    }
+
     /* Form container layout */
     .form-container {
       display: grid;
@@ -93,8 +99,8 @@
   <%- include ('partials/navbar.ejs') %>
 
   <div class="container text-center mt-4">
-    <h2>Publish Content</h2>
     <br>
+    <h2>Publish Content</h2>
     <form action="/addContent" method="POST" enctype="multipart/form-data" class="form-container">
 
       <label for="categoryID">Category:</label>
@@ -114,7 +120,7 @@
 
 
       <label for="contentFile">File Upload:</label>
-      <input type="file" id="contentFile" name="contentFile" accept="image/*" required>
+      <input type="file" id="contentFile" name="contentFile" required>
 
       <div class="submit-container">
         <button type="submit">Publish Content</button> <br><br>

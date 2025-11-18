@@ -43,6 +43,21 @@
       font-size: 1.1em; 
       color: #555; 
     }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 50px;
+      text-decoration: none;
+      color: #256b45;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: color 0.3s ease;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+      color: #1a4b32;
+    }
     /* .rate-label {
       text-align: center;
       font-size: 1rem;
@@ -95,7 +110,7 @@
         <%= content.contentDescription %>
       </div>
 
-      <a href="/category/<%=content.categoryID %>/content" style="color: #000; text-decoration: none;">< Back</a>
+      <a href="/category/<%= content.categoryID %>/content" class="back-link">← Back to <%= content.categoryName %></a>
 
       <!-- Rating Section -->
       <!-- <div class="rate-label">

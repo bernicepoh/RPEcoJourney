@@ -17,7 +17,7 @@ const storage = multer.diskStorage({
         cb(null, 'public/images'); // Directory to save uploaded files
     },
     filename: (req, file, cb) => {
-        cb(null, file.originalname); 
+        cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
@@ -100,6 +100,10 @@ app.get('/category/:id/content', contentController.getContentByCategory);
 app.get('/content/:id', contentController.getContent);
 app.get('/addContent', contentController.addContentForm);
 app.post('/addContent', upload.single('contentFile'), contentController.addContent);
+app.get('/editContent/:id', contentController.editContentForm);
+app.post('/editContent/:id', upload.single('contentFile'), contentController.editContent);
+app.get('/deleteContent/:id', contentController.deleteContent);
+
 
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories
