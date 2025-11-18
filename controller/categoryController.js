@@ -5,6 +5,7 @@ const path = require('path');
 // Public — List all categories
 exports.getCategories = (req, res) => {
     const sql = 'SELECT * FROM category';
+    const user = req.session.user 
 
     // Fetch data from MySQL
     db.query(sql, (error, results) => {
@@ -31,6 +32,7 @@ exports.getCategories = (req, res) => {
 exports.getCategory = (req, res) => {
     const categoryID = req.params.id;
     const sql = 'SELECT * FROM category WHERE categoryID = ?';
+    const user = req.session.user 
     
     // Fetch data from MySQL
     db.query(sql, [categoryID], (error, results) => {
