@@ -1,15 +1,17 @@
 <nav>
-  <a href="/homepage">
+  <a href="/adminDashboard">
     <h1>RPEcoJourney</h1>
   </a>
   <ul>
     <li><a href="/homepage">Home</a></li>
     <li><a href="/aboutus">About Us</a></li>
     <li><a href="/categories">Categories</a></li>
-    <li><a href="/addContent">Publish Content</a></li>
     <li><a href="/quiz">Quiz Me!</a></li>
   </ul>
-  <img src="/images/profile.jpg" alt="Profile" class="profile-pic" />
+  <ul>
+    <li><a href="/editProfile/<%= user.userID %>">Profile</a></li>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
 </nav>
 
 <style>
@@ -23,10 +25,10 @@
     font-family: 'Georgia', serif;
   }
 
-  /* Title */
+  
   nav h1 {
     margin: 0;
-    font-size: 2.3rem; /* larger title */
+    font-size: 2.3rem; 
     font-weight: 900;
     letter-spacing: 1px;
     font-weight: bold;

@@ -1,18 +1,20 @@
 const db = require('../db');
 
 exports.getQuiz = (req, res) => {
+  const user = req.session.user 
   const sql = 'SELECT * FROM category';
   db.query(sql, (err, categories) => {
     if (err) {
       console.error('Error fetching categories:', err);
       return res.status(500).send('Database error');
     }
-    res.render('quizCategories', { categories });
+    res.render('quizCategories', { user, categories });
   });
 };
 
 exports.getSetByCategory = (req, res) => {
   const categoryID = req.params.id;
+  const user = req.session.user 
 
   // Fetch category name (to show on quizSets.ejs)
   const categorySql = 'SELECT categoryName FROM category WHERE categoryID = ?';
@@ -42,13 +44,15 @@ exports.getSetByCategory = (req, res) => {
         return res.status(500).send('Database error');
       }
 
-      res.render('quizSets', { sets, categoryID, categoryName });
+      res.render('quizSets', { user, sets, categoryID, categoryName });
     });
   });
 };
 
 exports.getQuestionBySets = (req, res) => {
   const { categoryID, setNumber } = req.params;
+
+  const user = req.session.user 
 
   const sql = `
     SELECT * FROM quiz
@@ -66,7 +70,7 @@ exports.getQuestionBySets = (req, res) => {
     req.session.categoryID = categoryID;
     req.session.setNumber = setNumber;
 
-    res.render('quizPage', { questions, categoryID, setNumber });
+    res.render('quizPage', { user, questions, categoryID, setNumber });
   });
 };
 
@@ -132,6 +136,7 @@ exports.getQuizResult = (req, res) => {
 
   const questions = req.session.lastReview?.questions || [];
   const categoryID = req.session.lastReview?.categoryID || null;
+  const user = req.session.user 
 
   db.query('SELECT * FROM category', (err, categories) => {
     if (err) return res.status(500).send('Database error');
@@ -141,7 +146,8 @@ exports.getQuizResult = (req, res) => {
   total: Number(total) || 0,
   categories,
   questions,
-  categoryID
+  categoryID,
+  user
 });
 
   });
