@@ -89,16 +89,17 @@ const validateRegistration = (req,res, next) => {
 
 //Profile Routes 
 app.get('/editProfile/:id', profileController.getProfile);
-app.post('/editProfile/:id', profileController.updateProfile);
+app.post('/editProfile/:id',upload.single('Image'), profileController.updateProfile);
 app.get('/editUserRole/:id', checkAdmin, profileController.getProfileAdmin);
 app.post('/editUserRole/:id', checkAdmin, profileController.updateUserRole);
+app.get('/viewProfile/:id', profileController.getViewProfile);
 
  
 //User Routes
 app.get('/', userController.getLogin);
 app.post('/', userController.login);
 app.get('/register',userController.getRegister);
-app.post('/register',validateRegistration,userController.register);
+app.post('/register',upload.single('Image'),validateRegistration,userController.register);
 app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);

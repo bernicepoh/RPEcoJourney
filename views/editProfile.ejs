@@ -22,7 +22,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 70px); /* Adjust if your navbar height changes */
+            height: calc(100vh - 70px);
         }
 
         .card-profile {
@@ -56,13 +56,21 @@
         .alert {
             margin-bottom: 15px;
         }
+
+        .img-preview {
+            display: block;
+            margin: 0 auto 15px;
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+        }
     </style>
 </head>
 <body>
-    <!-- Navbar stays at the top -->
     <%- include('partials/navbar') %>
 
-    <!-- Flex container for centering the card -->
     <div class="flex-container">
         <div class="card-profile">
             <h2>Edit Profile</h2>
@@ -83,7 +91,7 @@
                 </div>
             <% } %>
 
-            <form action="/editProfile/<%= user.userID %>" method="POST">
+            <form action="/editProfile/<%= user.userID %>" method="POST" enctype="multipart/form-data">
                 <label for="userName">Username:</label>
                 <input 
                     type="text" 
@@ -114,27 +122,28 @@
                     required
                 >
 
-                <label for="password">New Password (optional):</label>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password" 
-                    class="form-control" 
-                    placeholder="Enter new password"
-                >
+                <label>Current Profile Image:</label>
+                <% if (user.Image) { %>
+                    <img src="/images/<%= user.Image %>" alt="Profile Image" class="img-preview">
+                <% } else { %>
+                    <img src="/images/defaultUser.png" alt="Default Image" class="img-preview">
+                <% } %>
 
-                <label for="confirmPassword">Confirm New Password:</label>
+                <label for="Image">Upload New Profile Image (optional):</label>
                 <input 
-                    type="password" 
-                    id="confirmPassword" 
-                    name="confirmPassword" 
-                    class="form-control" 
-                    placeholder="Confirm new password"
+                    type="file" 
+                    id="Image" 
+                    name="Image" 
+                    class="form-control"
+                    accept="image/*"
                 >
 
                 <button type="submit" class="btn btn-primary btn-update">Update Profile</button>
+
+                <p><a href="/forgot-password">Forgot Password?</a></p>
             </form>
         </div>
     </div>
 </body>
 </html>
+
