@@ -7,12 +7,16 @@
 
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background: white;          /* Whole page is white */
-            font-family: Arial, sans-serif;
-            color: #333;
-        }
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background-image: url("/images/background.png");
+  background-repeat: no-repeat;
+  background-size: cover; 
+  background-position: center;
+}
 
         .profile-wrapper {
             display: flex;
@@ -55,7 +59,7 @@
 
          .edit-btn {
             padding: 10px 20px;
-            background: white;
+            background: #a2be78;
             color: #7d9cad;
             border: none;
             border-radius: 8px;
@@ -81,8 +85,8 @@
     <div class="profile-card">
 
         <!-- Profile Image -->
-        <% if (user.Image) { %>
-            <img src="/images/<%= user.Image %>" alt="Profile Picture">
+        <% if (user.image) { %>
+            <img src="/images/<%= user.image %>" alt="Profile Picture">
         <% } else { %>
             <img src="/images/default.png" alt="Profile Picture">
         <% } %>
@@ -92,7 +96,7 @@
             <div><b>Username</b>: <%= user.userName %></div>
             <div><b>Email</b>: <%= user.email %></div>
             <div><b>Contact Number</b>: <%= user.contactNo %></div>
-
+            <br>
             <a href="/editProfile/<%= user.userID %>">
                 <button class="edit-btn">Edit Profile</button>
             </a>

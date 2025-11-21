@@ -32,7 +32,7 @@ exports.login = (req, res) => {
       
       // ⭐ Automatically create progress row if missing
     const initProgress = `
-        INSERT IGNORE INTO user_progress (userID, xp, level, streak, lastCheckinDate)
+        INSERT IGNORE INTO user (userID, totalXP, level, streak, CheckInDate)
         VALUES (?, 0, 1, 0, NULL)
     `;
     db.query(initProgress, [results[0].userID]);
@@ -204,12 +204,12 @@ exports.register = (req, res) => {
   const { userName, email, password, confirmPassword, contactNo } = req.body;
   const errors = [];
 
-  let Image;
+  let image;
 
   if (req.file) {
-    Image = req.file.filename;
+    image = req.file.filename;
   } else {
-    Image = null;
+    image = null;
   }
  
  
@@ -276,8 +276,8 @@ exports.register = (req, res) => {
       }
 
       const insertSql =
-        'INSERT INTO user (userName, email, password, contactNo, Image) VALUES (?, ?, SHA(?), ?, ?)';
-      db.query(insertSql, [userName, email, password, contactNo, Image], (err) => {
+        'INSERT INTO user (userName, email, password, contactNo, image) VALUES (?, ?, SHA(?), ?, ?)';
+      db.query(insertSql, [userName, email, password, contactNo, image], (err) => {
         if (err) {
           console.error('Error registering user:', err);
           req.flash('error', 'An error occurred while registering. Please try again.');
@@ -286,23 +286,22 @@ exports.register = (req, res) => {
         }
 
         // ⭐ NEW: auto creates user_progress for new user
-        const getUserIDSql = 'SELECT userID FROM user WHERE email = ?';
-        db.query(getUserIDSql, [email], (err2, resultUser) => {
-          if (!err2 && resultUser.length > 0) {
-            const insertProgress = `
-              INSERT INTO user_progress (userID)
-              VALUES (?)
-            `;
-            db.query(insertProgress, [resultUser[0].userID]);
-          }
+        // const getUserIDSql = 'SELECT userID FROM user WHERE email = ?';
+        // db.query(getUserIDSql, [email], (err2, resultUser) => {
+        //   if (!err2 && resultUser.length > 0) {
+        //     const insertProgress = `
+        //       INSERT INTO user (userID)
+        //       VALUES (?)
+        //     `;
+        //     db.query(insertProgress, [resultUser[0].userID]);
+        //   }
 
           req.flash('success', 'Registration successful. You can now log in.');
           res.redirect('/');
         });
       });
     });
-  });
-};
+  };
 
 exports.getAdminDashboard = (req,res) => {
 

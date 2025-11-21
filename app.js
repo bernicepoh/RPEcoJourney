@@ -5,16 +5,16 @@ const categoryController = require('./controller/categoryController');
 const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
-const quizDisplayController = require('./controller/quizDisplayController');
 const profileController = require('./controller/profileController');
 const db = require('./db');
 
 const multer = require('multer');
-const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
-const session = require('express-session'); // ✅ Required before using flash
+const session = require('express-session');
+const flash = require('connect-flash');  
 const path = require('path');
 const app = express();
 
+// multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/uploads'); // Directory to save uploaded files
@@ -25,9 +25,9 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-// // Import middleware
-const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser } = require('./middleware/auth');
 
+// Import middleware
+const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser } = require('./middleware/auth');
 
 const validateRegistration = (req,res, next) => {
     const { userName, email, password, contactNo } = req.body;
@@ -44,15 +44,6 @@ const validateRegistration = (req,res, next) => {
     next()
 }
 
-// const checkAdmin = (req, res, next) => {
-//     if (req.session.user.userType === 'Admin') {
-//         return next();
-//     } else {
-//         req.flash('error', 'Access denied');
-//         res.redirect('/homepage');
-//     }
-// };
-
 // Set up view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -61,13 +52,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Enable form processing
-app.use(express.urlencoded({ 
-  extended: false 
-}));
-
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// ===== Sessions & flash =====
+// Session
 app.use(session({
   secret: 'secret-key', 
   resave: false,
@@ -76,14 +64,14 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true }
 }));
 
+// Use connect-flash middleware
+app.use(flash());
+
 // Make user session available in ALL EJS files
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
-
-// Use connect-flash middleware
-app.use(flash());
 
 // Make flash available in all EJS views
 app.use((req, res, next) => {
@@ -91,22 +79,16 @@ app.use((req, res, next) => {
     next();
 });
 
-// Make session available in all EJS views
 app.use((req, res, next) => {
-    res.locals.session = req.session;
-    next();
+  res.locals.messages = req.flash();   res.locals.messages = req.flash(); 
+  next();
 });
 
 app.use('/uploads', express.static('uploads'));
 
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
-});
-
 //Profile Routes 
 app.get('/editProfile/:id', profileController.getProfile);
-app.post('/editProfile/:id',upload.single('Image'), profileController.updateProfile);
+app.post('/editProfile/:id',upload.single('image'), profileController.updateProfile);
 app.get('/editUserRole/:id', checkAdmin, profileController.getProfileAdmin);
 app.post('/editUserRole/:id', checkAdmin, profileController.updateUserRole);
 app.get('/viewProfile/:id', profileController.getViewProfile);
@@ -116,7 +98,7 @@ app.get('/viewProfile/:id', profileController.getViewProfile);
 app.get('/', userController.getLogin);
 app.post('/', userController.login);
 app.get('/register',userController.getRegister);
-app.post('/register',upload.single('Image'),validateRegistration,userController.register);
+app.post('/register',upload.single('image'),validateRegistration,userController.register);
 app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
@@ -199,9 +181,9 @@ app.get('/quiz/game/complete/:categoryID/:setNumber', quizController.completeGam
       QR QUIZ ROUTES
 ======================== */
 
-app.get('/quiz-start', quizDisplayController.showQuizStart);     // TV QR screen
-app.get('/quiz-access', quizDisplayController.showQuizAccess);   // Phone: choose guest/login
-app.get('/guest-start', quizDisplayController.startAsGuest);     // Create guest session
+app.get('/quiz-start', quizController.showQuizStart);     // TV QR screen
+app.get('/quiz-access', quizController.showQuizAccess);   // Phone: choose guest/login
+app.get('/guest-start', quizController.startAsGuest);     // Create guest session
 
 // Guest welcome screen (reuse quiz-access.ejs)
 app.get('/guest-welcome', (req, res) => {

@@ -1,4 +1,5 @@
 const db = require('../db');
+const QRCode = require('qrcode');
 
 /* =======================================================
    1) SHOW CATEGORY LIST
@@ -70,7 +71,7 @@ exports.startGame = (req, res) => {
 
   // 2) REAL USERS — Ensure progress row exists
   const initSql = `
-    INSERT IGNORE INTO user_progress (userID, xp, level, streak, lastCheckinDate)
+    INSERT IGNORE INTO user (userID, totalXP, level, streak, checkInDate)
     VALUES (?, 0, 1, 0, NULL)
   `;
 
@@ -88,8 +89,8 @@ exports.startGame = (req, res) => {
       // Already completed → show results
       if (attempts.length > 0) {
         const userSql = `
-          SELECT xp, level
-          FROM user_progress
+          SELECT totalXP, level
+          FROM user
           WHERE userID = ?
         `;
 
@@ -217,7 +218,7 @@ exports.answerGame = (req, res) => {
 
     // Only REAL users get XP
     if (req.session.user.userType !== "Guest") {
-      db.query(`UPDATE user_progress SET xp = xp + ? WHERE userID = ?`, [
+      db.query(`UPDATE user SET totalXP = totalXP + ? WHERE userID = ?`, [
         xpEarned,
         userID
       ]);
@@ -315,8 +316,8 @@ exports.completeGame = (req, res) => {
     const setXP = xpRows[0].setXP || 0;
 
     const userSql = `
-        SELECT xp, level
-        FROM user_progress
+        SELECT totalXP, level
+        FROM user
         WHERE userID = ?
     `;
 
@@ -356,4 +357,34 @@ exports.completeGame = (req, res) => {
       });
     });
   });
+};
+
+exports.showQuizStart = (req, res) => {
+    const qrLink = `http://192.168.0.7:3000/quiz-access`;
+
+    QRCode.toDataURL(qrLink, (err, qrImage) => {
+        if (err) return res.send("Error generating QR");
+
+        res.render("quiz-start", { qrImage });
+    });
+};
+
+exports.showQuizAccess = (req, res) => {
+    res.render("quiz-access", { guestMode: false });
+};
+
+// Start as guest (create guest session)
+exports.startAsGuest = (req, res) => {
+    const guestID = "guest_" + Math.floor(Math.random() * 1000000);
+
+    req.session.user = {
+        userID: guestID,
+        userName: "Guest",
+        userType: "Guest"
+    };
+
+    // MUST save session before redirect
+    req.session.save(() => {
+        res.redirect("/guest-welcome");
+    });
 };

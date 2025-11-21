@@ -161,26 +161,38 @@ exports.postComment = (req, res) => {
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
-    const sql = 'SELECT * FROM content c JOIN category cat ON c.categoryID = cat.categoryID WHERE contentID = ?';
-    // Fetch data from MySQL
-    db.query(sql, [contentID], (error, results) => {
 
+    // Join content, category, and engagement on contentID and categoryID
+    const sql = `
+        SELECT 
+            c.*, 
+            cat.categoryName, cat.categoryDescription, cat.categoryImage, 
+            e.engagementID, e.userID, e.comments, e.createdAt
+        FROM content c
+        JOIN category cat ON c.categoryID = cat.categoryID
+        LEFT JOIN engagement e ON c.contentID = e.contentID
+        WHERE c.contentID = ?
+    `;
+
+    db.query(sql, [contentID], (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
-            return res.status(500).send('Error retrieving category by ID');
+            return res.status(500).send('Error retrieving content by ID');
         }
 
-        // Check if any content with the given ID was found
         if (results.length > 0) {
-            // Render HTML page with the category data
-            res.render('viewContent', { content: results[0] });
+            res.render('viewContent', {
+                content: results[0],           // The main content row (with category info)
+                engagements: results,          // All engagement rows for this content, with user comments
+                sessionUser: req.session.user || null 
+            });
         } else {
-            // If no product with the given ID was found, 
-            //render a 404 page or handle it accordingly
             res.status(404).send('Content not found');
         }
     });
 };
+
+
 
 exports.editComment = (req, res) => {
     const commentID = req.params.commentID;
