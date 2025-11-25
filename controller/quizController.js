@@ -79,7 +79,7 @@ exports.startGame = (req, res) => {
     if (errInit) return res.send("Database error (init user progress)");
 
     const checkSql = `
-      SELECT * FROM quiz_attempts
+      SELECT * FROM quiz
       WHERE userID = ? AND categoryID = ? AND setNumber = ?
     `;
 
@@ -204,14 +204,12 @@ exports.answerGame = (req, res) => {
 
     // Save answer
     const saveSql = `
-      INSERT INTO quiz_results (userID, quizID, userAnswer, isCorrect, timeTaken, xpEarned)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO quiz_results (userID, quizID, timeTaken, xpEarned)
+      VALUES (?, ?, ?, ?)
     `;
     db.query(saveSql, [
       userID,
       quizID,
-      userAnswer,
-      isCorrect ? 1 : 0,
       t,
       xpEarned
     ]);
