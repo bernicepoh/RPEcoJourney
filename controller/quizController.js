@@ -80,10 +80,10 @@ exports.startGame = (req, res) => {
 
     const checkSql = `
       SELECT * FROM quiz
-      WHERE userID = ? AND categoryID = ? AND setNumber = ?
+      WHERE categoryID = ? AND setNumber = ?
     `;
 
-    db.query(checkSql, [userID, categoryID, setNumber], (err, attempts) => {
+    db.query(checkSql, [categoryID, setNumber], (err, attempts) => {
       if (err) return res.send("DB error checking attempts");
 
       // Already completed → show results
