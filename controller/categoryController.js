@@ -11,20 +11,23 @@ exports.getCategories = (req, res) => {
     db.query(sql, (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
-            return res.status(500).send('Error retrieving categories');
+
+            // Still render but with no categories
+            return res.render("categories", {
+                categories: [],
+                user: req.session.user,
+                flashSuccess: req.flash("success"),
+                flashError: req.flash("error")
+            });
         }
 
-        if (results.length > 0) {
-            console.log('All categories:', results[0].categoryName);
-            res.render('categories', { 
-                categories: results,
-                user: req.session.user || null,
-            });
-        } else {
-            // If no category with the given ID was found, 
-            //render a 404 page or handle it accordingly
-            res.status(404).send('No categories found');
-        }
+        // ALWAYS PASS FLASH HERE!!
+        res.render("categories", {
+            categories: results,
+            user: req.session.user || null,
+            flashSuccess: req.flash("success"),
+            flashError: req.flash("error")
+        });
     });
 };
 
@@ -76,8 +79,9 @@ exports.addCategory = (req, res) => {
     // Insert the new category into the database
     db.query(sql, [categoryName, categoryDescription, categoryImage], (error, results) => {
         if (error) {
-            console.error('Error adding category:', error.message);
-            return res.status(500).send('Error adding category');
+            console.error("FULL MYSQL ERROR:", error);
+            return res.status(500).send(error.sqlMessage || error.message || "Error adding category");
+
         } else {
             // Send a success response
             req.flash('success', 'Category added successfully!');

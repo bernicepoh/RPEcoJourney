@@ -99,14 +99,47 @@
     <label>Category Description:</label>
     <textarea name="categoryDescription" rows="3" required><%= category.categoryDescription %></textarea>
 
-    <label>Current Image:</label>
-    <input type="hidden" name="currentImage" value="<%= category.categoryImage %>">
-    <img id="previewImg" src="/images/<%= category.categoryImage %>">
+    <!-- IMAGE SECTION (Side-by-side layout) -->
+    <div style="display:flex; gap:40px; align-items:flex-start; margin-top:20px;">
 
-    <label>Upload New Image:</label>
-    <input type="file" name="categoryImage" accept="image/*" 
-           onchange="previewImage(event)">
-    <span id="fileNameDisplay" class="file-text"></span>
+      <!-- LEFT: CURRENT IMAGE -->
+      <div style="flex:1; text-align:center;">
+        <label><strong>Current Image:</strong></label>
+        <input type="hidden" name="currentImage" value="<%= category.categoryImage %>">
+
+        <%
+          let imgSrc;
+          if (!category.categoryImage) {
+            imgSrc = "/images/default.png";
+          } 
+          else if (["Environmental.png", "Social.png", "Governance.png"].includes(category.categoryImage)) {
+            imgSrc = "/images/" + category.categoryImage;
+          } 
+          else {
+            imgSrc = "/uploads/" + category.categoryImage;
+          }
+        %>
+
+        <img 
+          src="<%= imgSrc %>?v=<%= Date.now() %>" 
+          alt="<%= category.categoryName %>" 
+          style="width:160px; height:auto; border-radius:10px; margin-top:10px;"
+          onerror="this.src='/images/default.png'"
+        >
+      </div>
+
+      <!-- RIGHT: UPLOAD NEW IMAGE -->
+      <div style="flex:1; text-align:center;">
+        <label><strong>Upload New Image:</strong></label>
+        <input type="file" name="categoryImage" accept="image/*"
+              onchange="previewImage(event)"
+              style="margin-top:10px;">
+        <img id="previewImg"
+              style="width:160px; display:none; margin-top:10px; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15);" />
+        <span id="fileNameDisplay" class="file-text" 
+              style="display:block; margin-top:6px;"></span>
+      </div>
+    </div>
 
     <button type="submit" class="update-btn">Update Category</button>
   </form>

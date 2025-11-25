@@ -195,12 +195,12 @@
 
   <!-- Main Content -->
   <main>
-    <% if (messages.error) { %>
-      <div class="alert alert-danger"><%= messages.error %></div>
+    <% if (flash('error').length > 0) { %>
+        <div class="alert alert-danger"><%= flash('error') %></div>
     <% } %>
 
-    <% if (messages.success) { %>
-      <div class="alert alert-success"><%= messages.success %></div>
+    <% if (flash('success').length > 0) { %>
+        <div class="alert alert-success"><%= flash('success') %></div>
     <% } %>
 
     <section class="intro">
@@ -230,31 +230,57 @@
     <hr>
 
     <% if (categories && categories.length) { %>
-      <% categories.forEach(c => { 
-           const imgSrc = c.categoryImage ? '/images/' + c.categoryImage : '/images/default.png';
-      %>
+
+      <% categories.forEach(c => { %>
+
         <section class="category">
           <div>
-            <!-- Link to single category page by ID -->
+
+            <!-- Link to single category page -->
             <a href="/category/<%= c.categoryID %>/content"><%= c.categoryName %></a><br>
+
             <% if (c.categoryDescription) { %>
               <%= c.categoryDescription.split('.')[0] %>
             <% } %>
 
-            <!-- EDIT & DELETE BUTTONS HERE -->
+            <!-- EDIT & DELETE BUTTONS -->
             <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
               <div class="category-actions">
                 <a href="/editCategory/<%= c.categoryID %>" class="edit-btn">✏ Edit</a>
-                
-                <form id="deleteForm-<%= c.categoryID %>" action="/deleteCategory/<%= c.categoryID %>" method="POST" class="delete-form">
-                  <button type="button" class="delete-btn" onclick="confirmDelete('<%= c.categoryID %>')">🗑 Delete</button>
+
+                <form id="deleteForm-<%= c.categoryID %>" 
+                      action="/deleteCategory/<%= c.categoryID %>" 
+                      method="POST" 
+                      class="delete-form">
+                  <button type="button" 
+                          class="delete-btn" 
+                          onclick="confirmDelete('<%= c.categoryID %>')">
+                    🗑 Delete
+                  </button>
                 </form>
               </div>
             <% } %>
 
           </div>
-          
-          <img src="<%= imgSrc %>" alt="<%= c.categoryName %>" loading="lazy" onerror="this.src='/images/default.png'">
+
+          <% 
+            let imgSrc;
+
+            if (!c.categoryImage) {
+              imgSrc = "/images/default.png";
+            } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
+              imgSrc = "/images/" + c.categoryImage;
+            } else {
+              imgSrc = "/uploads/" + c.categoryImage;
+            }
+          %>
+
+          <img 
+            src="<%= imgSrc %>" 
+            alt="<%= c.categoryName %>" 
+            loading="lazy"
+            onerror="this.src='/images/default.png'"
+          >
         </section>
       <% }) %>
     <% } else { %>
@@ -271,8 +297,8 @@
 
   <script>
     // SWEETALERT ADD & UPDATE CONFIRM
-      const successMsg = "<%- messages.success && messages.success.length ? messages.success[0] : '' %>";
-      const errorMsg   = "<%- messages.error && messages.error.length ? messages.error[0] : '' %>";
+      const successMsg = "<%= flashSuccess ? flashSuccess : '' %>";
+      const errorMsg   = "<%= flashError ? flashError : '' %>";
 
       if (successMsg) {
         Swal.fire({

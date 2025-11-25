@@ -7,7 +7,7 @@ const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
 const quizDisplayController = require('./controller/quizDisplayController');
 const profileController = require('./controller/profileController');
-const db = require('./db');
+const db = require('./db'); 
 
 const multer = require('multer');
 const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
@@ -147,6 +147,7 @@ app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
 
 // Like toggle route
 app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);
+//app.get('/likes/:id', contentController.getLikesList);
 
 // Comment route
 app.post('/content/:id/comment', checkAuthenticated, contentController.postComment);
@@ -207,8 +208,6 @@ app.get('/guest-start', quizDisplayController.startAsGuest);     // Create guest
 app.get('/guest-welcome', (req, res) => {
     res.render("quiz-access", { guestMode: true });
 });
-
-
 
 
 
