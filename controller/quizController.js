@@ -2,10 +2,9 @@ const db = require('../db');
 
 /* =======================================================
    1) SHOW CATEGORY LIST
-======================================================== */
+======================================================= */
 exports.getQuiz = (req, res) => {
   const sql = 'SELECT * FROM category';
-
   db.query(sql, (err, categories) => {
     if (err) return res.status(500).send('Database error');
     res.render('quizCategories', { categories });
@@ -14,352 +13,332 @@ exports.getQuiz = (req, res) => {
 
 /* =======================================================
    2) SHOW SETS FOR CATEGORY
-======================================================== */
+======================================================= */
 exports.getSetByCategory = (req, res) => {
   const categoryID = req.params.id;
 
-  const categorySql = 'SELECT categoryName FROM category WHERE categoryID = ?';
-
-  db.query(categorySql, [categoryID], (err, categoryResults) => {
-    if (err) return res.status(500).send('Database error');
-    if (categoryResults.length === 0) return res.status(404).send('Category not found');
-
-    const categoryName = categoryResults[0].categoryName;
-
-    const setSql = `
-      SELECT DISTINCT setNumber 
-      FROM quiz
-      WHERE categoryID = ?
-      ORDER BY setNumber
-    `;
-
-    db.query(setSql, [categoryID], (err, sets) => {
+  db.query(
+    `SELECT categoryName FROM category WHERE categoryID = ?`,
+    [categoryID],
+    (err, categoryResults) => {
       if (err) return res.status(500).send('Database error');
+      if (categoryResults.length === 0)
+        return res.status(404).send('Category not found');
 
-      res.render('quizSets', { sets, categoryID, categoryName });
-    });
-  });
+      const categoryName = categoryResults[0].categoryName;
+
+      db.query(
+        `SELECT setNumber, title, cardColor
+         FROM quiz_info
+         WHERE categoryID = ?
+         ORDER BY setNumber ASC`,
+        [categoryID],
+        (err2, sets) => {
+          if (err2) return res.status(500).send("Database error retrieving sets");
+
+          res.render('quizSets', { sets, categoryID, categoryName });
+        }
+      );
+    }
+  );
 };
 
 /* =======================================================
-   3) START GAME — Prevent Retake + Guest Mode
-======================================================== */
+   3) START GAME 
+======================================================= */
 exports.startGame = (req, res) => {
   const { categoryID, setNumber } = req.params;
 
-  // SAFETY — If missing session → create guest
   if (!req.session.user) {
     const guestID = "guest_" + Math.floor(Math.random() * 1000000);
-
     req.session.user = {
       userID: guestID,
       userName: "Guest",
-      userType: "Guest"
+      userType: "Guest",
     };
   }
 
-  const userID = req.session.user.userID;
-  const userType = req.session.user.userType;
-
-  // 1) GUEST MODE (NO RETAKE CHECK)
-  if (userType === "Guest") {
-    return res.redirect(`/quizPage/${categoryID}/${setNumber}`);
-  }
-
-  // 2) REAL USERS — Ensure progress row exists
-  const initSql = `
-    INSERT IGNORE INTO user_progress (userID, xp, level, streak, lastCheckinDate)
-    VALUES (?, 0, 1, 0, NULL)
-  `;
-
-  db.query(initSql, [userID], (errInit) => {
-    if (errInit) return res.send("Database error (init user progress)");
-
-    const checkSql = `
-      SELECT * FROM quiz_attempts
-      WHERE userID = ? AND categoryID = ? AND setNumber = ?
-    `;
-
-    db.query(checkSql, [userID, categoryID, setNumber], (err, attempts) => {
-      if (err) return res.send("DB error checking attempts");
-
-      // Already completed → show results
-      if (attempts.length > 0) {
-        const userSql = `
-          SELECT xp, level
-          FROM user_progress
-          WHERE userID = ?
-        `;
-
-        db.query(userSql, [userID], (err2, userRows) => {
-          if (err2) return res.send("Error retrieving user XP");
-
-          const totalXP = userRows[0].xp;
-          const level = userRows[0].level;
-          const progressPercent = Math.min((totalXP % 500) / 500 * 100, 100);
-
-          const xpSql = `
-            SELECT SUM(r.xpEarned) AS setXP
-            FROM quiz_results r
-            JOIN quiz q ON r.quizID = q.quizID
-            WHERE r.userID = ?
-              AND q.categoryID = ?
-              AND q.setNumber = ?
-          `;
-
-          db.query(xpSql, [userID, categoryID, setNumber], (err3, xpRows) => {
-            if (err3) return res.send("Error retrieving quiz XP");
-
-            const previousXP = xpRows[0].setXP || 0;
-
-            return res.render("quizResult", {
-              alreadyDone: true,
-              sessionXP: previousXP,
-              totalXP,
-              level,
-              progressPercent,
-              categoryID,
-              setNumber
-            });
-          });
-        });
-
-        return;
-      }
-
-      // FIRST ATTEMPT → start quiz
-      res.redirect(`/quizPage/${categoryID}/${setNumber}`);
-    });
-  });
+  res.redirect(`/quizPage/${categoryID}/${setNumber}`);
 };
 
 /* =======================================================
-   4) SHOW QUIZ PAGE — First Question
-======================================================== */
+   4) SHOW FIRST QUESTION
+======================================================= */
 exports.showQuizPage = (req, res) => {
   const { categoryID, setNumber } = req.params;
 
-  const firstQsql = `
-    SELECT * FROM quiz
-    WHERE categoryID = ?
-      AND setNumber = ?
-    ORDER BY quizID ASC
-    LIMIT 1
-  `;
+  db.query(
+    `SELECT * FROM quiz
+     WHERE categoryID = ? AND setNumber = ?
+     ORDER BY quizID ASC`,
+    [categoryID, setNumber],
+    (err, rows) => {
+      if (err) return res.send("DB error loading first question");
+      if (rows.length === 0) return res.send("No questions found");
 
-  db.query(firstQsql, [categoryID, setNumber], (err, rows) => {
-    if (err) return res.send("DB error loading first question");
-    if (rows.length === 0) return res.send("No questions found");
+      const question = rows[0];
 
-    const question = rows[0];
+      db.query(
+        `SELECT COUNT(*) AS totalCount
+         FROM quiz 
+         WHERE categoryID = ? AND setNumber = ?`,
+        [categoryID, setNumber],
+        (err2, countRows) => {
+          const totalQuestions = countRows[0].totalCount;
 
-    const countSql = `
-      SELECT COUNT(*) AS totalCount
-      FROM quiz
-      WHERE categoryID = ? AND setNumber = ?
-    `;
-
-    db.query(countSql, [categoryID, setNumber], (err2, countRows) => {
-      if (err2) return res.send("DB error counting questions");
-
-      const totalQuestions = countRows[0].totalCount;
-
-      res.render("quizPage", {
-        question,
-        feedback: null,
-        xpEarned: null,
-        timeTaken: null,
-        categoryID,
-        setNumber,
-        totalQuestions,
-        userAnswer: null
-      });
-    });
-  });
+          res.render("quizPage", {
+            question,
+            feedback: null,
+            xpEarned: null,
+            timeTaken: null,
+            categoryID,
+            setNumber,
+            totalQuestions,
+            userAnswer: null,
+            timeLimit: 20,
+            questionIndex: 0,      // ⭐ ALWAYS START AT 0
+            nextQuizID: question.quizID
+          });
+        }
+      );
+    }
+  );
 };
 
 /* =======================================================
    5) SUBMIT ANSWER
-======================================================== */
+======================================================= */
 exports.answerGame = (req, res) => {
   const userID = req.session.user.userID;
-  const { quizID, answer, timeTaken, categoryID, setNumber } = req.body;
+  const { quizID, answer, timeTaken, categoryID, setNumber, questionIndex } = req.body;
 
-  const sql = `SELECT * FROM quiz WHERE quizID = ?`;
-
-  db.query(sql, [quizID], (err, rows) => {
+  db.query("SELECT * FROM quiz WHERE quizID = ?", [quizID], (err, rows) => {
     if (err) return res.send("DB error (answerGame)");
 
     const question = rows[0];
-    const correct = Number(question.correctOption);
     const userAnswer = Number(answer);
+    const correct = Number(question.correctOption);
     const isCorrect = userAnswer === correct;
+    const t = Number(timeTaken) || 0;
 
     let xpEarned = 0;
     const MAX_XP = 20;
-    const timeLimit = 20;
-    const t = Number(timeTaken) || 0;
 
-    if (isCorrect) {
-      xpEarned = Math.floor(MAX_XP * Math.max(0, 1 - (t / timeLimit)));
-    }
+    db.query(
+      "SELECT timeLimit FROM quiz_info WHERE categoryID = ? AND setNumber = ?",
+      [categoryID, setNumber],
+      (err2, infoRows) => {
+        const timeLimit = infoRows?.[0]?.timeLimit || 20;
 
-    // Save answer
-    const saveSql = `
-      INSERT INTO quiz_results (userID, quizID, userAnswer, isCorrect, timeTaken, xpEarned)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-    db.query(saveSql, [
-      userID,
-      quizID,
-      userAnswer,
-      isCorrect ? 1 : 0,
-      t,
-      xpEarned
-    ]);
+        if (isCorrect) {
+          xpEarned = Math.floor(MAX_XP * Math.max(0, 1 - t / timeLimit));
+        }
 
-    // Only REAL users get XP
-    if (req.session.user.userType !== "Guest") {
-      db.query(`UPDATE user_progress SET xp = xp + ? WHERE userID = ?`, [
-        xpEarned,
-        userID
-      ]);
-    }
+        // Store result
+        db.query(
+          `INSERT INTO quiz_results 
+           (userID, quizID, userAnswer, isCorrect, timeTaken, xpEarned)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [userID, quizID, userAnswer, isCorrect ? 1 : 0, t, xpEarned]
+        );
 
-    const countSql = `
-      SELECT COUNT(*) AS totalCount
-      FROM quiz
-      WHERE categoryID = ? AND setNumber = ?
-    `;
+        // Find next question
+        db.query(
+          `SELECT quizID FROM quiz
+           WHERE categoryID = ? AND setNumber = ? AND quizID > ?
+           ORDER BY quizID ASC LIMIT 1`,
+          [categoryID, setNumber, quizID],
+          (err3, nextRows) => {
+            const nextQuizID = nextRows?.[0]?.quizID || null;
 
-    db.query(countSql, [categoryID, setNumber], (err2, countRows) => {
-      const totalQuestions = countRows[0].totalCount;
+            // Count total questions
+            db.query(
+              `SELECT COUNT(*) AS totalCount FROM quiz 
+               WHERE categoryID = ? AND setNumber = ?`,
+              [categoryID, setNumber],
+              (err4, countRows) => {
+                const totalQuestions = countRows[0].totalCount;
 
-      res.render("quizPage", {
-        question,
-        feedback: isCorrect ? "Correct! 🌱" : "Incorrect 😢",
-        xpEarned,
-        timeTaken: t,
-        categoryID,
-        setNumber,
-        totalQuestions,
-        userAnswer
-      });
-    });
+                res.render("quizPage", {
+                  question,
+                  feedback: isCorrect ? "Correct! 🌱" : "Incorrect 😢",
+                  xpEarned,
+                  timeTaken: t,
+                  categoryID,
+                  setNumber,
+                  totalQuestions,
+                  userAnswer,
+                  timeLimit,
+                  questionIndex: Number(questionIndex),   // ⭐ KEEP SAME INDEX HERE
+                  nextQuizID
+                });
+              }
+            );
+          }
+        );
+      }
+    );
   });
 };
 
 /* =======================================================
    6) NEXT QUESTION
-======================================================== */
+======================================================= */
 exports.nextGameQuestion = (req, res) => {
   const { currentID, categoryID, setNumber } = req.params;
 
-  const sql = `
-    SELECT * FROM quiz
-    WHERE quizID > ?
-      AND categoryID = ?
-      AND setNumber = ?
-    ORDER BY quizID ASC
-    LIMIT 1
-  `;
+  db.query(
+    `SELECT * FROM quiz
+     WHERE quizID > ? AND categoryID = ? AND setNumber = ?
+     ORDER BY quizID ASC LIMIT 1`,
+    [currentID, categoryID, setNumber],
+    (err, rows) => {
 
-  db.query(sql, [currentID, categoryID, setNumber], (err, rows) => {
-    if (err) return res.send("DB error");
+      if (rows.length === 0) {
+        return res.redirect(`/quiz/game/complete/${categoryID}/${setNumber}`);
+      }
 
-    if (rows.length === 0) {
-      return res.redirect(`/quiz/game/complete/${categoryID}/${setNumber}`);
+      const question = rows[0];
+
+      db.query(
+        `SELECT COUNT(*) AS totalCount FROM quiz
+         WHERE categoryID = ? AND setNumber = ?`,
+        [categoryID, setNumber],
+        (err2, countRows) => {
+
+          res.render("quizPage", {
+            question,
+            feedback: null,
+            xpEarned: null,
+            timeTaken: null,
+            categoryID,
+            setNumber,
+            totalQuestions: countRows[0].totalCount,
+            userAnswer: null,
+            timeLimit: 20,
+            questionIndex: 0, 
+            nextQuizID: question.quizID
+          });
+        }
+      );
     }
-
-    const question = rows[0];
-
-    const countSql = `
-      SELECT COUNT(*) AS totalCount
-      FROM quiz
-      WHERE categoryID = ? AND setNumber = ?
-    `;
-
-    db.query(countSql, [categoryID, setNumber], (err2, countRows) => {
-      const totalQuestions = countRows[0].totalCount;
-
-      res.render("quizPage", {
-        question,
-        feedback: null,
-        xpEarned: null,
-        timeTaken: null,
-        categoryID,
-        setNumber,
-        totalQuestions,
-        userAnswer: null
-      });
-    });
-  });
+  );
 };
 
 /* =======================================================
    7) COMPLETE QUIZ
-======================================================== */
+======================================================= */
 exports.completeGame = (req, res) => {
   const userID = req.session.user.userID;
   const { categoryID, setNumber } = req.params;
 
-  const xpSql = `
-      SELECT SUM(r.xpEarned) AS setXP
-      FROM quiz_results r
-      JOIN quiz q ON r.quizID = q.quizID
-      WHERE r.userID = ?
-        AND q.categoryID = ?
-        AND q.setNumber = ?
-  `;
+  db.query(
+    `SELECT SUM(r.xpEarned) AS setXP
+     FROM quiz_results r
+     JOIN quiz q ON r.quizID = q.quizID
+     WHERE r.userID = ? AND q.categoryID = ? AND q.setNumber = ?`,
+    [userID, categoryID, setNumber],
+    (err, xpRows) => {
+      if (err) return res.send("Error calculating XP");
 
-  db.query(xpSql, [userID, categoryID, setNumber], (err, xpRows) => {
-    if (err) return res.send("Error calculating XP");
-
-    const setXP = xpRows[0].setXP || 0;
-
-    const userSql = `
-        SELECT xp, level
-        FROM user_progress
-        WHERE userID = ?
-    `;
-
-    db.query(userSql, [userID], (err2, userRows) => {
-      if (err2) return res.send("Error retrieving user XP");
-
-      /* ======================================================
-         ⭐ GUEST MODE — No row found in user_progress
-      ====================================================== */
-      if (!userRows || userRows.length === 0) {
-        return res.render("quizResult", {
-          alreadyDone: false,
-          sessionXP: setXP,
-          totalXP: 0,
-          level: 1,
-          progressPercent: 0,
-          categoryID,
-          setNumber
-        });
-      }
-
-      /* ======================================================
-         ⭐ REAL USER — Row exists
-      ====================================================== */
-      const totalXP = userRows[0].xp || 0;
-      const level = userRows[0].level || 1;
-      const progressPercent = Math.min((totalXP % 500) / 500 * 100, 100);
+      const setXP = xpRows?.[0]?.setXP || 0;
 
       res.render("quizResult", {
         alreadyDone: false,
         sessionXP: setXP,
-        totalXP,
-        level,
-        progressPercent,
+        totalXP: setXP,
+        level: 1,
+        progressPercent: (setXP % 500) / 5,
         categoryID,
         setNumber
       });
-    });
-  });
+    }
+  );
 };
+
+
+/* =======================================================
+   8) CREATE QUIZ 
+======================================================= */
+exports.createQuizOnePage = (req, res) => {
+
+  console.log("REQ BODY:", req.body);
+
+  const {
+    categoryID,
+    setNumber,
+    title,
+    cardColor,
+    requiredLevel,
+    questions,       // single question string
+    option1,
+    option2,
+    option3,
+    option4,
+    correctOption
+  } = req.body;
+
+  // Validate question text
+  if (!questions || questions.trim() === "") {
+    return res.send("Please enter a question");
+  }
+
+  // ===============================
+  // 1) INSERT INTO quiz_info TABLE
+  // ===============================
+  const infoSql = `
+    INSERT INTO quiz_info 
+    (categoryID, title, cardColor, requiredLevel, numberOfQuestions)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+
+  db.query(
+    infoSql,
+    [categoryID, setNumber, title, cardColor, requiredLevel, 1],   // 👈 numberOfQuestions = 1
+    (err, infoResult) => {
+      if (err) {
+        console.log("QUIZ_INFO SQL ERROR:", err);
+        return res.send("Error saving quiz info");
+      }
+
+      // ===============================
+      // 2) INSERT QUESTION INTO quiz TABLE
+      // ===============================
+
+      const quizSql = `
+        INSERT INTO quiz 
+        (categoryID, setNumber, question, option1, option2, option3, option4, correctOption)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      db.query(
+        quizSql,
+        [
+          categoryID,
+          setNumber,
+          questions,       // question text
+          option1,
+          option2,
+          option3,
+          option4,
+          correctOption
+        ],
+        (err2) => {
+          if (err2) {
+            console.log("QUIZ SQL ERROR:", err2);
+            return res.send("Error saving quiz question");
+          }
+
+          // Redirect after success
+          res.redirect(`/quiz/category/${categoryID}`);
+        }
+      );
+    }
+  );
+};
+
+
+
 
 
 

@@ -5,23 +5,16 @@
   <title>Sustainability Quiz</title>
 
   <style>
-    /* =============================
-       GLOBAL STYLES + BACKGROUND
-    ============================== */
     body {
       font-family: 'Poppins', system-ui, sans-serif;
       margin: 0;
       padding: 0;
-
-      /* Background image */
       background: url("/images/quizBackground.jpg") no-repeat center center fixed;
       background-size: cover;
-      background-position: center;
       min-height: 100vh;
       position: relative;
     }
 
-    /* White overlay but transparent so background shows */
     body::before {
       content: "";
       position: fixed;
@@ -29,17 +22,14 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(255, 255, 255, 0.35); /* LOWER OPACITY */
+      background: rgba(255, 255, 255, 0.35);
       z-index: -1;
     }
 
-    /* =============================
-       QUIZ CARD
-    ============================== */
     .quiz-container {
       max-width: 900px;
       margin: 60px auto;
-      background: rgba(255, 255, 255, 0.82); /* Slight see-through */
+      background: rgba(255, 255, 255, 0.82);
       padding: 40px;
       border-radius: 20px;
       box-shadow: 0 6px 20px rgba(0,0,0,0.1);
@@ -54,24 +44,19 @@
 
     .subtitle {
       text-align: center;
-      font-size: 1rem;
       color: #305e5f;
       margin-bottom: 30px;
     }
 
-    /* =============================
-       QUESTION BOX
-    ============================== */
     .question-box {
       background: #d2e5f0;
       padding: 30px;
       border-radius: 18px;
-      box-shadow: inset 0px 0px 8px rgba(0,0,0,0.05);
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
     }
 
     .question-number {
       font-style: italic;
-      font-size: 1.1rem;
       margin-bottom: 15px;
       color: #0d3c3d;
     }
@@ -83,9 +68,6 @@
       color: #0d3c3d;
     }
 
-    /* =============================
-       OPTIONS
-    ============================== */
     .option {
       margin: 10px 0;
       padding: 12px 16px;
@@ -94,156 +76,68 @@
       display: block;
       border: 1px solid #ced7df;
       cursor: pointer;
-      transition: 0.15s ease;
+      transition: 0.15s;
     }
 
-    .option:hover {
-      background: #eef7ee;
-    }
+    .option:hover { background: #eef7ee; }
 
-    /* Correct / Incorrect styling */
-    .correct {
-      background: #8dc47c !important;
-      border-color: #477d4d !important;
-      color: white !important;
-      font-weight: 600;
-    }
-
-    .incorrect {
-      background: #df7c7c !important;
-      border-color: #8a2f2f !important;
-      color: white !important;
-      font-weight: 600;
-    }
-
-    .explanation {
-      font-style: italic;
-      margin-top: 20px;
-      text-align: center;
-      color: #2f4f4f;
-      font-size: 0.95rem;
-    }
-
-    /* =============================
-       BUTTONS
-    ============================== */
-    .btn-primary {
-      padding: 12px 25px;
-      background: #198754;
-      color: white;
-      border-radius: 25px;
-      border: none;
-      cursor: pointer;
-      margin-top: 20px;
-      font-weight: 600;
-      transition: 0.2s ease;
-    }
-
-    .btn-primary:hover {
-      background: #146c43;
-    }
+    .correct { background: #8dc47c !important; color: white !important; font-weight: 600; }
+    .incorrect { background: #df7c7c !important; color: white !important; font-weight: 600; }
 
     .btn-next {
-      display: inline-block;
       padding: 12px 25px;
       background: #85b36d;
       color: white;
       text-decoration: none;
       border-radius: 25px;
       margin-top: 20px;
-      font-weight: 600;
       float: right;
-      transition: 0.2s;
-    }
-
-    .btn-next:hover {
-      background: #6f945a;
-    }
-
-    .timer-badge {
-      display: inline-block;
-      background: #ffffffcc;
-      padding: 8px 14px;
-      border-radius: 999px;
-      margin-bottom: 20px;
       font-weight: 600;
-      color: #305e5f;
     }
 
-    /* =============================
-       MOBILE FIXES
-    ============================== */
-    @media (max-width: 768px) {
-      body {
-        background-attachment: scroll; /* Fix for iOS background zoom bug */
-      }
-
-      .quiz-container {
-        margin: 20px;
-        padding: 25px;
-      }
-    }
+    .btn-next:hover { background: #6f945a; }
   </style>
 </head>
 
 <body>
 
 <div class="quiz-container">
-
   <h2>Sustainability Quiz</h2>
   <p class="subtitle">Test your knowledge about sustainability!</p>
 
   <div class="question-box">
 
-    <!-- Timer -->
-    <% if (!feedback) { %>
-    <div class="timer-badge">
-      Time left: <span id="countdown">20</span>s
-    </div>
-    <% } %>
-
+    <!-- 🟢 Question Number (now fixed!) -->
     <div class="question-number">
-      Question <%= question.quizID %> of <%= totalQuestions %>
+      Question <%= (questionIndex || 0) + 1 %> of <%= totalQuestions %>
     </div>
 
     <div class="question-text"><%= question.question %></div>
 
-    <!-- ANSWER MODE -->
     <% if (!feedback) { %>
 
+      <!-- 🟢 Answering Form -->
       <form id="quizForm" action="/quiz/game/answer" method="POST">
-
         <input type="hidden" name="quizID" value="<%= question.quizID %>">
         <input type="hidden" name="categoryID" value="<%= categoryID %>">
         <input type="hidden" name="setNumber" value="<%= setNumber %>">
-        <input type="hidden" name="timeTaken" id="timeTaken">
+        
+        <!-- 🟢 NEW FIX: REAL QUESTION INDEX -->
+        <input type="hidden" name="questionIndex" value="<%= questionIndex || 0 %>">
 
-        <label class="option">
-          <input type="radio" name="answer" value="1" required>
-          A) <%= question.option1 %>
-        </label>
+        <% for (let i = 1; i <= 4; i++) { %>
+          <label class="option">
+            <input type="radio" name="answer" value="<%= i %>" required>
+            <%= String.fromCharCode(64 + i) %>) <%= question["option" + i] %>
+          </label>
+        <% } %>
 
-        <label class="option">
-          <input type="radio" name="answer" value="2">
-          B) <%= question.option2 %>
-        </label>
-
-        <label class="option">
-          <input type="radio" name="answer" value="3">
-          C) <%= question.option3 %>
-        </label>
-
-        <label class="option">
-          <input type="radio" name="answer" value="4">
-          D) <%= question.option4 %>
-        </label>
-
-        <button type="button" class="btn-primary" onclick="submitAnswer()">Submit</button>
+        <button type="submit" class="btn-next">Submit →</button>
       </form>
 
     <% } else { %>
 
-      <!-- FEEDBACK MODE -->
+      <!-- Feedback view -->
       <% for (let i = 1; i <= 4; i++) { %>
         <div class="option 
           <% if (i === question.correctOption) { %> correct 
@@ -252,49 +146,25 @@
         </div>
       <% } %>
 
-      <div class="explanation">
-        <%= question.explanation %>
-      </div>
+      <!-- 🟢 NEXT or FINISH BUTTON -->
+      <% if (nextQuizID && (questionIndex + 1) < totalQuestions) { %>
+        <a href="/quiz/game/next/<%= nextQuizID %>/<%= categoryID %>/<%= setNumber %>"
+           class="btn-next">Next Question →</a>
 
-      <a href="/quiz/game/next/<%= question.quizID %>/<%= categoryID %>/<%= setNumber %>"
-         class="btn-next">
-         Next Question →
-      </a>
+      <% } else { %>
+        <a href="/quiz/game/complete/<%= categoryID %>/<%= setNumber %>"
+           class="btn-next">Finish Quiz →</a>
+      <% } %>
 
     <% } %>
 
   </div>
 </div>
 
-<!-- TIMER SCRIPT -->
-<script>
-  <% if (!feedback) { %>
-    let timeLimit = 20;
-    let startTime = Date.now();
-    const countdownEl = document.getElementById('countdown');
-
-    const countdownInterval = setInterval(() => {
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      const remaining = Math.max(0, timeLimit - elapsed);
-      countdownEl.textContent = remaining;
-
-      if (remaining <= 0) {
-        clearInterval(countdownInterval);
-        submitAnswer();
-      }
-    }, 1000);
-
-    function submitAnswer() {
-      const endTime = Date.now();
-      const timeTaken = Math.floor((endTime - startTime) / 1000);
-      document.getElementById('timeTaken').value = timeTaken;
-      document.getElementById('quizForm').submit();
-    }
-  <% } %>
-</script>
-
 </body>
 </html>
+
+
 
 
 

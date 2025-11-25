@@ -40,6 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ 
   extended: false 
 }));
+app.use(express.json());
 
 // ===== Sessions & flash =====
 app.use(session({
@@ -71,7 +72,7 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/uploads', express.static('uploads'));
+app.use('/images', express.static('images'));
 
 
 const validateRegistration = (req,res, next) => {
@@ -144,7 +145,7 @@ app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
 app.post('/quiz/game/answer', quizController.answerGame);
 
 // Next question
-app.get('/quiz/game/next/:currentID/:categoryID/:setNumber', quizController.nextGameQuestion);
+app.get('/quiz/game/next/:currentID/:categoryID/:setNumber',quizController.nextGameQuestion);
 
 // Completed quiz
 app.get('/quiz/game/complete/:categoryID/:setNumber', quizController.completeGame);
@@ -161,6 +162,15 @@ app.get('/guest-start', quizDisplayController.startAsGuest);     // Create guest
 app.get('/guest-welcome', (req, res) => {
     res.render("quiz-access", { guestMode: true });
 });
+
+//ADD QUIZ 
+// Add Quiz (form page)
+app.get('/addQuiz', (req, res) => {
+    res.render('addQuiz');
+});
+
+// Add Quiz (submit form)
+app.post('/createQuiz', quizController.createQuizOnePage);
 
 
 
@@ -179,3 +189,4 @@ app.get('/401', (req, res) => {
 // Start express server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+

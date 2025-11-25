@@ -6,24 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    /* RESET */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* MATCH QUIZ CATEGORY PAGE MEASUREMENT */
     body {
       font-family: 'Georgia', serif;
       background: url('/images/quizBackground.jpg') no-repeat center center fixed;
       background-size: cover;
       min-height: 100vh;
-      margin: 0;
-      padding: 0;
     }
 
-    /* SAME WHITE SOFT OVERLAY */
     body::before {
       content: "";
       position: fixed;
@@ -35,16 +26,12 @@
       z-index: -1;
     }
 
-    /* SPACE BELOW NAVBAR */
-    .nav-spacer {
-      height: 40px; /* same spacing type as categories page */
-    }
+    .nav-spacer { height: 40px; }
 
-    /* TITLE */
     h1 {
       text-align: center;
       color: #0b2535;
-      font-size: 2.4rem;  /* match style of categories page title */
+      font-size: 2.4rem;
       margin-bottom: 10px;
     }
 
@@ -52,22 +39,21 @@
       text-align: center;
       color: #4f665a;
       font-size: 1.1rem;
-      margin-bottom: 45px; /* increased because category page has bigger spacing */
+      margin-bottom: 45px;
     }
 
-    /* CARD GRID – centered + consistent spacing */
+    /* CARDS LAYOUT */
     .sets-wrapper {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 35px;   /* match spacing style */
+      gap: 35px;
       padding-bottom: 40px;
     }
 
-    /* CARD */
     .set-card {
       width: 100%;
-      max-width: 420px; /* match your category card proportions */
+      max-width: 420px;
       border-radius: 25px;
       padding: 30px 25px;
       text-align: center;
@@ -75,18 +61,8 @@
       transition: transform 0.3s ease;
     }
 
-    .set-card:hover {
-      transform: translateY(-8px);
-    }
+    .set-card:hover { transform: translateY(-8px); }
 
-    /* ICON */
-    .quiz-icon {
-      width: 90px;
-      height: 90px;
-      margin-bottom: 18px;
-    }
-
-    /* TITLE INSIDE CARD */
     .set-title {
       font-size: 1.5rem;
       font-weight: bold;
@@ -94,7 +70,6 @@
       color: #0b2535;
     }
 
-    /* BUTTON */
     .start-btn {
       background: #2d7a31;
       padding: 12px 26px;
@@ -106,11 +81,8 @@
       transition: 0.2s;
     }
 
-    .start-btn:hover {
-      background: #256628;
-    }
+    .start-btn:hover { background: #256628; }
 
-    /* Back Link */
     .back-link {
       display: block;
       text-align: center;
@@ -120,9 +92,7 @@
       text-decoration: none;
     }
 
-    .back-link:hover {
-      text-decoration: underline;
-    }
+    .back-link:hover { text-decoration: underline; }
 
   </style>
 </head>
@@ -132,14 +102,11 @@
   <!-- NAVBAR -->
   <%- include ('partials/navbar.ejs') %>
 
-  <!-- SPACING BELOW NAVBAR -->
   <div class="nav-spacer"></div>
 
-  <!-- PAGE HEADER -->
   <h1><%= categoryName %> Quiz Sets</h1>
   <p class="subtitle">Choose a set to begin your sustainability quiz 🌿</p>
 
-  <!-- QUIZ SETS -->
   <div class="sets-wrapper">
     <% sets.forEach(set => { %>
 
@@ -148,9 +115,10 @@
         const cardColor = colors[set.setNumber % colors.length];
       %>
 
-      <div class="set-card" style="background:<%= cardColor %>;">
-        <img class="quiz-icon" src="/images/default-eco-icon.png" alt="icon">
-        <div class="set-title">Quiz Set <%= set.setNumber %></div>
+      <!-- QUIZ CARD -->
+      <div class="set-card" style="background:<%= set.cardColor || '#b7e4c7' %>;">
+
+        <div class="set-title"><%= set.title || ("Quiz Set " + set.setNumber) %></div>
 
         <a href="/startGame/<%= categoryID %>/<%= set.setNumber %>">
           <button class="start-btn">Start Quiz</button>
@@ -164,5 +132,6 @@
 
 </body>
 </html>
+
 
 
