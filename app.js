@@ -30,17 +30,24 @@ const upload = multer({ storage: storage });
 const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser } = require('./middleware/auth');
 
 const validateRegistration = (req,res, next) => {
-    const { userName, email, password, contactNo } = req.body;
-    
-    if (!userName || !email || !password || !contactNo) {
-        return res.status(400).send('All fields are required');
+    const { userName, email, password, confirmPassword, contactNo } = req.body;
+    console.log('validateRegistration: attempt', { userName, email, contactNo });
+
+    if (!userName || !email || !password || !confirmPassword || !contactNo) {
+        console.log('validateRegistration: missing fields', { userNamePresent: !!userName, emailPresent: !!email, passwordPresent: !!password, contactNoPresent: !!contactNo });
+        req.flash('error', ['All fields are required.']);
+        req.flash('formData', req.body);
+        return res.redirect('/register');
     }
 
-    if (password.length < 6) {
-        req.flash('error', 'Password six characters long');
+    if (password.length < 8) {
+        console.log('validateRegistration: password too short', { userName, email });
+        req.flash('error', 'Password eight characters long');
         req.flash('formData',req.body);
         return res.redirect('/register')
     }
+
+    console.log('validateRegistration: passed basic checks');
     next()
 }
 
@@ -79,10 +86,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use((req, res, next) => {
-  res.locals.messages = req.flash();   res.locals.messages = req.flash(); 
-  next();
-});
+// Note: don't automatically consume flash here (controllers should read flash()),
+// res.locals.flash is already available via binding above.
 
 app.use('/uploads', express.static('uploads'));
 
