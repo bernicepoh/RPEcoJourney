@@ -1,5 +1,5 @@
 <nav>
-  <a href="/homepage">
+  <a href="/adminDashboard">
     <h1>RPEcoJourney</h1>
   </a>
 
@@ -20,8 +20,10 @@
   </ul>
 
   <% if (user && user.userType !== "Guest") { %>
-    <!-- SHOW PROFILE ONLY FOR REAL USERS -->
-    <img src="/images/profile.jpg" alt="Profile" class="profile-pic" />
+    <ul>
+      <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
+      <li><a href="/">Logout</a></li>
+    </ul>
   <% } %>
 
 </nav>

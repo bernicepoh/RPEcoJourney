@@ -6,7 +6,7 @@ const db = mysql.createConnection({
     user: 'root',
     password: 'Republic_C207',
     database: 'rpecojourney'
-});
+  });
 
 //Connecting to database
 db.connect((err) => {

@@ -148,13 +148,14 @@
 
       <!-- 🟢 NEXT or FINISH BUTTON -->
       <% if (nextQuizID && (questionIndex + 1) < totalQuestions) { %>
-        <a href="/quiz/game/next/<%= nextQuizID %>/<%= categoryID %>/<%= setNumber %>"
-           class="btn-next">Next Question →</a>
-
-      <% } else { %>
-        <a href="/quiz/game/complete/<%= categoryID %>/<%= setNumber %>"
-           class="btn-next">Finish Quiz →</a>
+        <a href="/quiz/game/next/<%= nextQuizID %>/<%= categoryID %>/<%= setNumber %>?index=<%= questionIndex + 1 %>"class="btn-next">Next Question →</a>
+        
+        <% } else { %>
+          <a href="/quiz/game/complete/<%= categoryID %>/<%= setNumber %>"
+            class="btn-next">Finish Quiz →</a>
+      
       <% } %>
+
 
     <% } %>
 

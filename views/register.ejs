@@ -6,26 +6,25 @@
   <link rel="stylesheet" href="/styles.css"> <!-- optional -->
   <style>
     body {
-      font-family: 'Georgia', serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-image: url("/images/userBackground.png");
-      background-repeat: no-repeat;
-      background-size: contain; 
-      background-position: center;  
-      min-height: 100vh;
-    }
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Georgia', serif;
+  background-image: url("/images/background.png");
+  background-repeat: no-repeat;
+  background-size: cover; 
+  background-position: center;
+}
 
-    .card {
-      background-color: #fff;
-      padding: 30px 40px;
-      border-radius: 15px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      width: 400px;
-    }
+.card {
+  margin: auto;          /* Center vertically and horizontally */
+  background-color: #fff;
+  padding: 30px 40px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  width: 400px;
+}
 
     h1 {
       text-align: center;
@@ -129,7 +128,7 @@
     <% } %>
 
     <!-- Registration Form -->
-    <form action="/register" method="POST">
+    <form action="/register" method="POST" enctype="multipart/form-data">
       <div>
         <label for="userName">Username:</label>
         <input type="text" id="userName" name="userName" value="<%= formData?.userName || '' %>" required>
@@ -155,16 +154,17 @@
         <input type="text" id="contactNo" name="contactNo" value="<%= formData?.contactNo || '' %>">
       </div>
 
+      <div>
+        <label for="image">Image:</label>
+        <input type="file" id="image" name="image" accept="image/*">
+      </div>
+
       <button type="submit">Register</button>
     </form>
 
     <div class="login-link">
       <p>Already have an account? <a href="/">Login here</a></p>
-      
-
     </div>
-    
-  
   </div>
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
