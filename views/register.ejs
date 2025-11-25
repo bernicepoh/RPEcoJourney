@@ -101,6 +101,28 @@
       text-decoration: underline;
     }
 
+    .error {
+      border-color: red !important;
+    }
+
+    .field-wrapper.error {
+      border: 2px solid rgba(255,0,0,0.15);
+      padding: 8px;
+      border-radius: 8px;
+      background-color: #fff6f6;
+    }
+
+    .field-error {
+      color: red;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .confirm-status {
+      margin-top: 5px;
+      font-size: 18px;
+    }
+
     footer {
       text-align: center; 
       padding: 25px; 
@@ -127,37 +149,50 @@
       <% }) %>
     <% } %>
 
+    <%
+    const fieldErrors = {};
+    if (errors) {
+      errors.forEach(err => {
+        if (err.includes('Gmail')) fieldErrors.email = err;
+        else if (err.includes('Password must')) fieldErrors.password = err;
+        else if (err.includes('Passwords do not match')) fieldErrors.confirmPassword = err;
+        else if (err.includes('8-digit')) fieldErrors.contactNo = err;
+        else if (err.includes('All fields')) fieldErrors.all = err;
+        else if (err.includes('Email is already in use')) fieldErrors.email = 'EMAIL TAKEN';
+        else if (err.includes('Contact number is already in use')) fieldErrors.contactNo = 'CONTACT TAKEN';
+        else if (err.toLowerCase().includes('username')) fieldErrors.userName = err;
+      });
+    }
+    %>
+
     <!-- Registration Form -->
-    <form action="/register" method="POST" enctype="multipart/form-data">
-      <div>
+    <form action="/register" method="POST">
+      <div class="field-wrapper <%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>">
         <label for="userName">Username:</label>
-        <input type="text" id="userName" name="userName" value="<%= formData?.userName || '' %>" required>
+        <input type="text" id="userName" name="userName" value="<%= formData?.userName || '' %>" placeholder="<%= fieldErrors.userName || fieldErrors.all || 'Enter username' %>" class="<%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>" required>
       </div>
 
-      <div>
+      <div class="field-wrapper <%= fieldErrors.email ? 'error' : '' %>">
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<%= formData?.email || '' %>" required>
+        <input type="email" id="email" name="email" value="<%= formData?.email || '' %>" placeholder="<%= fieldErrors.email || 'Enter your email' %>" class="<%= fieldErrors.email ? 'error' : '' %>" required>
       </div>
 
-      <div>
+      <div class="field-wrapper <%= fieldErrors.password ? 'error' : '' %>">
         <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+        <input type="password" id="password" name="password" placeholder="<%= fieldErrors.password || 'Enter password' %>" class="<%= fieldErrors.password ? 'error' : '' %>" required>
       </div>
 
-      <div>
+      <div class="field-wrapper <%= fieldErrors.confirmPassword ? 'error' : '' %>">
         <label for="confirmPassword">Confirm Password:</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" required>
+        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="<%= fieldErrors.confirmPassword || 'Confirm password' %>" class="<%= fieldErrors.confirmPassword ? 'error' : '' %>" required>
       </div>
 
-      <div>
+      <div class="field-wrapper <%= fieldErrors.contactNo ? 'error' : '' %>">
         <label for="contactNo">Contact Number:</label>
-        <input type="text" id="contactNo" name="contactNo" value="<%= formData?.contactNo || '' %>">
+        <input type="text" id="contactNo" name="contactNo" value="<%= formData?.contactNo || '' %>" placeholder="<%= fieldErrors.contactNo || 'Enter contact number' %>" class="<%= fieldErrors.contactNo ? 'error' : '' %>">
       </div>
 
-      <div>
-        <label for="image">Image:</label>
-        <input type="file" id="image" name="image" accept="image/*">
-      </div>
+      
 
       <button type="submit">Register</button>
     </form>
@@ -169,6 +204,49 @@
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+  <script>
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
+    const label = document.querySelector('label[for="confirmPassword"]');
+    label.innerHTML = 'Confirm Password: <span id="confirmIcon" class="confirm-status"></span>';
+    const confirmIcon = document.getElementById('confirmIcon');
+
+    function checkMatch() {
+      if (confirmPassword.value === '') {
+        confirmIcon.innerHTML = '';
+      } else if (confirmPassword.value === password.value) {
+        confirmIcon.innerHTML = '✓';
+        confirmIcon.style.color = 'green';
+      } else {
+        confirmIcon.innerHTML = '✗';
+        confirmIcon.style.color = 'red';
+      }
+    }
+
+    confirmPassword.addEventListener('input', checkMatch);
+    password.addEventListener('input', checkMatch);
+    
+    // Remove error highlight when user edits a field
+    document.querySelectorAll('.field-wrapper input').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const wrapper = e.target.closest('.field-wrapper');
+        if (wrapper && wrapper.classList.contains('error')) {
+          wrapper.classList.remove('error');
+          e.target.classList.remove('error');
+        }
+      });
+    });
+  </script>
+  <script>
+    window.onload = function() {
+      <% if (errors && errors.length > 0) { %>
+        alert('Registration failed:\n<%= errors.join('\\n') %>');
+      <% } %>
+      <% if (messages && messages.length > 0) { %>
+        alert('<%= messages.join('\\n') %>');
+      <% } %>
+    }
+  </script>
 </body>
 </html>
 

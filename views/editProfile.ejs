@@ -124,7 +124,7 @@
 
                 <label>Current Profile Image:</label>
                 <% if (user.image) { %>
-                    <img src="/images/<%= user.image %>" alt="Profile image" class="img-preview">
+                    <img src="/uploads/<%= user.image %>" alt="Profile image" class="img-preview">
                 <% } else { %>
                     <img src="/images/defaultUser.png" alt="Default image" class="img-preview">
                 <% } %>
