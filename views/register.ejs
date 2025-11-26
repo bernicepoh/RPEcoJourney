@@ -226,7 +226,7 @@
     confirmPassword.addEventListener('input', checkMatch);
     password.addEventListener('input', checkMatch);
     
-    // Remove error highlight when user edits a field
+   
     document.querySelectorAll('.field-wrapper input').forEach(input => {
       input.addEventListener('input', (e) => {
         const wrapper = e.target.closest('.field-wrapper');
@@ -237,16 +237,7 @@
       });
     });
   </script>
-  <script>
-    window.onload = function() {
-      <% if (errors && errors.length > 0) { %>
-        alert('Registration failed:\n<%= errors.join('\\n') %>');
-      <% } %>
-      <% if (messages && messages.length > 0) { %>
-        alert('<%= messages.join('\\n') %>');
-      <% } %>
-    }
-  </script>
+  
 </body>
 </html>
 
