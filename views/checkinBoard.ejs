@@ -12,9 +12,9 @@
             font-family: 'Arial', sans-serif;
             margin: 0;
             background-image: url("/images/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover; 
+            background-position: center;
         }
 
         .container {
@@ -30,7 +30,6 @@
             font-size: 2.4rem;
         }
 
-        /* GRID LAYOUT FOR TOP CARDS */
         .top-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -51,7 +50,6 @@
             margin-bottom: 8px;
         }
 
-        /* XP BAR */
         .xp-bar {
             width: 100%;
             height: 12px;
@@ -67,7 +65,6 @@
             transition: 0.4s ease;
         }
 
-        /* CHECK-IN BUTTON */
         .check-btn {
             width: 100%;
             background: #6bbf59;
@@ -84,7 +81,19 @@
             background-color: #4fa34b;
         }
 
-        /* ACTION BUTTONS */
+        .disabled-btn {
+            width: 100%;
+            background: #b3b3b3;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
         .action-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -99,7 +108,7 @@
             text-align: center;
             font-weight: 600;
             color: #0b2535;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             cursor: pointer;
             border: 1px solid #d9e6da;
             transition: 0.2s ease;
@@ -110,7 +119,6 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
 
-        /* MISSIONS BOX */
         .missions {
             background: white;
             padding: 20px;
@@ -129,18 +137,10 @@
     </style>
 </head>
 
+
 <body>
 
-    <!-- NAVBAR -->
     <%- include('partials/navbar') %>
-
-    <!-- ALERT POPUP -->
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('already') === 'true') {
-            alert("You have already checked in today!Click ok to return");
-        }
-    </script>
 
     <div class="container">
 
@@ -152,7 +152,7 @@
             Keep growing your green habits! 🌱
         </p>
 
-        <!-- ⭐⭐⭐ PROFILE + BADGE SECTION ADDED HERE ⭐⭐⭐ -->
+        <!-- PROFILE SECTION -->
         <div style="
             background:white;
             padding:25px;
@@ -165,11 +165,9 @@
             box-shadow:0 4px 15px rgba(0,0,0,0.1);
         ">
 
-            <!-- Profile Photo -->
-            <img src="<%= user.profilePhoto %>" 
+            <img src="/uploads/<%= user.image %>" 
                  style="width:110px; height:110px; border-radius:50%; border:4px solid #e6f7e6;">
 
-            <!-- Name + Badge -->
             <div>
                 <h2 style="margin:0; font-size:1.8rem; color:#0b2535;">
                     <%= user.userName %>
@@ -191,12 +189,11 @@
             </div>
 
         </div>
-        <!-- ⭐⭐⭐ END OF ADDED SECTION ⭐⭐⭐ -->
 
-        <!-- TOP CARDS (XP + STREAK) -->
+        <!-- XP & STREAK -->
         <div class="top-grid">
 
-            <!-- XP Progress -->
+            <!-- XP -->
             <div class="card">
                 <h2>Level <%= progress.level %></h2>
 
@@ -207,14 +204,28 @@
                 <p><%= progress.xp %> / <%= xpNeeded %> XP</p>
             </div>
 
-            <!-- Streak -->
+            <!-- STREAK -->
             <div class="card">
                 <h2>🔥 Streak: <%= progress.streak %> days</h2>
                 <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
 
-                <form action="/do-checkin" method="POST">
-                    <button class="check-btn">Check In Today</button>
-                </form>
+                <!-- FIXED ONE-TIME CHECK-IN BUTTON -->
+                <%
+                    let last = progress.lastCheckinDate
+                        ? new Date(progress.lastCheckinDate).toISOString().slice(0, 10)
+                        : null;
+
+                    let today = new Date().toISOString().slice(0, 10);
+                %>
+
+                <% if (last === today) { %>
+                    <button class="disabled-btn" disabled>✔ Already checked in today</button>
+                <% } else { %>
+                    <form action="/do-checkin" method="POST">
+                        <button class="check-btn">Check In Today</button>
+                    </form>
+                <% } %>
+
             </div>
 
         </div>
@@ -252,8 +263,34 @@
 
     </div>
 
+    <!-- SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    if (window.location.search.includes("already")) {
+        history.replaceState(null, "", "/checkin-board?already=true");
+    }
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const already = urlParams.get("already");
+
+        if (already === "true") {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Already Checked In!',
+                text: 'You can only check in once per day 🌿',
+                confirmButtonColor: '#6bbf59'
+            });
+        }
+    });
+</script>
+
+
 </body>
 </html>
+
+
+
 
 
 
