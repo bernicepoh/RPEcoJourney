@@ -224,26 +224,70 @@ exports.toggleLike = (req, res) => {
 // ============================
 // POSTING OF COMMENT 
 // ============================
-exports.postComment = (req, res) => {
+const OpenAI = require("openai");
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+exports.postComment = async (req, res) => {
     const contentID = req.params.id;
-    const userID = req.session.user.userID;  // user must be logged in
+    const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
-    const sql = `
-        INSERT INTO engagement (userID, contentID, comments, share) 
-        VALUES (?, ?, ?, ?)
-    `;
+    try {
+        // ============================
+        // GPT-4o-mini Moderation
+        // ============================
+        const response = await client.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `
+                        You are a strict moderation system. 
+                        Your job is to classify the user's comment. 
+                        If the comment contains ANY of these:
+                        - hate speech
+                        - harassment or bullying
+                        - sexual or NSFW content
+                        - violence
+                        - threats
+                        - self-harm mention
+                        - spam or scams
 
-    db.query(sql, [userID, contentID, commentText, 0], (err) => {
-        if (err) {
-            console.error("Error inserting comment:", err);
-            return res.status(500).send("Failed to post comment");
+                        Respond ONLY with: "unsafe"
+                        Otherwise, respond ONLY: "safe"
+                    `
+                },
+                { role: "user", content: commentText }
+            ]
+        });
+
+        const result = response.choices[0].message.content.trim();
+        const flagged = (result === "unsafe");
+
+        if (flagged) {
+            // AI says inappropriate
+            return res.redirect(`/content/${contentID}?error=inappropriate`);
         }
 
-        // Redirect back to same content page
-        res.redirect(`/content/${contentID}`);
-    });
+        // =================================
+        // Inserting of Clean Comment to DB
+        // =================================
+        const sql = `
+            INSERT INTO engagement (userID, contentID, comments, share) 
+            VALUES (?, ?, ?, ?)
+        `;
+
+        db.query(sql, [userID, contentID, commentText, 0], (err) => {
+            if (err) return res.status(500).send("Failed to post comment");
+            res.redirect(`/content/${contentID}?success=posted`);
+        });
+
+    } catch (error) {
+        console.error("AI moderation error:", error);
+        return res.redirect(`/content/${contentID}?error=moderation_fail`);
+    }
 };
+
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;

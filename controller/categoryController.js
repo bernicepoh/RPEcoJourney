@@ -205,19 +205,73 @@ exports.deleteCategory = (req, res) => {
     });
 };
 
-
-// // Admin/Manager — Delete category
+// // Admin/Manager — Delete Category (Enhanced & Safe)
 // exports.deleteCategory = (req, res) => {
 //     const categoryID = req.params.id;
-//     const sql = 'DELETE FROM category WHERE categoryID = ?';
-//     db.query(sql, [categoryID], (error, results) => {
-//         if (error) {
-//             // Handle any error that occurs during the database operation
-//             console.error('Error deleting category:', error.message);
-//             return res.status(500).send('Error deleting category');
-//         } else {
-//             // Send a success response
-//             res.redirect('/categories');
+
+//     // Safety Check: Validate ID
+//     if (!categoryID) {
+//         req.flash('error', 'Invalid category ID');
+//         return res.redirect('/categories');
+//     }
+
+//     // Check if category has content
+//     const checkSql = 'SELECT contentID FROM content WHERE categoryID = ?';
+//     db.query(checkSql, [categoryID], (err, contentRows) => {
+//         if (err) {
+//             console.error("Error checking category content:", err);
+//             req.flash('error', 'Server error');
+//             return res.redirect('/categories');
 //         }
+
+//         // If content exists → move to Uncategorized (ID = 0)
+//         if (contentRows.length > 0) {
+//             const moveSql = 'UPDATE content SET categoryID = 0 WHERE categoryID = ?';
+
+//             db.query(moveSql, [categoryID], (moveErr) => {
+//                 if (moveErr) {
+//                     console.error("Error moving content:", moveErr);
+//                     req.flash('error', 'Could not move content before deletion.');
+//                     return res.redirect('/categories');
+//                 }
+
+//                 console.log(`Moved ${contentRows.length} item(s) to Uncategorized.`);
+//             });
+//         }
+
+//         // Get category image
+//         const imgSql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
+//         db.query(imgSql, [categoryID], (err, imgRows) => {
+//             if (err) {
+//                 console.error("Image lookup error:", err);
+//                 req.flash('error', 'Server error');
+//                 return res.redirect('/categories');
+//             }
+
+//             const imageFile = imgRows[0]?.categoryImage || null;
+//             const imagePath = path.join(__dirname, '../public/images', imageFile);
+
+//             // Delete category itself
+//             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
+//             db.query(deleteSql, [categoryID], (delErr) => {
+//                 if (delErr) {
+//                     console.error("Delete error:", delErr);
+//                     req.flash('error', 'Could not delete category.');
+//                     return res.redirect('/categories');
+//                 }
+
+//                 // Remove image file only if it's not default
+//                 if (imageFile && imageFile !== 'default.png') {
+//                     fs.unlink(imagePath, (unlinkErr) => {
+//                         if (unlinkErr) {
+//                             console.warn("Failed to delete image:", unlinkErr.message);
+//                         }
+//                     });
+//                 }
+
+//                 req.flash('success', 'Category deleted successfully!');
+//                 res.redirect('/categories');
+//             });
+//         });
 //     });
 // };
