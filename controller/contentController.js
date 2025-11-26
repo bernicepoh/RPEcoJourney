@@ -6,6 +6,8 @@ const nodemailer = require('nodemailer');
 // ============================
 exports.getContentByCategory = (req, res) => {
     const categoryID = req.params.id;
+    const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
+
     const sql = `SELECT 
                     c.contentID, 
                     c.contentTitle, 
@@ -13,17 +15,27 @@ exports.getContentByCategory = (req, res) => {
                     c.contentFile,
                     cat.categoryName,
                     cat.categoryDescription,
-                    cat.categoryImage
-                FROM 
-                    content c
-                JOIN 
-                    category cat
-                ON 
-                    c.categoryID = cat.categoryID
-                WHERE 
-                    cat.categoryID = ?;`;
+                    cat.categoryImage,
 
-    db.query(sql, [categoryID], (error, results) => {
+                    /* Total like count */
+                    (SELECT COUNT(*) 
+                    FROM engagement e 
+                    WHERE e.contentID = c.contentID 
+                    AND e.likes = 1) AS likeCount,
+
+                    /* Whether THIS user liked */
+                    (SELECT COUNT(*) 
+                    FROM engagement e 
+                    WHERE e.contentID = c.contentID 
+                    AND e.userID = ? 
+                    AND e.likes = 1) AS userLiked
+                FROM content c
+                JOIN category cat
+                    ON c.categoryID = cat.categoryID
+                WHERE cat.categoryID = ?
+            `;
+
+    db.query(sql, [userID, categoryID], (error, results) => {
         if (error) {
             return res.status(500).send('Error retrieving content');
         }
@@ -56,73 +68,127 @@ exports.getContentByCategory = (req, res) => {
                     contentList: [],
                     user: req.session.user || null
                 });
+                // // After we get content list, fetch likers for ALL content
+                // const likerSql = `
+                //     SELECT e.contentID, u.userID, u.userName, u.profilePic
+                //     FROM engagement e
+                //     JOIN user u ON u.userID = e.userID
+                //     WHERE e.likes = 1
+                // `;
+
+                // db.query(likerSql, (err2, likerRows) => {
+                //     if (err2) {
+                //         console.error("Error loading liker list:", err2);
+                //         return res.status(500).send("Error retrieving likes");
+                //     }
+
+                //     // Attach likers to each content item
+                //     const updatedContentList = results.map(content => {
+                //         return {
+                //             ...content,
+                //             likers: likerRows.filter(l => l.contentID == content.contentID)
+                //         };
+                //     });
+
+                //     res.render('viewContentByCategory', {
+                //         category: categoryInfo,
+                //         contentList: updatedContentList,
+                //         user: req.session.user || null
+                //     });
+                //});
             });
         }
     });
 };
 
 // ============================
-// TOGGLE LIKE
+// TOGGLE LIKE (Correct Version)
 // ============================
 exports.toggleLike = (req, res) => {
     if (!req.session.user) {
-        // Not logged in
         return res.status(401).json({ success: false, notLoggedIn: true });
     }
 
     const userID = req.session.user.userID;
     const contentID = req.params.contentID;
 
-    // 1) Check if user already liked this content
-    const checkSql = 'SELECT engagementID FROM engagement WHERE userID = ? AND contentID = ?';
+    console.log("🔥 Toggle like for:", { userID, contentID });
+
+    const checkSql = `
+        SELECT likes FROM engagement 
+        WHERE userID = ? AND contentID = ?
+    `;
 
     db.query(checkSql, [userID, contentID], (err, rows) => {
+
+        console.log("📌 SQL rows found:", rows);
+        console.log("📌 SQL error:", err);
+
         if (err) {
-            console.error('Error checking like:', err);
+            console.error("❌ Error checking like:", err);
             return res.status(500).json({ success: false });
         }
 
         if (rows.length > 0) {
-            // Already liked → UNLIKE (delete row)
-            const deleteSql = 'DELETE FROM engagement WHERE userID = ? AND contentID = ?';
-            db.query(deleteSql, [userID, contentID], (delErr) => {
-                if (delErr) {
-                    console.error('Error deleting like:', delErr);
-                    return res.status(500).json({ success: false });
-                }
+            const newLikeValue = rows[0].likes === 1 ? 0 : 1;
 
-                // Get updated like count
-                const countSql = 'SELECT COUNT(*) AS likeCount FROM engagement WHERE contentID = ?';
+            console.log("🔄 Updating like to:", newLikeValue);
+
+            const updateSql = `
+                UPDATE engagement 
+                SET likes = ?
+                WHERE userID = ? AND contentID = ?
+            `;
+
+            db.query(updateSql, [newLikeValue, userID, contentID], (updateErr) => {
+                console.log("❌ Update error:", updateErr);
+
+                if (updateErr) return res.status(500).json({ success: false });
+
+                const countSql = `
+                    SELECT COUNT(*) AS likeCount 
+                    FROM engagement 
+                    WHERE contentID = ? AND likes = 1
+                `;
+
                 db.query(countSql, [contentID], (countErr, countRows) => {
-                    if (countErr) {
-                        console.error('Error counting likes:', countErr);
-                        return res.status(500).json({ success: false });
-                    }
+                    console.log("❌ Count error:", countErr);
+                    console.log("📌 Count rows:", countRows);
+
+                    if (countErr) return res.status(500).json({ success: false });
 
                     return res.json({
                         success: true,
-                        liked: false,
+                        liked: newLikeValue === 1,
                         likeCount: countRows[0].likeCount
                     });
                 });
             });
 
         } else {
-            // Not liked yet → LIKE (insert row)
-            const insertSql = 'INSERT INTO engagement (userID, contentID) VALUES (?, ?)';
-            db.query(insertSql, [userID, contentID], (insErr) => {
-                if (insErr) {
-                    console.error('Error inserting like:', insErr);
-                    return res.status(500).json({ success: false });
-                }
+            console.log("🆕 No existing row found → creating new one");
 
-                // Get updated like count
-                const countSql = 'SELECT COUNT(*) AS likeCount FROM engagement WHERE contentID = ?';
+            const insertSql = `
+                INSERT INTO engagement (userID, contentID, likes)
+                VALUES (?, ?, 1)
+            `;
+
+            db.query(insertSql, [userID, contentID], (insErr) => {
+                console.log("❌ Insert error:", insErr);
+
+                if (insErr) return res.status(500).json({ success: false });
+
+                const countSql = `
+                    SELECT COUNT(*) AS likeCount 
+                    FROM engagement 
+                    WHERE contentID = ? AND likes = 1
+                `;
+
                 db.query(countSql, [contentID], (countErr, countRows) => {
-                    if (countErr) {
-                        console.error('Error counting likes:', countErr);
-                        return res.status(500).json({ success: false });
-                    }
+                    console.log("❌ Count error:", countErr);
+                    console.log("📌 Count rows:", countRows);
+
+                    if (countErr) return res.status(500).json({ success: false });
 
                     return res.json({
                         success: true,
@@ -135,60 +201,149 @@ exports.toggleLike = (req, res) => {
     });
 };
 
+// exports.getLikesList = (req, res) => {
+//     const contentID = req.params.id;
+
+//     const sql = `
+//         SELECT u.userName, u.profilePic, u.userID
+//         FROM engagement e
+//         JOIN user u ON e.userID = u.userID
+//         WHERE e.contentID = ? AND e.likes = 1
+//     `;
+
+//     db.query(sql, [contentID], (err, rows) => {
+//         if (err) return res.status(500).json({ success: false });
+
+//         res.json({
+//             success: true,
+//             users: rows
+//         });
+//     });
+// };
+
 // ============================
 // POSTING OF COMMENT 
 // ============================
-exports.postComment = (req, res) => {
+const OpenAI = require("openai");
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+exports.postComment = async (req, res) => {
     const contentID = req.params.id;
-    const userID = req.session.user.userID;  // user must be logged in
+    const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
-    const sql = `
-        INSERT INTO engagement (userID, contentID, comments, share) 
-        VALUES (?, ?, ?, ?)
-    `;
+    try {
+        // ============================
+        // GPT-4o-mini Moderation
+        // ============================
+        const response = await client.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+                {
+                    role: "system",
+                    content: `
+                        You are a strict moderation system. 
+                        Your job is to classify the user's comment. 
+                        If the comment contains ANY of these:
+                        - hate speech
+                        - harassment or bullying
+                        - sexual or NSFW content
+                        - violence
+                        - threats
+                        - self-harm mention
+                        - spam or scams
 
-    db.query(sql, [userID, contentID, commentText, 0], (err) => {
-        if (err) {
-            console.error("Error inserting comment:", err);
-            return res.status(500).send("Failed to post comment");
+                        Respond ONLY with: "unsafe"
+                        Otherwise, respond ONLY: "safe"
+                    `
+                },
+                { role: "user", content: commentText }
+            ]
+        });
+
+        const result = response.choices[0].message.content.trim();
+        const flagged = (result === "unsafe");
+
+        if (flagged) {
+            // AI says inappropriate
+            return res.redirect(`/content/${contentID}?error=inappropriate`);
         }
 
-        // Redirect back to same content page
-        res.redirect(`/content/${contentID}`);
-    });
+        // =================================
+        // Inserting of Clean Comment to DB
+        // =================================
+        const sql = `
+            INSERT INTO engagement (userID, contentID, comments, share) 
+            VALUES (?, ?, ?, ?)
+        `;
+
+        db.query(sql, [userID, contentID, commentText, 0], (err) => {
+            if (err) return res.status(500).send("Failed to post comment");
+            res.redirect(`/content/${contentID}?success=posted`);
+        });
+
+    } catch (error) {
+        console.error("AI moderation error:", error);
+        return res.redirect(`/content/${contentID}?error=moderation_fail`);
+    }
 };
+
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
 
-    // Join content, category, and engagement on contentID and categoryID
-    const sql = `
-        SELECT 
-            c.*, 
-            cat.categoryName, cat.categoryDescription, cat.categoryImage, 
-            e.engagementID, e.userID, e.comments, e.createdAt
+    const contentSql = `
+        SELECT c.*, cat.categoryName, cat.categoryDescription, cat.categoryImage
         FROM content c
         JOIN category cat ON c.categoryID = cat.categoryID
-        LEFT JOIN engagement e ON c.contentID = e.contentID
         WHERE c.contentID = ?
     `;
 
-    db.query(sql, [contentID], (error, results) => {
-        if (error) {
-            console.error('Database query error:', error.message);
-            return res.status(500).send('Error retrieving content by ID');
+    const commentSql = `
+        SELECT 
+            e.engagementID AS commentID,
+            e.comments AS commentText,
+            e.createdAt,
+            u.userID,
+            u.userName,
+            u.image AS userImage
+        FROM engagement e
+        JOIN user u ON e.userID = u.userID
+        WHERE e.contentID = ? AND e.comments IS NOT NULL AND e.comments != ''
+        ORDER BY e.createdAt DESC
+    `;
+
+    const likeSql = `
+        SELECT COUNT(*) AS likeCount
+        FROM engagement
+        WHERE contentID = ? AND likes = 1
+    `;
+
+    db.query(contentSql, [contentID], (err, contentRows) => {
+        if (err) return res.status(500).send("Error loading content");
+
+        if (contentRows.length === 0) {
+            return res.status(404).send("Content not found");
         }
 
-        if (results.length > 0) {
-            res.render('viewContent', {
-                content: results[0],           // The main content row (with category info)
-                engagements: results,          // All engagement rows for this content, with user comments
-                sessionUser: req.session.user || null 
+        const content = contentRows[0];
+
+        db.query(commentSql, [contentID], (err2, comments) => {
+            if (err2) return res.status(500).send("Error loading comments");
+
+            db.query(likeSql, [contentID], (err3, likeRows) => {
+                if (err3) return res.status(500).send("Error loading likes");
+
+                const likeCount = likeRows[0].likeCount;
+
+                res.render("viewContent", {
+                    content,
+                    comments,
+                    likeCount,
+                    sessionUser: req.session.user || null   // <-- FIX HERE
+                });
             });
-        } else {
-            res.status(404).send('Content not found');
-        }
+        });
     });
 };
 
@@ -197,32 +352,37 @@ exports.getContent = (req, res) => {
 exports.editComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
-    const { updatedText } = req.body;
+    const updatedText = req.body.updatedText;
 
     if (!updatedText || updatedText.trim() === "") {
-        return res.redirect('back'); 
+        return res.redirect("back");
     }
 
-    // Step 1: Get the related contentID first
-    const getContentSQL = "SELECT contentID FROM comments WHERE commentID = ? AND userID = ?";
+    // First get the contentID of this comment
+    const getSQL = `
+        SELECT contentID 
+        FROM engagement 
+        WHERE engagementID = ? AND userID = ?
+    `;
 
-    db.query(getContentSQL, [commentID, userID], (err, result) => {
-        if (err || result.length === 0) {
-            return res.redirect('back');
+    db.query(getSQL, [commentID, userID], (err, rows) => {
+        if (err || rows.length === 0) {
+            return res.redirect("back");
         }
 
-        const contentID = result[0].contentID;
+        const contentID = rows[0].contentID;
 
-        // Step 2: Update comment
+        // Update the comment
         const updateSQL = `
-            UPDATE engagement SET comments = ?
+            UPDATE engagement 
+            SET comments = ?
             WHERE engagementID = ? AND userID = ?
         `;
 
-        db.query(updateSQL, [updatedText.trim(), commentID, userID], (err) => {
-            if (err) return res.status(500).send('Failed to edit comment');
-            
-            // Step 3: Redirect back to main post page
+        db.query(updateSQL, [updatedText.trim(), commentID, userID], (err2) => {
+            if (err2) return res.status(500).send("Failed to update");
+
+            // Redirect back to the SAME content page
             res.redirect(`/content/${contentID}`);
         });
     });
@@ -232,22 +392,36 @@ exports.deleteComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
 
-    const sqlGet = `SELECT engagementID FROM engagement WHERE engagementID = ? AND userID = ?`;
+    // 1) Get contentID first
+    const sqlGet = `
+        SELECT contentID 
+        FROM engagement 
+        WHERE engagementID = ? AND userID = ?
+    `;
 
-    db.query(sqlGet, [commentID, userID], (err, result) => {
-        if (err || result.length === 0) return res.redirect('back');
+    db.query(sqlGet, [commentID, userID], (err, rows) => {
+        if (err || rows.length === 0) {
+            return res.redirect('back');
+        }
 
-        const contentID = result[0].contentID;
+        const contentID = rows[0].contentID;
 
-        const sqlDelete = `DELETE FROM engagement WHERE engagementID = ? AND userID = ?`;
+        // 2) Delete the comment
+        const sqlDelete = `
+            DELETE FROM engagement 
+            WHERE engagementID = ? AND userID = ?
+        `;
 
-        db.query(sqlDelete, [commentID, userID], (err) => {
-            if (err) return res.status(500).send('Failed to delete comment');
+        db.query(sqlDelete, [commentID, userID], (delErr) => {
+            if (delErr) {
+                return res.status(500).send('Failed to delete comment');
+            }
+
+            // 3) Redirect user back to content page
             res.redirect(`/content/${contentID}`);
         });
     });
 };
-
 
 exports.addContentForm = (req, res) => {
     const sql = 'SELECT * FROM category';

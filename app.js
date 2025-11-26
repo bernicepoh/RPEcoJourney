@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const userController = require('./controller/userController');
 const contentController = require('./controller/contentController');
@@ -6,7 +7,7 @@ const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
 const profileController = require('./controller/profileController');
-const db = require('./db');
+const db = require('./db'); 
 
 const multer = require('multer');
 const session = require('express-session');
@@ -134,6 +135,7 @@ app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
 
 // Like toggle route
 app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);
+//app.get('/likes/:id', contentController.getLikesList);
 
 // Comment route
 app.post('/content/:id/comment', checkAuthenticated, contentController.postComment);
@@ -203,8 +205,6 @@ app.get('/addQuiz', (req, res) => {
 
 // Add Quiz (submit form)
 app.post('/createQuiz', quizController.createQuizOnePage);
-
-
 
 
 

@@ -239,5 +239,50 @@ function confirmDelete(id) {
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get("error");
+
+    // SUCCESS POPUP
+    if (urlParams.get("success") === "posted") {
+        Swal.fire({
+            icon: "success",
+            title: "Comment Posted!",
+            text: "Your comment has been successfully added.",
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+    
+    if (error === "rate_limit") {
+        Swal.fire({
+            icon: "warning",
+            title: "AI Moderation Busy",
+            text: "Please try again in a few seconds.",
+            confirmButtonColor: "#6ab04c"
+        });
+    }
+
+    if (error === "moderation_fail") {
+        Swal.fire({
+            icon: "error",
+            title: "AI Moderation Error",
+            text: "Something went wrong. Please try again later.",
+            confirmButtonColor: "#eb4d4b"
+        });
+    }
+
+    if (error === "inappropriate") {
+        Swal.fire({
+            icon: "error",
+            title: "Comment Blocked",
+            text: "Your comment contains inappropriate content. Please rewrite and try again.",
+            confirmButtonColor: "#e74c3c"
+        });
+    }
+</script>
+
 </body>
 </html>
