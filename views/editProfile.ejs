@@ -11,9 +11,9 @@
             font-family: 'Georgia', serif;
             margin: 0;
             padding: 0;
-            background-image: url("/images/userBackground.png");
+            background-image: url("/images/background.png");
             background-repeat: no-repeat;
-            background-size: contain;
+            background-size: cover; 
             background-position: center;
             min-height: 100vh;
         }
@@ -30,7 +30,7 @@
             padding: 30px;
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            background-color: #fff;
+            background-color: #7d9cad;
         }
 
         h2 {
@@ -123,24 +123,24 @@
                 >
 
                 <label>Current Profile Image:</label>
-                <% if (user.Image) { %>
-                    <img src="/images/<%= user.Image %>" alt="Profile Image" class="img-preview">
+                <% if (user.image) { %>
+                    <img src="/uploads/<%= user.image %>" alt="Profile image" class="img-preview">
                 <% } else { %>
-                    <img src="/images/defaultUser.png" alt="Default Image" class="img-preview">
+                    <img src="/images/defaultUser.png" alt="Default image" class="img-preview">
                 <% } %>
 
-                <label for="Image">Upload New Profile Image (optional):</label>
+                <label for="image">Upload New Profile Image (optional):</label>
                 <input 
                     type="file" 
-                    id="Image" 
-                    name="Image" 
+                    id="image" 
+                    name="image" 
                     class="form-control"
                     accept="image/*"
                 >
 
                 <button type="submit" class="btn btn-primary btn-update">Update Profile</button>
 
-                <p><a href="/forgot-password">Forgot Password?</a></p>
+                <p><a href="/forgot-password">Reset Password</a></p>
             </form>
         </div>
     </div>

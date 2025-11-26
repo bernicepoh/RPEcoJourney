@@ -4,7 +4,7 @@ const QRCode = require('qrcode');
 
 // Show QR page on TV
 exports.showQuizStart = (req, res) => {
-    const qrLink = `http://192.168.0.7:3000/quiz-access`;
+    const qrLink = `http://172.20.10.6:3000/quiz-access`;
 
     QRCode.toDataURL(qrLink, (err, qrImage) => {
         if (err) return res.send("Error generating QR");

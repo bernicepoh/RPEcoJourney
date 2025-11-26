@@ -32,7 +32,7 @@ exports.login = (req, res) => {
       
       // ⭐ Automatically create progress row if missing
     const initProgress = `
-        INSERT IGNORE INTO user_progress (userID, xp, level, streak, lastCheckinDate)
+        INSERT IGNORE INTO user (userID, totalXP, level, streak, CheckInDate)
         VALUES (?, 0, 1, 0, NULL)
     `;
     db.query(initProgress, [results[0].userID]);
@@ -53,10 +53,21 @@ exports.login = (req, res) => {
 
 
 exports.getRegister = (req, res) => {
-  res.render('register', { 
-    errors: req.flash('error'),       
-    messages: req.flash('success'),   
-    formData: req.flash('formData')[0] || {},
+  // Read flashes into variables first so we can log and ensure they are passed correctly
+  const errors = req.flash('error');
+  const messages = req.flash('success');
+  const formData = req.flash('formData')[0] || {};
+
+  console.log('getRegister: rendering register view with', {
+    errorsCount: Array.isArray(errors) ? errors.length : 0,
+    messagesCount: Array.isArray(messages) ? messages.length : 0,
+    formDataKeys: Object.keys(formData)
+  });
+
+  res.render('register', {
+    errors,
+    messages,
+    formData,
     user: req.session.user
   });
 };
@@ -204,48 +215,57 @@ exports.register = (req, res) => {
   const { userName, email, password, confirmPassword, contactNo } = req.body;
   const errors = [];
 
-  let Image;
+  console.log('Registration attempt for user:', userName, 'email:', email, 'contact:', contactNo);
 
-  if (req.file) {
-    Image = req.file.filename;
-  } else {
-    Image = null;
-  }
+  
  
  
+  console.log('Checking if all fields are present');
   if (!userName || !email || !password || !confirmPassword || !contactNo) {
+    console.log('Validation failed: All fields are required');
     errors.push('All fields are required.');
   }
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+  console.log('Checking email format');
   if (!emailRegex.test(email)) {
+    console.log('Validation failed: Invalid email format');
     errors.push('Please enter a valid Gmail address (example@gmail.com).');
   }
 
   const passwordRegex =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/;
+  console.log('Checking password strength');
   if (!passwordRegex.test(password)) {
+    console.log('Validation failed: Password does not meet requirements');
     errors.push(
       'Password must be at least 8 characters long and include one uppercase letter, one number, and one special character.'
     );
   }
 
+  console.log('Checking password confirmation');
   if (password !== confirmPassword) {
+    console.log('Validation failed: Passwords do not match');
     errors.push('Passwords do not match.');
   }
 
   const contactRegex = /^[0-9]{8}$/;
+  console.log('Checking contact number format');
   if (!contactRegex.test(contactNo)) {
+    console.log('Validation failed: Invalid contact number');
     errors.push('Please enter a valid 8-digit contact number.');
   }
 
   if (errors.length > 0) {
+    console.log('Registration validation errors:', errors);
     req.flash('error', errors);
     req.flash('formData', req.body);
     return res.redirect('/register');
   }
 
+  console.log('Proceeding to duplicate checks');
   const checkEmailSql = 'SELECT * FROM user WHERE email = ?';
+  console.log('Checking for duplicate email');
   db.query(checkEmailSql, [email], (err, results) => {
     if (err) {
       console.error('Error checking email:', err);
@@ -255,13 +275,33 @@ exports.register = (req, res) => {
     }
 
     if (results.length > 0) {
+      console.log('Duplicate email found for:', email);
       req.flash('error', 'Email is already in use.');
       req.flash('formData', req.body);
       return res.redirect('/register');
     }
 
-    const checkContactSql = 'SELECT * FROM user WHERE contactNo = ?';
-    db.query(checkContactSql, [contactNo], (err, results) => {
+    // Check username duplicate
+    const checkUsernameSql = 'SELECT * FROM user WHERE userName = ?';
+    console.log('Checking for duplicate username');
+    db.query(checkUsernameSql, [userName], (err, results) => {
+      if (err) {
+        console.error('Error checking username:', err);
+        req.flash('error', 'An error occurred. Please try again.');
+        req.flash('formData', req.body);
+        return res.redirect('/register');
+      }
+
+      if (results.length > 0) {
+        console.log('Duplicate username found for:', userName);
+        req.flash('error', 'Username is already in use.');
+        req.flash('formData', req.body);
+        return res.redirect('/register');
+      }
+
+      const checkContactSql = 'SELECT * FROM user WHERE contactNo = ?';
+      console.log('Checking for duplicate contact number');
+      db.query(checkContactSql, [contactNo], (err, results) => {
       if (err) {
         console.error('Error checking contact number:', err);
         req.flash('error', 'An error occurred. Please try again.');
@@ -270,14 +310,16 @@ exports.register = (req, res) => {
       }
 
       if (results.length > 0) {
+        console.log('Duplicate contact number found for:', contactNo);
         req.flash('error', 'Contact number is already in use.');
         req.flash('formData', req.body);
         return res.redirect('/register');
       }
 
       const insertSql =
-        'INSERT INTO user (userName, email, password, contactNo, Image) VALUES (?, ?, SHA(?), ?, ?)';
-      db.query(insertSql, [userName, email, password, contactNo, Image], (err) => {
+        'INSERT INTO user (userName, email, password, contactNo) VALUES (?, ?, SHA(?), ?)';
+      console.log('Inserting new user');
+      db.query(insertSql, [userName, email, password, contactNo], (err) => {
         if (err) {
           console.error('Error registering user:', err);
           req.flash('error', 'An error occurred while registering. Please try again.');
@@ -286,18 +328,24 @@ exports.register = (req, res) => {
         }
 
         // ⭐ NEW: auto creates user_progress for new user
-        const getUserIDSql = 'SELECT userID FROM user WHERE email = ?';
-        db.query(getUserIDSql, [email], (err2, resultUser) => {
-          if (!err2 && resultUser.length > 0) {
-            const insertProgress = `
-              INSERT INTO user_progress (userID)
-              VALUES (?)
-            `;
-            db.query(insertProgress, [resultUser[0].userID]);
-          }
+        // const getUserIDSql = 'SELECT userID FROM user WHERE email = ?';
+        // db.query(getUserIDSql, [email], (err2, resultUser) => {
+        //   if (!err2 && resultUser.length > 0) {
+        //     const insertProgress = `
+        //       INSERT INTO user (userID)
+        //       VALUES (?)
+        //     `;
+        //     db.query(insertProgress, [resultUser[0].userID]);
+        //   }
 
+          console.log('User registered successfully:', userName);
           req.flash('success', 'Registration successful. You can now log in.');
-          res.redirect('/');
+          res.render('index', { 
+            errors: [], 
+            messages: req.flash('success'), 
+            formData: {}, 
+            user: req.session.user 
+          });
         });
       });
     });

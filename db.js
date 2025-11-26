@@ -3,12 +3,9 @@ const mysql = require('mysql2');
 const db = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: 'Republic_C207',   // your actual password
-    database: 'rpecojourney',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
+    password: 'Republic_C207',
+    database: 'rpecojourney'
+  });
 
 module.exports = db;
 

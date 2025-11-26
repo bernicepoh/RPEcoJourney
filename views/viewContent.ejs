@@ -11,10 +11,10 @@
       font-size: larger;
       margin: 0;
       padding: 0;
-      background-image: url("/images/categoryBackground.png") !important;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: bottom center;
+      background-image: url("/images/background.png");
+  background-repeat: no-repeat;
+  background-size: cover; 
+  background-position: center;
       min-height: 100vh;
     }
     .desc-divider {
@@ -37,6 +37,49 @@
       border-radius: 8px;
     }
 
+    .file-box {
+      width: 350px;              /* all previews share SAME width */
+      height: 260px;             /* adjust height if needed */
+      display: flex;
+      align-items: center;       /* center vertically */
+      justify-content: center;   /* center horizontally */
+      margin: 40px auto 16px auto; /* centers horizontally with bottom space */
+    }
+
+    .file-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .file-box video {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .comment-area {
+      width: 100%;
+      min-height: 55px;
+      border-radius: 7px;
+      padding: 8px 12px;
+      background: #a7c3bb42;
+      border: 1px solid #bddad1;
+      resize: vertical;
+    }
+
+    .publish-btn {
+      background: #2a7e4e;
+      color: white;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 6px 22px;
+      border: none;
+      margin-top: 8px;
+      float: right;
+    }
+
     footer {
       text-align: center; 
       padding: 25px; 
@@ -57,49 +100,6 @@
     .back-link:hover {
       text-decoration: underline;
       color: #1a4b32;
-    }
-
-.file-box {
-  width: 350px;              /* all previews share SAME width */
-  height: 260px;             /* adjust height if needed */
-  display: flex;
-  align-items: center;       /* center vertically */
-  justify-content: center;   /* center horizontally */
-  margin: 40px auto 16px auto; /* centers horizontally with bottom space */
-}
-
-.file-box img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  border-radius: 12px;
-}
-
-.file-box video {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-}
-
-.comment-area {
-      width: 100%;
-      min-height: 55px;
-      border-radius: 7px;
-      padding: 8px 12px;
-      background: #a7c3bb42;
-      border: 1px solid #bddad1;
-      resize: vertical;
-    }
-
-    .publish-btn {
-      background: #2a7e4e;
-      color: white;
-      font-weight: 600;
-      border-radius: 10px;
-      padding: 6px 22px;
-      border: none;
-      margin-top: 8px;
-      float: right;
     }
   </style>
 </head>
@@ -139,6 +139,7 @@
         <% } %>
       </div>
 
+
       <hr class="desc-divider">
 
       <div class="desc-text">
@@ -146,80 +147,56 @@
       </div>
 
 
-      
-
-      <hr class="desc-divider" style="margin-top:45px;">
-
-<div style="display:flex; justify-content:space-between; align-items:center; max-width:750px; margin:auto;">
-  <h4 style="font-weight:600; color:#145a32;">Comments</h4>
-
-  <!-- SORT DROPDOWN -->
-  <form method="GET" style="margin:0;">
-    <select name="sort" onchange="this.form.submit()" class="form-select form-select-sm" style="width:auto;">
-      <option value="newest" selected>Newest</option>
-      <option value="oldest">Oldest</option>
-      <option value="az">A → Z</option>
-      <option value="za">Z → A</option>
-    </select>
-  </form>
-</div>
-
-
-<!-- If no comments -->
-<% if (comments.length === 0) { %>
+      <!-- If no comments -->
+<% if (engagements.filter(e => e.comments && e.comments.trim()).length === 0) { %>
   <p style="text-align:center; color:#6e6e6e;">No comments yet — be the first to share your thoughts!</p>
 <% } else { %>
 
   <div class="mt-3" style="max-width:750px; margin:auto;">
-    <% comments.forEach(c => { %>
-      <div style="background:#edf3ef; border-radius:10px; padding:10px 15px; margin-bottom:12px; border:1px solid #d6e4d9; display:flex; gap:12px;">
+    <% engagements.forEach(e => { %>
+      <% if (e.comments && e.comments.trim()) { %>
+        <div style="background:#edf3ef; border-radius:10px; padding:10px 15px; margin-bottom:12px; border:1px solid #d6e4d9; display:flex; gap:12px;">
 
-        <!-- Avatar -->
-        <img 
-          src="/images/<%= c.userImage ? c.userImage : 'default-avatar.png' %>" 
-          style="width:48px; height:48px; border-radius:50%; object-fit:cover;"
-        >
+          <!-- Avatar -->
+          <img 
+            src="/images/<%= e.userImage ? e.userImage : 'default-avatar.png' %>" 
+            style="width:48px; height:48px; border-radius:50%; object-fit:cover;"
+          >
 
-        <div style="flex:1;">
-          <strong><%= c.userName %></strong>
-          <small style="opacity:0.6; margin-left:6px;"><%= c.createdAt.toLocaleString() %></small>
+          <div style="flex:1;">
+            <strong><%= e.userName ? e.userName : 'User #' + e.userID %></strong>
+            <small style="opacity:0.6; margin-left:6px;"><%= e.createdAt ? new Date(e.createdAt).toLocaleString() : '' %></small>
 
-          <!-- Normal text mode -->
-          <p id="commentText-<%= c.commentID %>" style="margin:4px 0; font-size:0.98em;"><%= c.commentText %></p>
+            <!-- Normal text mode -->
+            <p id="commentText-<%= e.engagementID %>" style="margin:4px 0; font-size:0.98em;"><%= e.comments %></p>
 
-          <!-- Hidden Edit Box -->
-          <form action="/comment/edit/<%= c.commentID %>" method="POST" style="display:none;" id="editForm-<%= c.commentID %>">
-            <input type="hidden" name="contentID" value="<%= content.contentID %>">
-            <textarea name="updatedText" class="form-control" rows="2"><%= c.commentText %></textarea>
-            <button class="btn btn-success btn-sm mt-2">Save</button>
-            <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="cancelEdit('<%= c.commentID %>')">Cancel</button>
-          </form>
+            <!-- Hidden Edit Box -->
+            <form action="/comment/edit/<%= e.engagementID %>" method="POST" style="display:none;" id="editForm-<%= e.engagementID %>">
+              <input type="hidden" name="contentID" value="<%= content.contentID %>">
+              <textarea name="updatedText" class="form-control" rows="2"><%= e.comments %></textarea>
+              <button class="btn btn-success btn-sm mt-2">Save</button>
+              <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="cancelEdit('<%= e.engagementID %>')">Cancel</button>
+            </form>
 
-
-          <!-- Action buttons -->
-          <% if (sessionUser && sessionUser.userID === c.userID) { %>
-            <div style="margin-top:5px;">
-              <button class="btn btn-link p-0 me-2" onclick="enableEdit('<%= c.commentID %>')">✏️ Edit</button>
-              <button class="btn btn-link p-0 text-danger" onclick="confirmDelete('<%= c.commentID %>')">🗑️ Delete</button>
-            </div>
-          <% } %>
+            <!-- Action buttons -->
+            <% if (sessionUser && sessionUser.userID === e.userID) { %>
+              <div style="margin-top:5px;">
+                <button class="btn btn-link p-0 me-2" onclick="enableEdit('<%= e.engagementID %>')">✏️ Edit</button>
+                <button class="btn btn-link p-0 text-danger" onclick="confirmDelete('<%= e.engagementID %>')">🗑️ Delete</button>
+              </div>
+            <% } %>
+          </div>
         </div>
-
-      </div>
+      <% } %>
     <% }) %>
   </div>
-
 <% } %>
 
-
-<!-- Add new comment box -->
 <form action="/content/<%= content.contentID %>/comment" method="POST" style="max-width:750px; margin:25px auto 0;">
   <label class="form-label" style="font-size:0.98em;">Write a comment:</label>
   <textarea name="commentText" class="comment-area" required></textarea>
   <button type="submit" class="publish-btn">Publish</button>
 </form>
-
-
 
       <a href="/category/<%= content.categoryID %>/content" class="back-link">← Back to <%= content.categoryName %></a>
 
@@ -228,9 +205,10 @@
     <% } %>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <script>
+<script>
 function enableEdit(id) {
   document.getElementById("commentText-" + id).style.display = "none";
   document.getElementById("editForm-" + id).style.display = "block";
@@ -257,8 +235,7 @@ function confirmDelete(id) {
   });
 }
 
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</script>
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>

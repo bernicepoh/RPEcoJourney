@@ -6,16 +6,16 @@ const categoryController = require('./controller/categoryController');
 const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
-const quizDisplayController = require('./controller/quizDisplayController');
 const profileController = require('./controller/profileController');
 const db = require('./db'); 
 
 const multer = require('multer');
-const flash = require('connect-flash'); // ✅ You used flash() but didn’t import it
-const session = require('express-session'); // ✅ Required before using flash
+const session = require('express-session');
+const flash = require('connect-flash');  
 const path = require('path');
 const app = express();
 
+// multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/uploads'); // Directory to save uploaded files
@@ -26,33 +26,31 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-// // Import middleware
+
+// Import middleware
 const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser } = require('./middleware/auth');
 
-
 const validateRegistration = (req,res, next) => {
-    const { userName, email, password, contactNo } = req.body;
-    
-    if (!userName || !email || !password || !contactNo) {
-        return res.status(400).send('All fields are required');
+    const { userName, email, password, confirmPassword, contactNo } = req.body;
+    console.log('validateRegistration: attempt', { userName, email, contactNo });
+
+    if (!userName || !email || !password || !confirmPassword || !contactNo) {
+        console.log('validateRegistration: missing fields', { userNamePresent: !!userName, emailPresent: !!email, passwordPresent: !!password, contactNoPresent: !!contactNo });
+        req.flash('error', ['All fields are required.']);
+        req.flash('formData', req.body);
+        return res.redirect('/register');
     }
 
-    if (password.length < 6) {
-        req.flash('error', 'Password six characters long');
+    if (password.length < 8) {
+        console.log('validateRegistration: password too short', { userName, email });
+        req.flash('error', 'Password eight characters long');
         req.flash('formData',req.body);
         return res.redirect('/register')
     }
+
+    console.log('validateRegistration: passed basic checks');
     next()
 }
-
-// const checkAdmin = (req, res, next) => {
-//     if (req.session.user.userType === 'Admin') {
-//         return next();
-//     } else {
-//         req.flash('error', 'Access denied');
-//         res.redirect('/homepage');
-//     }
-// };
 
 // Set up view engine
 app.set('view engine', 'ejs');
@@ -62,13 +60,10 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Enable form processing
-app.use(express.urlencoded({ 
-  extended: false 
-}));
-
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// ===== Sessions & flash =====
+// Session
 app.use(session({
   secret: 'secret-key', 
   resave: false,
@@ -77,14 +72,14 @@ app.use(session({
   cookie: { maxAge: 1000 * 60 * 60 * 24 * 7, httpOnly: true }
 }));
 
+// Use connect-flash middleware
+app.use(flash());
+
 // Make user session available in ALL EJS files
 app.use((req, res, next) => {
     res.locals.user = req.session.user || null;
     next();
 });
-
-// Use connect-flash middleware
-app.use(flash());
 
 // Make flash available in all EJS views
 app.use((req, res, next) => {
@@ -92,22 +87,14 @@ app.use((req, res, next) => {
     next();
 });
 
-// Make session available in all EJS views
-app.use((req, res, next) => {
-    res.locals.session = req.session;
-    next();
-});
+// Note: don't automatically consume flash here (controllers should read flash()),
+// res.locals.flash is already available via binding above.
 
 app.use('/uploads', express.static('uploads'));
 
-app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
-  next();
-});
-
 //Profile Routes 
 app.get('/editProfile/:id', profileController.getProfile);
-app.post('/editProfile/:id',upload.single('Image'), profileController.updateProfile);
+app.post('/editProfile/:id',upload.single('image'), profileController.updateProfile);
 app.get('/editUserRole/:id', checkAdmin, profileController.getProfileAdmin);
 app.post('/editUserRole/:id', checkAdmin, profileController.updateUserRole);
 app.get('/viewProfile/:id', profileController.getViewProfile);
@@ -117,7 +104,7 @@ app.get('/viewProfile/:id', profileController.getViewProfile);
 app.get('/', userController.getLogin);
 app.post('/', userController.login);
 app.get('/register',userController.getRegister);
-app.post('/register',upload.single('Image'),validateRegistration,userController.register);
+app.post('/register',upload.single('image'),validateRegistration,userController.register);
 app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
@@ -182,17 +169,17 @@ app.get('/quiz', quizController.getQuiz);
 // Category → sets
 app.get('/quiz/category/:id', quizController.getSetByCategory);
 
-// Start game (handles guest + real user logic)
+// Start game (handles guest + real user )
 app.get('/startGame/:categoryID/:setNumber', quizController.startGame);
 
 // Actual quiz page (first question)
-// app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
+app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
 
 // Submit answer
 app.post('/quiz/game/answer', quizController.answerGame);
 
 // Next question
-app.get('/quiz/game/next/:currentID/:categoryID/:setNumber', quizController.nextGameQuestion);
+app.get('/quiz/game/next/:currentID/:categoryID/:setNumber',quizController.nextGameQuestion);
 
 // Completed quiz
 app.get('/quiz/game/complete/:categoryID/:setNumber', quizController.completeGame);
@@ -201,14 +188,23 @@ app.get('/quiz/game/complete/:categoryID/:setNumber', quizController.completeGam
       QR QUIZ ROUTES
 ======================== */
 
-app.get('/quiz-start', quizDisplayController.showQuizStart);     // TV QR screen
-app.get('/quiz-access', quizDisplayController.showQuizAccess);   // Phone: choose guest/login
-app.get('/guest-start', quizDisplayController.startAsGuest);     // Create guest session
+app.get('/quiz-start', quizController.showQuizStart);     // TV QR screen
+app.get('/quiz-access', quizController.showQuizAccess);   // Phone: choose guest/login
+app.get('/guest-start', quizController.startAsGuest);     // Create guest session
 
 // Guest welcome screen (reuse quiz-access.ejs)
 app.get('/guest-welcome', (req, res) => {
     res.render("quiz-access", { guestMode: true });
 });
+
+//ADD QUIZ 
+// Add Quiz (form page)
+app.get('/addQuiz', (req, res) => {
+    res.render('addQuiz');
+});
+
+// Add Quiz (submit form)
+app.post('/createQuiz', quizController.createQuizOnePage);
 
 
 
@@ -224,4 +220,5 @@ app.get('/401', (req, res) => {
 
 // Start express server
 const PORT = process.env.PORT || 3000;
-app.listen(3000, "0.0.0.0", () => console.log(`✅ Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
+
