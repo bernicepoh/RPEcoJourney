@@ -110,7 +110,7 @@ app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
 
 //Admin Routes 
-app.get('/adminDashboard', checkAdmin, userController.getAdminDashboard);
+app.get('/adminDashboard', checkAuthenticated, userController.getAdminDashboard);
 app.get('/adminUsers', checkAdmin, userController.getAllUsers);
 
 //testing forget password route
@@ -131,7 +131,7 @@ app.post('/addContent', checkAdmin, upload.single('contentFile'), contentControl
 app.get('/editContent/:id', checkAdmin, contentController.editContentForm);
 app.post('/editContent/:id', checkAdmin, upload.single('contentFile'), contentController.editContent);
 app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
-
+app.get('/manageContent', checkAdmin, contentController.manageContent);
 
 // Like toggle route
 app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);

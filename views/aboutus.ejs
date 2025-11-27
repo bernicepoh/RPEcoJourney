@@ -4,6 +4,142 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About Us | RPECOJOURNEY</title>
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Georgia', serif;
+    }
+
+    /* Background */
+    body {
+      background: url('/images/background.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #073b3a;
+      line-height: 1.8;
+      position: relative;
+    }
+
+    .about-container {
+      padding: 80px 10%;
+    }
+
+    /* About Us Section */
+    .about-section h2 {
+      font-size: 3.2rem;
+      text-align: center;
+      margin-bottom: 50px;
+      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+    }
+
+    .about-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: nowrap; /* stay side by side */
+      gap: 60px;
+    }
+
+    .about-text {
+      flex: 1;
+      font-size: 1.6rem;
+      color: #f5f5f5;
+      text-align: justify;
+      background-color: rgba(0, 0, 0, 0.6);
+      padding: 30px;
+      border-radius: 10px;
+      line-height: 2;
+    }
+
+    .about-image {
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .about-image img {
+      width: 100%;
+      max-width: 600px; /* 💚 sweet spot */
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      object-fit: cover;
+    }
+
+    /* Vision Section */
+    .vision-section {
+      margin: 80px 0;
+      background-color: rgba(46, 139, 87, 0.6);
+      padding: 50px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .vision-section h3 {
+      font-size: 2.8rem;
+      margin-bottom: 20px;
+      font-style: italic;
+      color: #d4f4d4;
+    }
+
+    .vision-section p {
+      font-size: 1.6rem;
+      color: #fff;
+    }
+
+    /* Mission Section */
+    .mission-section {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 50px;
+      border-radius: 10px;
+    }
+
+    .mission-section h3 {
+      font-size: 2.8rem;
+      text-align: center;
+      margin-bottom: 30px;
+      font-style: italic;
+      color: #d4f4d4;
+    }
+
+    .mission-section ul {
+      list-style-type: disc;
+      margin: 0 auto;
+      max-width: 950px;
+      font-size: 1.5rem;
+      color: #f5f5f5;
+      text-align: left;
+      padding-left: 50px;
+      line-height: 2;
+    }
+
+    .mission-section li {
+      margin-bottom: 18px;
+    }
+
+    /* Responsive (mobile only) */
+    @media (max-width: 992px) {
+      .about-row {
+        flex-direction: column;
+        align-items: center;
+      }
+      .about-image img {
+        max-width: 100%;
+      }
+      .about-text {
+        font-size: 1.4rem;
+      }
+    }
+
+    footer { 
+      text-align: center; 
+      padding: 25px; 
+      font-size: 1.1em; 
+      color: #555; 
+    }
+  </style>
 </head>
 <body>
   <!-- Include Navbar -->
@@ -67,141 +203,6 @@
     </div>
   </div>
 
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: 'Georgia', serif;
-    }
-
-    /* Background */
-    body {
-      background: url('/images/background.png') no-repeat center center fixed;
-      background-size: cover;
-      color: #073b3a;
-      line-height: 1.8;
-      position: relative;
-    }
-
-    .about-container {
-      padding: 80px 10%;
-    }
-
-    /* About Us Section */
-    .about-section h2 {
-      font-size: 3.2rem;
-      text-align: center;
-      margin-bottom: 50px;
-      text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
-    }
-
-    .about-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: nowrap; /* stay side by side */
-      gap: 60px;
-    }
-
-    .about-text {
-      flex: 1;
-      font-size: 1.6rem;
-      color: #f5f5f5;
-      text-align: justify;
-      background-color: rgba(0, 0, 0, 0.35);
-      padding: 30px;
-      border-radius: 10px;
-      line-height: 2;
-    }
-
-    .about-image {
-      flex: 0 0 auto;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .about-image img {
-      width: 100%;
-      max-width: 600px; /* 💚 sweet spot */
-      border-radius: 15px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
-      object-fit: cover;
-    }
-
-    /* Vision Section */
-    .vision-section {
-      margin: 80px 0;
-      background-color: rgba(46, 139, 87, 0.35);
-      padding: 50px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    .vision-section h3 {
-      font-size: 2.8rem;
-      margin-bottom: 20px;
-      font-style: italic;
-      color: #d4f4d4;
-    }
-
-    .vision-section p {
-      font-size: 1.6rem;
-      color: #fff;
-    }
-
-    /* Mission Section */
-    .mission-section {
-      background-color: rgba(0, 0, 0, 0.35);
-      padding: 50px;
-      border-radius: 10px;
-    }
-
-    .mission-section h3 {
-      font-size: 2.8rem;
-      text-align: center;
-      margin-bottom: 30px;
-      font-style: italic;
-      color: #d4f4d4;
-    }
-
-    .mission-section ul {
-      list-style-type: disc;
-      margin: 0 auto;
-      max-width: 950px;
-      font-size: 1.5rem;
-      color: #f5f5f5;
-      text-align: left;
-      padding-left: 50px;
-      line-height: 2;
-    }
-
-    .mission-section li {
-      margin-bottom: 18px;
-    }
-
-    /* Responsive (mobile only) */
-    @media (max-width: 992px) {
-      .about-row {
-        flex-direction: column;
-        align-items: center;
-      }
-      .about-image img {
-        max-width: 100%;
-      }
-      .about-text {
-        font-size: 1.4rem;
-      }
-    }
-
-    footer { 
-      text-align: center; 
-      padding: 25px; 
-      font-size: 1.1em; 
-      color: #555; 
-    }
-  </style>
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
