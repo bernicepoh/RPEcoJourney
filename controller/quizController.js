@@ -19,16 +19,17 @@ exports.getSetByCategory = (req, res) => {
   const categoryID = req.params.id;
   const user = req.session.user;
 
-  // Query category name
   const categorySql = `SELECT categoryName FROM category WHERE categoryID = ?`;
 
   db.query(categorySql, [categoryID], (err, categoryResults) => {
-    if (err) return res.status(500).send('Database error');
+    if (err) {
+      console.log("CATEGORY SQL ERROR:", err);
+      return res.status(500).send('Database error');
+    }
     if (categoryResults.length === 0) return res.status(404).send('Category not found');
 
     const categoryName = categoryResults[0].categoryName;
 
-    // Query set list from `quiz` table
     const setSql = `
       SELECT 
         setNumber,
@@ -43,7 +44,10 @@ exports.getSetByCategory = (req, res) => {
     `;
 
     db.query(setSql, [categoryID], (err2, sets) => {
-      if (err2) return res.status(500).send('Database error');
+      if (err2) {
+        console.log("SET SQL ERROR:", err2);   // ⭐ SEE REAL ERROR IN TERMINAL
+        return res.status(500).send('Database error');
+      }
 
       res.render("quizSets", {
         user,
@@ -365,63 +369,55 @@ exports.completeGame = (req, res) => {
 /* =======================================================
    8) CREATE QUIZ (ONE-PAGE FORM)
 ======================================================= */
-exports.createQuizOnePage = (req, res) => {
+exports.createQuiz = (req, res) => {
   const {
     categoryID,
     setNumber,
     title,
     cardColor,
     requiredLevel,
-    questions,
-    option1,
-    option2,
-    option3,
-    option4,
-    correctOption
+    numberOfQuestions,
+    timeLimit
   } = req.body;
 
-  if (!questions || questions.trim() === "") {
-    return res.send("Please enter a question");
-  }
+  const questions = req.body["question[]"];
+  const option1 = req.body["option1[]"];
+  const option2 = req.body["option2[]"];
+  const option3 = req.body["option3[]"];
+  const option4 = req.body["option4[]"];
+  const correctOption = req.body["correctOption[]"];
+  const explanation = req.body["explanation[]"];
 
-  const infoSql = `
-    INSERT INTO quiz_info 
-    (categoryID, title, cardColor, requiredLevel, numberOfQuestions)
-    VALUES (?, ?, ?, ?, ?)
+  const sql = `
+    INSERT INTO quiz 
+    (categoryID, setNumber, question, option1, option2, option3, option4, correctOption, explanation,
+     quizTitle, requiredLevel, numberOfQuestion, timeLimit, cardColor)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  db.query(
-    infoSql,
-    [categoryID, setNumber, title, cardColor, requiredLevel, 1],
-    (err) => {
-      if (err) return res.send("Error saving quiz info");
+  for (let i = 0; i < questions.length; i++) {
+    db.query(sql, [
+      categoryID,
+      setNumber,
+      questions[i],
+      option1[i],
+      option2[i],
+      option3[i],
+      option4[i],
+      correctOption[i],
+      explanation[i] || "",
+      title,
+      requiredLevel,
+      numberOfQuestions,
+      timeLimit,
+      cardColor
+    ]);
+  }
 
-      const quizSql = `
-        INSERT INTO quiz 
-        (categoryID, setNumber, question, option1, option2, option3, option4, correctOption)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      db.query(
-        quizSql,
-        [
-          categoryID,
-          setNumber,
-          questions,
-          option1,
-          option2,
-          option3,
-          option4,
-          correctOption
-        ],
-        (err2) => {
-          if (err2) return res.send("Error saving quiz question");
-          res.redirect(`/quiz/category/${categoryID}`);
-        }
-      );
-    }
-  );
+  res.redirect(`/quiz/category/${categoryID}`);
 };
+
+
 
 /* =======================================================
    QR CODE START PAGE
