@@ -28,7 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Import middleware
-const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser } = require('./middleware/auth');
+const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser, checkWriter, allowAdminManagerWriter, allowAdminOrWriter } = require('./middleware/auth');
 
 const validateRegistration = (req,res, next) => {
     const { userName, email, password, confirmPassword, contactNo } = req.body;
@@ -110,7 +110,7 @@ app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
 
 //Admin Routes 
-app.get('/adminDashboard', checkAuthenticated, userController.getAdminDashboard);
+app.get('/adminDashboard',allowAdminManagerWriter, userController.getAdminDashboard);
 app.get('/adminUsers', checkAdmin, userController.getAllUsers);
 
 //testing forget password route
@@ -126,8 +126,8 @@ function simpleHash(str) {
 // Content Routes
 app.get('/category/:id/content', contentController.getContentByCategory);
 app.get('/content/:id', contentController.getContent);
-app.get('/addContent', checkAdmin, contentController.addContentForm);
-app.post('/addContent', checkAdmin, upload.single('contentFile'), contentController.addContent);
+app.get('/addContent', allowAdminOrWriter, contentController.addContentForm);
+app.post('/addContent', allowAdminOrWriter, upload.single('contentFile'), contentController.addContent);
 app.get('/editContent/:id', checkAdmin, contentController.editContentForm);
 app.post('/editContent/:id', checkAdmin, upload.single('contentFile'), contentController.editContent);
 app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
@@ -204,7 +204,7 @@ app.get('/addQuiz', (req, res) => {
 });
 
 // Add Quiz (submit form)
-app.post('/createQuiz', quizController.createQuizOnePage);
+app.post('/createQuiz', quizController.createQuiz);
 
 
 
