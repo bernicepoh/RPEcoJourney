@@ -204,7 +204,7 @@ app.get('/addQuiz', (req, res) => {
 });
 
 // Add Quiz (submit form)
-app.post('/createQuiz', quizController.createQuizOnePage);
+app.post('/createQuiz', quizController.createQuiz);
 
 
 
