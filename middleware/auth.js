@@ -15,8 +15,7 @@ const checkAdmin = (req, res, next) => {
         return next();
     } else {
         console.log("User DO NOT have admin rights");
-        req.flash('error', 'Access denied');
-        res.redirect('/401');
+        res.redirect('/homepage');
     }
 };
 
@@ -28,7 +27,7 @@ const checkManager = (req, res, next) => {
     } else {
         console.log("User DO NOT have manager rights");
         req.flash('error', 'Manager access only');
-        res.redirect('/401');
+        
     }
 };
 
@@ -42,7 +41,7 @@ const allowAdminOrManager = (req, res, next) => {
     } else {
         console.log("Access denied: Not Admin/Manager");
         req.flash('error', 'Only Admin or Manager can perform this action');
-        return res.redirect('/401');
+        
     }
 };
 
@@ -54,14 +53,62 @@ const checkUser = (req, res, next) => {
     } else {
         console.log("This function is for users only.");
         req.flash('error', 'This function is for users only.');
-        res.redirect('/401');
+       
     }
 };
+
+
+const checkWriter = (req, res, next) => {
+    if (req.session.user && req.session.user.userType === 'Writer') {
+        console.log("Access denied: Not Writer");
+        return next();
+    } else {
+        console.log("Access denied: Not Admin/Manager");
+        req.flash('error', 'Only Admin or Manager can perform this action');
+        return res.redirect('/401');
+
+    }
+};
+
+const allowAdminManagerWriter = (req, res, next) => {
+    const role = req.session.user?.userType;
+
+    if (role === 'Admin' || role === 'Manager' || role === 'Writer') {
+        console.log("Access granted: Admin/Manager");
+        return next();
+    } else {
+        console.log("Access denied: Not Admin/Manager/writer");
+        req.flash('error', 'Only Admin or Manager can perform this action');
+        
+    }
+};
+
+const allowAdminOrWriter = (req, res, next) => {
+    const role = req.session.user?.userType;
+
+    if (role === 'Admin' || role === 'Writer') {
+        console.log("Access granted: Admin/Manager");
+        return next();
+    } else {
+        console.log("Access denied: Not Admin/Manager");
+        req.flash('error', 'Only Admin or Manager can perform this action');
+        
+    }
+};
+
+
+
+
+        
+       
 
 module.exports = {
     checkAuthenticated,
     checkAdmin,
     checkManager,
     allowAdminOrManager,
-    checkUser
+    checkUser,
+    checkWriter,
+    allowAdminManagerWriter,
+    allowAdminOrWriter
 };
