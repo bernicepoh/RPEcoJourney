@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
 
   <style>
-    /* Reset */
+    
     * {
       box-sizing: border-box;
       margin: 0;
@@ -15,13 +15,11 @@
     }
 
     body {
-      font-family: 'Georgia', serif;
-
-      /* 🔥 SAME MEASUREMENT AS QUIZ TOPIC PAGE */
+      
       background-image: url("/images/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;
       min-height: 100vh;
       position: relative;
       overflow-x: hidden;
@@ -76,8 +74,8 @@
     }
 
     .feature-card {
-      width: 320px;               /* FIXED CARD SIZE */
-      max-width: 320px;           /* PREVENT STRETCHING */
+      width: 320px;               
+      max-width: 320px;           
       background: rgba(255, 255, 255, 0.8);
       border-radius: 20px;
       padding: 35px 25px;
@@ -123,6 +121,18 @@
   </style>
 </head>
 
+<% if (loginSuccess && loginSuccess.length > 0) { %>
+<script>
+Swal.fire({
+  icon: 'success',
+  title: 'Welcome!',
+  text: '<%= loginSuccess %>',
+  timer: 1800,
+  showConfirmButton: false
+});
+</script>
+<% } %>
+
 <body>
   <%- include('partials/navbar') %>
 
@@ -155,6 +165,20 @@
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <% if (loginSuccess && loginSuccess.length > 0) { %>
+  <script>
+  Swal.fire({
+    icon: 'success',
+    title: 'Welcome!',
+    text: '<%= loginSuccess %>',
+    timer: 1800,
+    showConfirmButton: false
+  });
+  </script>
+  <% } %>
 
 </body>
 </html>

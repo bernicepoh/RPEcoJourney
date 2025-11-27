@@ -28,7 +28,7 @@ exports.login = (req, res) => {
     if (results.length > 0) {
       const user = results[0];
       req.session.user = user;
-      req.flash('success', 'Login successful');
+      req.flash('loginSuccess', 'Login successful');
       
       // ⭐ Automatically create progress row if missing
     const initProgress = `
@@ -124,8 +124,8 @@ exports.postForgotPassword = (req, res) => {
             const mailOptions = {
                 from: 'fyptesting13@gmail.com',
                 to: email,
-                subject: 'Temporary Password',
-                text: `Your temporary password is: ${tempPassword}\nPlease use this to log in and reset your password.`
+                subject: 'OTP',
+                text: `Your One-time password is: ${tempPassword}\nPlease use this to log in and reset your password.`
             };
 
             // Send email
@@ -356,13 +356,16 @@ exports.getAdminDashboard = (req,res) => {
 
   const username = req.session.user ? req.session.user.userName : 'Guest'; 
   const user = req.session.user 
+  const role = req.session.user ? req.session.user.userType : null;
 
   
 
   res.render('adminDashboard', {
     user: req.session.user,
     userName: username,
-    user
+    userType: role,
+    loginSuccess: req.flash("loginSuccess")
+    
 
   })
   
