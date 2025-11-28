@@ -16,6 +16,9 @@ exports.getContentByCategory = (req, res) => {
                     cat.categoryName,
                     cat.categoryDescription,
                     cat.categoryImage,
+                    cat.userID AS categoryOwnerID,
+                    u.userName AS categoryOwnerName,
+                    u.profilePic AS categoryOwnerPic,
 
                     /* Total like count */
                     (SELECT COUNT(*) 
@@ -32,6 +35,7 @@ exports.getContentByCategory = (req, res) => {
                 FROM content c
                 JOIN category cat
                     ON c.categoryID = cat.categoryID
+                LEFT JOIN user u ON cat.userID = u.userID
                 WHERE cat.categoryID = ?
             `;
 
@@ -44,7 +48,9 @@ exports.getContentByCategory = (req, res) => {
             const categoryInfo = {
                 categoryName: results[0].categoryName,
                 categoryDescription: results[0].categoryDescription,
-                categoryImage: results[0].categoryImage
+                categoryImage: results[0].categoryImage,
+                categoryOwnerName: results[0].categoryOwnerName || "Category Manager",
+                categoryOwnerPic: results[0].categoryOwnerPic || "defaultProfile.png"
             };
             res.render('viewContentByCategory', {
                 category: categoryInfo,
@@ -61,7 +67,9 @@ exports.getContentByCategory = (req, res) => {
                 const categoryInfo = {
                     categoryName: catRows[0].categoryName,
                     categoryDescription: catRows[0].categoryDescription,
-                    categoryImage: catRows[0].categoryImage
+                    categoryImage: catRows[0].categoryImage,
+                    categoryOwnerName: results[0].categoryOwnerName || "Category Manager",
+                    categoryOwnerPic: catRows[0].categoryOwnerPic || "defaultProfile.png"
                 };
                 res.render('viewContentByCategory', {
                     category: categoryInfo,
