@@ -83,7 +83,7 @@ exports.startGame = (req, res) => {
   if (userType === "Guest") {
     return res.redirect(`/quizPage/${categoryID}/${setNumber}`);
   }
-
+x   
   // Ensure user progress row exists
   const initSql = `
     INSERT IGNORE INTO user (userID, totalXP, level, streak, checkInDate)

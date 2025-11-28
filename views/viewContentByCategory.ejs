@@ -172,8 +172,7 @@ const heroBg = (category && category.categoryImage)
   <img class="spotlight__avatar" src="/images/manager-irdina.png">
   <div>
     <h4 style="margin:0; font-weight:700; font-style:italic;">
-      Ms <%= category.categoryOwnerName %> — 
-      Head of <%= category.categoryName %> Sustainability
+      MS Irdina — Head of <%= category ? category.categoryName : "" %> Sustainability
     </h4>
     <p style="margin:0;">
       Oversees this category in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
@@ -190,7 +189,7 @@ const heroBg = (category && category.categoryImage)
         <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
           <img src="/uploads/<%= contentList[i].contentFile %>">
         <% } else if (ext === 'pdf') { %>
-          <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
+          <a href="/uploads/<%= contentList[i].contenc1c1c11111tFile %>" target="_blank">
             <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
           </a>
         <% } else if (['doc','docx'].includes(ext)) { %>
@@ -207,7 +206,7 @@ const heroBg = (category && category.categoryImage)
           </video>
         <% } else { %>
           <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/file.png" style="width: 150px;">|F
           </a>
         <% } %>
       </div>
