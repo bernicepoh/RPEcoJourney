@@ -9,7 +9,7 @@
     <style>
         body {
             min-height: 100vh;
-            background-image: url("/images/background.png");
+            background-image: url("/uploads/background.png");
             background-repeat: no-repeat;
             background-size: cover; 
             background-position: center;
@@ -121,10 +121,10 @@
                                 let imgSrc;
 
                                 if (!c.categoryImage) {
-                                    imgSrc = "/images/default.png";        // if no image, NULL
+                                    imgSrc = "/uploads/default.png";        // if no image, NULL
                                 } 
                                 else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
-                                    imgSrc = "/images/" + c.categoryImage; // preset icons
+                                    imgSrc = "/uploads/" + c.categoryImage; // preset icons
                                 } 
                                 else {
                                     imgSrc = "/uploads/" + c.categoryImage; // ALL uploaded images

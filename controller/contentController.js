@@ -61,7 +61,7 @@ exports.getContentByCategory = (req, res) => {
                 const categoryInfo = {
                     categoryName: catRows[0].categoryName,
                     categoryDescription: catRows[0].categoryDescription,
-                    categoryImage: catRows[0].categoryImage
+                    categoryImage: catRows[0].categoryImage,
                 };
                 res.render('viewContentByCategory', {
                     category: categoryInfo,
@@ -457,7 +457,7 @@ exports.addContent = (req, res) => {
             res.status(500).send('Error adding content');
         } else {
             // Send a success response
-            res.redirect(`/content/${results.insertId}`);
+            res.redirect('manageContent');
         }
     });
 };
@@ -528,6 +528,7 @@ exports.editContent = (req, res) => {
             res.status(500).send('Error updating content');
         } else {
             // Send a success response
+            req.flash('success', 'Content updated successfully!');
             res.redirect(`/manageContent`);
 
         }
@@ -555,6 +556,7 @@ exports.deleteContent = (req, res) => {
                 return res.status(500).send('Error deleting content');
             } else {
                 // Redirect to viewContentByCategory for the category
+                req.flash('success', 'Content deleted successfully!');
                 res.redirect(`/manageContent`);
             }
         });
@@ -576,7 +578,10 @@ exports.manageContent = (req, res) => {
         }
 
         if (results.length > 0) {
-            res.render('manageContent', { content: results });
+            res.render('manageContent', { 
+                content: results,
+            flashSuccess: req.flash("success"),
+            flashError: req.flash("error") });
         } else {
             res.status(404).send('No content');
         }

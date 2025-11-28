@@ -7,219 +7,141 @@
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body {
-      background-image: url("/images/background.png");
+      background-image: url("/uploads/background.png");
       background-repeat: no-repeat;
-      background-size: cover; 
+      background-size: cover;
       background-position: center;
       background-size: 100% auto;
       background-attachment: fixed;
-      margin: 0; 
+      margin: 0;
       padding: 0;
-      font-family: 'Georgia', serif; 
+      font-family: 'Georgia', serif;
       color: #123524;
     }
-    header h1 { 
-      font-size: 2.2em; 
-      font-weight: bold; 
+
+    header h1 {
+      font-size: 2.2em;
+      font-weight: bold;
     }
-    main { 
-      padding: 60px 100px; 
-      text-align: center; 
+
+    main {
+      padding: 60px 100px;
+      text-align: center;
     }
-    h2 { 
-      font-style: italic; 
-      color: #1a4d2e; 
-      font-size: 2em; 
+
+    h2 {
+      font-style: italic;
+      color: #1a4d2e;
+      font-size: 2em;
     }
-    p { 
-      font-size: 1.2em; 
-      line-height: 1.7; 
-      max-width: 850px; 
-      margin: 0 auto; 
+
+    p {
+      font-size: 1.2em;
+      line-height: 1.7;
+      max-width: 850px;
+      margin: 0 auto;
     }
-    .intro { 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      flex-wrap: wrap; 
-      text-align: left; 
-      margin-bottom: 40px; 
+
+    .intro {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      text-align: left;
+      margin-bottom: 40px;
     }
+
     .intro-text {
       flex: 1;
       min-width: 320px;
-      text-align: left;    /* Ensure left alignment for text */
-      margin-left: 60px;   /* Push both h2 and p right equally */
+      text-align: left;
+      margin-left: 60px;
     }
-    .intro-text h2 { 
-      margin-left: 430px;      /* Remove extra h2 left margin */
-      text-align: left;    /* Explicit left alignment for header */
-    }  
-    .intro img { 
-        width: 250px; 
-        border-radius: 10px; 
-        margin-left: 40px; 
+
+    .intro-text h2 {
+      margin-left: 430px;
+      text-align: left;
     }
-    hr { 
-      border: 0; 
-      border-top: 3px solid #1a4d2e; 
+
+    .intro img {
+      width: 250px;
+      border-radius: 10px;
+      margin-left: 40px;
+    }
+
+    hr {
+      border: 0;
+      border-top: 3px solid #1a4d2e;
       margin: 50px 0;
     }
+
     /* Container of all categories */
-.category-list {
-  display: flex;
-  flex-direction: column;
-  gap: 35px;
-  margin-top: 50px;
-  margin-bottom: 50px;
-}
+    .category-list {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+      margin-top: 50px;
+      margin-bottom: 50px;
+    }
 
-/* Card layout */
-.category-card {
-  width: 100%;
-  max-width: 1100px;
-  background: white;
-  border-radius: 20px;
-  padding: 25px 40px;
-  margin: 40px auto;
+    /* Card layout */
+    .category-card {
+      width: 100%;
+      max-width: 1100px;
+      background: white;
+      border-radius: 20px;
+      padding: 25px 40px;
+      margin: 40px auto;
 
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
-  transition: 0.25s ease;
-    .flash-msg {
-    padding: 12px 18px;
-    border-radius: 6px;
-    font-weight: 600;
-    margin: 15px auto;
-    width: 90%;
-    max-width: 900px;
-    text-align: center;
-  }
-  .alert-success {
-    background-color: #d8f3dc;
-    color: #1b4332;
-  }
-  .alert-danger {
-    background-color: #ffe5e5;
-    color: #b60000;
-  }
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+      transition: 0.25s ease;
+    }
 
+    .category-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+    }
 
-  body {
-    background-image: url("/uploads/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
-    background-size: 100% auto;
-    background-attachment: fixed;
-    margin: 0; 
-    padding: 0;
-    font-family: 'Georgia', serif; 
-    color: #123524;
-  }
+    /* LEFT text column */
+    .category-left {
+      max-width: 60%;
+    }
 
-  header h1 { 
-    font-size: 2.2em; 
-    font-weight: bold; 
-  }
+    .category-title {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #123524;
+      text-decoration: none;
+    }
 
-  main { 
-    padding: 60px 100px; 
-    text-align: center; 
-  }
+    .category-title:hover {
+      text-decoration: underline;
+    }
 
-  .add-category-wrapper {
-    margin-top: 30px;
-  }
+    .category-desc {
+      margin-top: 10px;
+      font-size: 1.25rem;
+      color: #2d6a4f;
+    }
 
-  .add-category-btn {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #6bbf59;   /* RP green */
-    color: white;
-    font-weight: 600;
-    border-radius: 8px;
-    text-decoration: none;
-    transition: 0.25s ease;
-    font-size: 1rem;
-  }
+    /* RIGHT image side */
+    .category-img {
+      width: 260px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 16px;
+      flex-shrink: 0;
+    }
 
-  .add-category-btn:hover {
-    background-color: #5aa04c;
-    transform: translateY(-2px);
-  }
-
-
-  h2 { 
-    font-style: italic; 
-    color: #1a4d2e; 
-    font-size: 2em; 
-  }
-  p { 
-    font-size: 1.2em; 
-    line-height: 1.7; 
-    max-width: 850px; 
-    margin: 0 auto; 
-  }
-  .intro { 
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    flex-wrap: wrap; 
-    text-align: left; 
-    margin-bottom: 40px; 
-  }
-  .intro-text {
-  flex: 1;
-  min-width: 320px;
-  text-align: left;    /* Ensure left alignment for text */
-  margin-left: 60px;   /* Push both h2 and p right equally */
-}
-
-.category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
-}
-
-/* LEFT text column */
-.category-left {
-  max-width: 60%;
-}
-
-.category-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #123524;
-  text-decoration: none;
-}
-
-.category-title:hover {
-  text-decoration: underline;
-}
-
-.category-desc {
-  margin-top: 10px;
-  font-size: 1.25rem;
-  color: #2d6a4f;
-}
-
-/* RIGHT image side */
-.category-img {
-  width: 260px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 16px;
-  flex-shrink: 0;
-}
-
-    footer { 
-      text-align: center; 
-      padding: 25px; 
-      font-size: 1.1em; 
-      color: #555; 
+    footer {
+      text-align: center;
+      padding: 25px;
+      font-size: 1.1em;
+      color: #555;
     }
   </style>
 </head>
@@ -235,7 +157,7 @@
         <h2>RP Sustainability</h2>
         <p>
           At RP, we are committed to embracing sustainability, and our RP Green Plan lays out the roadmap for our sustainability journey.
-          The RP Green Plan is strategically designed to embed sustainability into everything we do 
+          The RP Green Plan is strategically designed to embed sustainability into everything we do
           whether it's our daily operations, practices, initiatives, or even what we teach in our classes.
         </p>
       </div>
@@ -246,47 +168,26 @@
 
     <% if (categories && categories.length) { %>
 
-    <% categories.forEach(c => { %>
+      <% categories.forEach(c => { %>
 
-      <% if (c.categoryName === "Uncategorized") return; %>   <!-- SKIP THIS ONE - onnie for admin/manager -->
+        <% if (c.categoryName === "Uncategorized") { return; } %>
 
-      <div class="category-card">
+        <div class="category-card">
 
-        <div class="category-left">
-          <a class="category-title" href="/category/<%= c.categoryID %>/content">
-            <%= c.categoryName %>
-          </a>
+          <div class="category-left">
+            <a class="category-title" href="/category/<%= c.categoryID %>/content">
+              <%= c.categoryName %>
+            </a>
 
-          <p class="category-desc">
-            <% if (c.categoryDescription) { %>
-              <%= c.categoryDescription.split('.')[0] %>
-            <% } %>
-          </p>
-        </div>
+            <p class="category-desc">
+              <% if (c.categoryDescription) { %>
+                <%= c.categoryDescription.split('.')[0] %>
+              <% } %>
+            </p>
+          </div>
 
-        <% 
-          let imgSrc;
-          if (!c.categoryImage) {
-            imgSrc = "/images/default.png";
-          } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
-            imgSrc = "/images/" + c.categoryImage;
-          } else {
-            imgSrc = "/uploads/" + c.categoryImage;
-          }
-        %>
-
-        <img 
-          src="<%= imgSrc %>" 
-          alt="<%= c.categoryName %>" 
-          class="category-img"
-          loading="lazy"
-          onerror="this.src='/images/default.png'"
-        >
-
-      </div>
-
-    <% }) %>
-
+          <%
+            let imgSrc;
             if (!c.categoryImage) {
               imgSrc = "/uploads/default.png";
             } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
@@ -296,17 +197,22 @@
             }
           %>
 
-          <img 
-            src="<%= imgSrc %>" 
-            alt="<%= c.categoryName %>" 
+          <img
+            src="<%= imgSrc %>"
+            alt="<%= c.categoryName %>"
+            class="category-img"
             loading="lazy"
             onerror="this.src='/uploads/default.png'"
           >
-        </section>
+
+        </div>
+
       <% }) %>
+
     <% } else { %>
       <p>No categories yet. Please add some data.</p>
     <% } %>
+
   </main>
 
   <footer>
