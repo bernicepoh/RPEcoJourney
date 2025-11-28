@@ -66,6 +66,9 @@ exports.getSetByCategory = (req, res) => {
 exports.startGame = (req, res) => {
   const { categoryID, setNumber } = req.params;
 
+  req.session.quizScore = 0;
+  req.session.quizStreak = 0 ; 
+
   // Create guest user if no session
   if (!req.session.user) {
     const guestID = "guest_" + Math.floor(Math.random() * 1000000);
@@ -192,9 +195,12 @@ exports.showQuizPage = (req, res) => {
             setNumber,
             totalQuestions,
             userAnswer: null,
-            timeLimit: 20,
+            timeLimit: question.timeLimit,
             questionIndex: 0,
-            nextQuizID: question.quizID
+            nextQuizID: null,
+            score: req.session.quizScore || 0,
+            streak: req.session.quizStreak || 0,
+            showStreakPopup: false
           });
         }
       );
@@ -220,6 +226,23 @@ exports.answerGame = (req, res) => {
 
     let xpEarned = isCorrect ? 20 : 0;
 
+    if (!req.session.quizScore) req.session.quizScore = 0;
+    if(isCorrect) req.session.quizScore += 10 ;
+
+    if (!req.session.quizStreak) req.session.quizStreak = 0;
+
+    let showStreakPopup = false ; 
+    if (isCorrect) {
+      req.session.quizStreak += 1;      
+      if (req.session.quizStreak % 3 === 0) {
+        xpEarned += 10; // Bonus XP for every 3 correct answers in a row
+        req.session.quizScore += 10 ;
+        showStreakPopup = true ;
+      }   
+    } else {
+      req.session.quizStreak = 0; // Reset streak on incorrect answer
+    }
+
     const saveSql = `
       INSERT INTO quiz_results (userID, quizID, timeTaken, xpEarned)
       VALUES (?, ?, ?, ?)
@@ -235,35 +258,29 @@ exports.answerGame = (req, res) => {
     }
 
     db.query(
-      `SELECT quizID FROM quiz
-       WHERE categoryID = ? AND setNumber = ? AND quizID > ?
-       ORDER BY quizID ASC LIMIT 1`,
-      [categoryID, setNumber, quizID],
-      (err3, nextRows) => {
-        const nextQuizID = nextRows?.[0]?.quizID || null;
+      `SELECT COUNT(*) AS totalCount FROM quiz 
+       WHERE categoryID = ? AND setNumber = ?`,
+      [categoryID, setNumber],
+      (err4, countRows) => {
+        console.log("COUNT ROWS:", countRows);
+        const totalQuestions = countRows[0].totalCount;
 
-        db.query(
-          `SELECT COUNT(*) AS totalCount FROM quiz 
-           WHERE categoryID = ? AND setNumber = ?`,
-          [categoryID, setNumber],
-          (err4, countRows) => {
-            const totalQuestions = countRows[0].totalCount;
-
-            res.render("quizPage", {
-              question,
-              feedback: isCorrect ? "Correct! 🌱" : "Incorrect 😢",
-              xpEarned,
-              timeTaken: t,
-              categoryID,
-              setNumber,
-              totalQuestions,
-              userAnswer,
-              timeLimit: 20,
-              questionIndex: Number(questionIndex) + 1,
-              nextQuizID
-            });
-          }
-        );
+        res.render("quizPage", {
+          question,
+          feedback: isCorrect ? "Correct! 🌱" : "Incorrect 😢",
+          xpEarned,
+          timeTaken: t,
+          categoryID,
+          setNumber,
+          totalQuestions,
+          userAnswer,
+          timeLimit: question.timeLimit,
+          questionIndex: Number(questionIndex),
+          nextQuizID: null , 
+          score: req.session.quizScore, 
+          streak: req.session.quizStreak , 
+          showStreakPopup
+        });
       }
     );
   });
@@ -274,12 +291,13 @@ exports.answerGame = (req, res) => {
 ======================================================= */
 exports.nextGameQuestion = (req, res) => {
   const { currentID, categoryID, setNumber } = req.params;
+  const questionIndex = req.query.index ? Number(req.query.index) : 1;
 
   db.query(
     `SELECT * FROM quiz
-     WHERE quizID > ? AND categoryID = ? AND setNumber = ?
-     ORDER BY quizID ASC LIMIT 1`,
-    [currentID, categoryID, setNumber],
+     WHERE categoryID = ? AND setNumber = ?
+     ORDER BY quizID ASC LIMIT 1 OFFSET ?`,
+    [categoryID, setNumber, questionIndex],
     (err, rows) => {
       if (!rows.length) {
         return res.redirect(`/quiz/game/complete/${categoryID}/${setNumber}`);
@@ -301,9 +319,12 @@ exports.nextGameQuestion = (req, res) => {
             setNumber,
             totalQuestions: countRows[0].totalCount,
             userAnswer: null,
-            timeLimit: 20,
-            questionIndex: req.query.index ? Number(req.query.index) : 1,
-            nextQuizID: question.quizID
+            timeLimit: question.timeLimit,
+            questionIndex: questionIndex,
+            nextQuizID: null,
+            score: req.session.quizScore , 
+            streak: req.session.quizStreak , 
+            showStreakPopup: false
           });
         }
       );
