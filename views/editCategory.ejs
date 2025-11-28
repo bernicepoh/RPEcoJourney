@@ -10,7 +10,7 @@
   body {
     font-family: 'Georgia', serif;
     background: #e8f5e9;
-    background-image: url("/images/background.png");
+    background-image: url("/uploads/background.png");
   background-repeat: no-repeat;
   background-size: cover; 
   background-position: center;
@@ -114,10 +114,10 @@
         <%
           let imgSrc;
           if (!category.categoryImage) {
-            imgSrc = "/images/default.png";
+            imgSrc = "/uploads/default.png";
           } 
           else if (["Environmental.png", "Social.png", "Governance.png"].includes(category.categoryImage)) {
-            imgSrc = "/images/" + category.categoryImage;
+            imgSrc = "/uploads/" + category.categoryImage;
           } 
           else {
             imgSrc = "/uploads/" + category.categoryImage;
@@ -128,7 +128,7 @@
           src="<%= imgSrc %>?v=<%= Date.now() %>" 
           alt="<%= category.categoryName %>" 
           style="width:160px; height:auto; border-radius:10px; margin-top:10px;"
-          onerror="this.src='/images/default.png'"
+          onerror="this.src='/uploads/default.png'"
         >
       </div>
 

@@ -536,7 +536,7 @@ exports.editContent = (req, res) => {
             res.status(500).send('Error updating content');
         } else {
             // Send a success response
-            res.redirect(`/category/${categoryID}/content`);
+            res.redirect(`/manageContent`);
 
         }
     });
@@ -563,11 +563,34 @@ exports.deleteContent = (req, res) => {
                 return res.status(500).send('Error deleting content');
             } else {
                 // Redirect to viewContentByCategory for the category
-                res.redirect(`/category/${categoryID}/content`);
+                res.redirect(`/manageContent`);
             }
         });
     });
 };
+
+// contentController.js
+exports.manageContent = (req, res) => {
+    const sql = `
+        SELECT *
+        FROM content c
+        JOIN category cat ON c.categoryID = cat.categoryID
+    `;
+
+    db.query(sql, (error, results) => {
+        if (error) {
+            console.error(error);
+            return res.status(500).send('Error retrieving contents');
+        }
+
+        if (results.length > 0) {
+            res.render('manageContent', { content: results });
+        } else {
+            res.status(404).send('No content');
+        }
+    });
+};
+
 
 // exports.postForgotPassword = (req, res) => {
 //     const { email } = req.body;

@@ -4,68 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About Us | RPECOJOURNEY</title>
-</head>
-<body>
-  <!-- Include Navbar -->
-  <%- include('partials/navbar') %>
-
-  <div class="about-container">
-    <!-- ABOUT US SECTION -->
-    <section class="about-section">
-      <h2>About Us</h2>
-      <div class="about-row">
-        <div class="about-text">
-          <p>
-            <strong>RPEcoJourney</strong> is a platform created by Republic Polytechnic students to
-            celebrate and share our commitment to sustainability. Our goal is to
-            showcase innovative projects, creative solutions, and meaningful initiatives
-            that contribute to a greener and more sustainable future.
-          </p>
-          <p>
-            Through this website, RP students can highlight their environmental efforts,
-            inspire others to take action, and connect with like-minded individuals who
-            care about our planet. RPEcoJourney is not just a collection of projects—it’s
-            a growing community of changemakers dedicated to making sustainability a way of life.
-          </p>
-        </div>
-        <div class="about-image">
-          <img src="/images/aboutus.jpg" alt="RP Students Sustainability Project" />
-        </div>
-      </div>
-    </section>
-
-    <!-- VISION SECTION -->
-    <section class="vision-section">
-      <h3>Vision</h3>
-      <p>
-        To inspire a community of Republic Polytechnic students who lead the way in building a
-        sustainable and environmentally conscious future.
-      </p>
-    </section>
-
-    <!-- MISSION SECTION -->
-    <section class="mission-section">
-      <h3>Mission</h3>
-      <ul>
-        <li>To provide a platform for RP students to showcase their sustainability projects and creative green solutions.</li>
-        <li>To raise awareness about environmental challenges and promote sustainable practices within the RP community.</li>
-        <li>To encourage collaboration and innovation among students passionate about making a positive impact on the planet.</li>
-        <li>To celebrate student achievements in sustainability and motivate others to join the journey toward a greener tomorrow.</li>
-      </ul>
-    </section>
-
-     <div class="Location-Info">
-        <div class="Locate">
-            <h2>Locate Us!</h2>
-           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5533339967915!2d103.78298867359057!3d1.4428309985435963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da1305aa7388d7%3A0x2b7f5e0463382f8!2sRepublic%20Polytechnic!5e0!3m2!1sen!2ssg!4v1763017441787!5m2!1sen!2ssg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-        </div>
-        <h2 class="address">
-            Republic Polytechnic<br>
-            9 Woodlands Ave 9, Singapore 738964
-
-        </h2>
-    </div>
-  </div>
 
   <style>
     html, body {
@@ -77,7 +15,7 @@
 
     /* Background */
     body {
-      background: url('/images/background.png') no-repeat center center fixed;
+      background: url('/uploads/background.png') no-repeat center center fixed;
       background-size: cover;
       color: #073b3a;
       line-height: 1.8;
@@ -109,7 +47,7 @@
       font-size: 1.6rem;
       color: #f5f5f5;
       text-align: justify;
-      background-color: rgba(0, 0, 0, 0.35);
+      background-color: rgba(0, 0, 0, 0.6);
       padding: 30px;
       border-radius: 10px;
       line-height: 2;
@@ -133,7 +71,7 @@
     /* Vision Section */
     .vision-section {
       margin: 80px 0;
-      background-color: rgba(46, 139, 87, 0.35);
+      background-color: rgba(46, 139, 87, 0.6);
       padding: 50px;
       border-radius: 10px;
       text-align: center;
@@ -153,7 +91,7 @@
 
     /* Mission Section */
     .mission-section {
-      background-color: rgba(0, 0, 0, 0.35);
+      background-color: rgba(0, 0, 0, 0.7);
       padding: 50px;
       border-radius: 10px;
     }
@@ -202,6 +140,69 @@
       color: #555; 
     }
   </style>
+</head>
+<body>
+  <!-- Include Navbar -->
+  <%- include('partials/navbar') %>
+
+  <div class="about-container">
+    <!-- ABOUT US SECTION -->
+    <section class="about-section">
+      <h2>About Us</h2>
+      <div class="about-row">
+        <div class="about-text">
+          <p>
+            <strong>RPEcoJourney</strong> is a platform created by Republic Polytechnic students to
+            celebrate and share our commitment to sustainability. Our goal is to
+            showcase innovative projects, creative solutions, and meaningful initiatives
+            that contribute to a greener and more sustainable future.
+          </p>
+          <p>
+            Through this website, RP students can highlight their environmental efforts,
+            inspire others to take action, and connect with like-minded individuals who
+            care about our planet. RPEcoJourney is not just a collection of projects—it’s
+            a growing community of changemakers dedicated to making sustainability a way of life.
+          </p>
+        </div>
+        <div class="about-image">
+          <img src="/uploads/aboutus.jpg" alt="RP Students Sustainability Project" />
+        </div>
+      </div>
+    </section>
+
+    <!-- VISION SECTION -->
+    <section class="vision-section">
+      <h3>Vision</h3>
+      <p>
+        To inspire a community of Republic Polytechnic students who lead the way in building a
+        sustainable and environmentally conscious future.
+      </p>
+    </section>
+
+    <!-- MISSION SECTION -->
+    <section class="mission-section">
+      <h3>Mission</h3>
+      <ul>
+        <li>To provide a platform for RP students to showcase their sustainability projects and creative green solutions.</li>
+        <li>To raise awareness about environmental challenges and promote sustainable practices within the RP community.</li>
+        <li>To encourage collaboration and innovation among students passionate about making a positive impact on the planet.</li>
+        <li>To celebrate student achievements in sustainability and motivate others to join the journey toward a greener tomorrow.</li>
+      </ul>
+    </section>
+
+     <div class="Location-Info">
+        <div class="Locate">
+            <h2>Locate Us!</h2>
+           <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5533339967915!2d103.78298867359057!3d1.4428309985435963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da1305aa7388d7%3A0x2b7f5e0463382f8!2sRepublic%20Polytechnic!5e0!3m2!1sen!2ssg!4v1763017441787!5m2!1sen!2ssg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <h2 class="address">
+            Republic Polytechnic<br>
+            9 Woodlands Ave 9, Singapore 738964
+
+        </h2>
+    </div>
+  </div>
+
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>

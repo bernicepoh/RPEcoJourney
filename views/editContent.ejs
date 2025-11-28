@@ -13,10 +13,10 @@
       font-size: larger;
       margin: 0;
       padding: 0;
-      background-image: url("/images/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
+      background-image: url("/uploads/background.png");
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;
       min-height: 100vh;
     }
 
@@ -119,8 +119,33 @@
             </select>
 
                 <label for="file">Current File:</label>
-                <input type="hidden" name="currentFile" value = <%= content.contentFile %> >
-                <img src = "/images/<%= content.contentFile %>" width="20%">
+                <input type="hidden" name="currentFile" value = "<%= content.contentFile %>" >
+                <div class="file-box">
+                  <% const ext = content.contentFile.split('.').pop().toLowerCase(); %>
+                  <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
+                  <img src="/uploads/<%= content.contentFile %>">
+                  <% } else if (ext === 'pdf') { %>
+                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
+                  </a>
+                  <% } else if (['doc','docx'].includes(ext)) { %>
+                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="/uploads/word.png" style="width: 150px;">
+                  </a>
+                  <% } else if (['ppt','pptx'].includes(ext)) { %>
+                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="/uploads/ppt.png" style="width: 150px;">
+                  </a>
+                  <% } else if (['mp4','mov','avi'].includes(ext)) { %>
+                  <video autoplay loop muted playsinline>
+                      <source src="/uploads/<%= content.contentFile %>">
+                  </video>
+                  <% } else { %>
+                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
+                  </a>
+                  <% } %>
+                </div>
                 
                 <label for="contentFile">New File:</label>
                 <input type="file" id="contentFile" name="contentFile">

@@ -196,7 +196,8 @@ exports.deleteCategory = (req, res) => {
                 return res.redirect('/manageCategories');
             }
 
-            const imageFile = imageResults[0]?.categoryImage; // may be null
+            const imageFile = imageResults[0]?.categoryImage;
+            const imagePath = path.join(__dirname, '../public/uploads', imageFile);
 
             // 3️⃣ Delete category from DB
             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
