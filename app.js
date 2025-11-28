@@ -131,7 +131,7 @@ app.post('/addContent', allowAdminOrWriter, upload.single('contentFile'), conten
 app.get('/editContent/:id', checkAdmin, contentController.editContentForm);
 app.post('/editContent/:id', checkAdmin, upload.single('contentFile'), contentController.editContent);
 app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
-app.get('/manageContent', checkAdmin, contentController.manageContent);
+app.get('/manageContent', allowAdminOrWriter, contentController.manageContent);
 
 // Like toggle route
 app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);

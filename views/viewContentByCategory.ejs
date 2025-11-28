@@ -12,7 +12,7 @@
       font-size: larger;
       margin: 0;
       padding: 0;
-      background-image: url("/images/background.png");
+      background-image: url("/uploads/background.png");
   background-repeat: no-repeat;
   background-size: cover; 
   background-position: center;
@@ -24,7 +24,7 @@
       position: relative;
       width: 100%;
       min-height: 240px;
-      background: url('/images/environmental-banner.png') center/cover no-repeat;
+      background: url('/uploads/environmental-banner.png') center/cover no-repeat;
       background-color:#cfe9c9;
       display:flex;
       align-items:center;
@@ -151,8 +151,8 @@
 
     <%
 const heroBg = (category && category.categoryImage) 
-    ? '/images/' + category.categoryImage 
-    : '/images/default.png';
+    ? '/uploads/' + category.categoryImage 
+    : '/uploads/default.png';
 %>
 
 <!-- HERO -->
@@ -169,7 +169,7 @@ const heroBg = (category && category.categoryImage)
 
 <!-- MANAGER SPOTLIGHT -->
 <section class="spotlight">
-  <img class="spotlight__avatar" src="/images/manager-irdina.png">
+  <img class="spotlight__avatar" src="/uploads/manager-irdina.png">
   <div>
     <h4 style="margin:0; font-weight:700; font-style:italic;">
       MS Irdina — Head of <%= category ? category.categoryName : "" %> Sustainability
@@ -190,15 +190,15 @@ const heroBg = (category && category.categoryImage)
           <img src="/uploads/<%= contentList[i].contentFile %>">
         <% } else if (ext === 'pdf') { %>
           <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/pdf.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
           </a>
         <% } else if (['doc','docx'].includes(ext)) { %>
           <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/word.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/word.png" style="width: 150px;">
           </a>
         <% } else if (['ppt','pptx'].includes(ext)) { %>
           <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/ppt.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/ppt.png" style="width: 150px;">
           </a>
         <% } else if (['mp4','mov','avi'].includes(ext)) { %>
           <video autoplay loop muted playsinline>
@@ -206,7 +206,7 @@ const heroBg = (category && category.categoryImage)
           </video>
         <% } else { %>
           <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/file.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
           </a>
         <% } %>
       </div>

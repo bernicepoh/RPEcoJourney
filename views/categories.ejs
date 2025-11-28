@@ -27,7 +27,7 @@
 
 
   body {
-    background-image: url("/images/background.png");
+    background-image: url("/uploads/background.png");
   background-repeat: no-repeat;
   background-size: cover; 
   background-position: center;
@@ -219,7 +219,7 @@
           whether it's our daily operations, practices, initiatives, or even what we teach in our classes.
         </p>
       </div>
-      <img src="/images/rp-green.png" alt="RP Green Plan">
+      <img src="/uploads/rp-green.png" alt="RP Green Plan">
     </section>
 
     
@@ -274,9 +274,9 @@
             let imgSrc;
 
             if (!c.categoryImage) {
-              imgSrc = "/images/default.png";
+              imgSrc = "/uploads/default.png";
             } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
-              imgSrc = "/images/" + c.categoryImage;
+              imgSrc = "/uploads/" + c.categoryImage;
             } else {
               imgSrc = "/uploads/" + c.categoryImage;
             }
@@ -286,7 +286,7 @@
             src="<%= imgSrc %>" 
             alt="<%= c.categoryName %>" 
             loading="lazy"
-            onerror="this.src='/images/default.png'"
+            onerror="this.src='/uploads/default.png'"
           >
         </section>
       <% }) %>

@@ -178,7 +178,7 @@ exports.deleteCategory = (req, res) => {
             }
 
             const imageFile = imageResults[0]?.categoryImage;
-            const imagePath = path.join(__dirname, '../public/images', imageFile);
+            const imagePath = path.join(__dirname, '../public/uploads', imageFile);
 
             // 4️⃣ Delete category record
             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
