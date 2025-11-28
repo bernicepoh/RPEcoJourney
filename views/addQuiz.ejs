@@ -4,78 +4,12 @@
   <meta charset="UTF-8">
   <title>Add Quiz | RPEcoJourney</title>
 
-  <!-- ========== FLATPICKR (Notion-style date picker) ========== -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-  <!-- Notion-Style Theme -->
-  <style>
-    .flatpickr-calendar {
-      border-radius: 14px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-      border: 1px solid #dfe7df;
-      padding: 8px 0;
-    }
-    .flatpickr-months .flatpickr-month {
-      font-size: 1rem;
-      font-weight: 600;
-      color: #2f4f2f;
-    }
-    .flatpickr-day {
-      border-radius: 8px !important;
-    }
-    .flatpickr-day:hover {
-      background: #e8f7e8 !important;
-      color: #1d3d1e;
-    }
-    .flatpickr-day.selected {
-      background: #55a859 !important;
-      color: #fff;
-    }
-    .flatpickr-day.today {
-      border-color: #55a859 !important;
-      color: #2e6b32;
-    }
-
-    /* All normal inputs = 410px */
-    .panel input,
-    .panel select,
-    .panel textarea {
-      max-width: 410px;
-      width: 100%;
-      padding: 14px;
-      border-radius: 10px;
-      border: 1px solid #bcd3bc;
-      font-size: 1rem;
-      margin-top: 6px;
-    }
-
-    /* Expiry follows same width */
-    #expiryPanel input {
-      max-width: 410px;
-    }
-
-    /* Question panel inputs wider = 650px */
-    #questionPanel input,
-    #questionPanel select,
-    #questionPanel textarea {
-      max-width: 650px;
-      width: 100%;
-    }
-  </style>
-
-
-  <!-- =========================================================== -->
-
   <style>
     body {
-      background: #f3f8f3;
-      margin: 0;
-      font-family: "Segoe UI", Arial, sans-serif;
-      font-size: 17px;
+      background: url('/uploads/background.png') no-repeat center center fixed;
+      background-size: cover;
     }
 
-    /* PAGE WRAPPER */
     .add-quiz-wrapper {
       max-width: 1500px;
       margin: 40px auto;
@@ -84,7 +18,6 @@
       gap: 40px;
     }
 
-    /* SIDEBAR */
     .add-quiz-left {
       width: 300px;
       background: #e3f5e1;
@@ -125,7 +58,6 @@
       transform: translateX(5px);
     }
 
-    /* MAIN AREA */
     .add-quiz-main {
       flex: 1;
     }
@@ -151,7 +83,6 @@
     .quiz-card-title {
         font-size: 1.5rem;
         font-weight: bold;
-        margin-bottom: 15px 0 5px;
         color: #0b2535;
     }
     
@@ -181,8 +112,6 @@
         color: #1b3f66;
     }
 
-
-    /* PANELS */
     .panel {
       display: none;
       background: white;
@@ -223,7 +152,6 @@
       font-size: 0.95rem;
     }
 
-    /* BOTTOM ROW */
     .bottom-row {
       margin-top: 35px;
       display: flex;
@@ -242,6 +170,24 @@
       transition: 0.25s;
     }
 
+    body {
+      margin-top: 0 ;
+      padding-top: top 0;
+    }
+
+    .add-quiz-wrapper {
+      margin-top:40px;
+    }
+
+    body { 
+      margin:0 ;
+      padding:0 ; 
+    }
+
+    .add-quiz-wrapper {
+      padding-left:0 ; 
+      padding-right: 0;
+    }
 
   </style>
 </head>
@@ -254,24 +200,19 @@
 
   <div class="add-quiz-wrapper">
 
-    <!-- ========= SIDEBAR ========= -->
     <div class="add-quiz-left">
       <h2>Quiz Builder</h2>
 
       <button type="button" class="menu-btn active" onclick="showPanel('titlePanel', this)">Add Title</button>
-      <button type="button" class="menu-btn" onclick="showPanel('colorPanel', this)">Choose Card Colour</button>
-      <button type="button" class="menu-btn" onclick="showPanel('expiryPanel', this)">Set Expiry Date</button>
-      <button type="button" class="menu-btn" onclick="showPanel('levelPanel', this)">Set Required Level</button>
-      <button type="button" class="menu-btn" onclick="showPanel('categoryPanel', this)">Choose Category</button>
+      <button type="button" class="menu-btn" onclick="showPanel('colorPanel', this)">Card Colour</button>
+      <button type="button" class="menu-btn" onclick="showPanel('levelPanel', this)">Required Level</button>
+      <button type="button" class="menu-btn" onclick="showPanel('categoryPanel', this)">Category</button>
       <button type="button" class="menu-btn" onclick="showPanel('questionPanel', this)">Add Questions</button>
-      <button type="button" class="menu-btn" onclick="showPanel('timerPanel', this)">Set Timer</button>
+      <button type="button" class="menu-btn" onclick="showPanel('timerPanel', this)">Timer</button>
     </div>
 
-
-    <!-- ========= MAIN ========= -->
     <div class="add-quiz-main">
 
-      <!-- PREVIEW -->
       <div class="preview-section">
         <h3>Live Quiz Card Preview</h3>
 
@@ -282,35 +223,24 @@
 
           <div class="badge-row">
             <div class="badge level" id="previewLevel">Required Level: 1</div>
-            <div class="badge" id="previewExpiry">No Expiry</div>
-            <div class="badge" id="previewTimer"> 15s/ question</div>
+            <div class="badge" id="previewTimer"> 15s / question</div>
           </div>
         </div>
       </div>
 
-
-      <!-- ========= PANELS START ========= -->
-
       <!-- TITLE -->
       <div class="panel active-panel" id="titlePanel">
         <label>Quiz Title</label>
-        <input type="text" name="title" placeholder="Enter quiz title"
-               oninput="updateTitle(this.value)">
+        <input type="text" name="title" required oninput="updateTitle(this.value)">
       </div>
 
-      <!-- Card Color -->
+      <!-- COLOR -->
       <div class="panel" id="colorPanel">
-        <label>Choose Card Colour</label>
+        <label>Card Colour</label>
         <input type="color" name="cardColor" value="#b7e4c7" onchange="updateCardColor(this.value)">
       </div>
 
-      <!-- EXPIRY -->
-      <div class="panel" id="expiryPanel">
-        <label>Expiry Date</label>
-        <input id="expiryDate" name="expiryDate" placeholder="Select a date">
-      </div>
-
-            <!-- CATEGORY -->
+      <!-- CATEGORY -->
       <div class="panel" id="categoryPanel">
         <label>Choose Category</label>
         <select name="categoryID" onchange="updateCategory(this)">
@@ -347,121 +277,102 @@
       </div>
 
       <!-- TIMER -->
-       <div class="panel" id="timerPanel">
+      <div class="panel" id="timerPanel">
         <label>Time Per Question (seconds)</label>
-        <input type="number" min="5" max="120" name="timeLimit" value="30"
-               oninput="updateTimer(this.value)">
-        </div>
+        <input type="number" min="5" max="120" name="timeLimit" value="15" oninput="updateTimer(this.value)">
+      </div>
 
+      <input type="hidden" name="numberOfQuestions" id="numberOfQuestionsField" value="1">
 
-
-      <!-- ========= BOTTOM ========= -->
       <div class="bottom-row">
-        <input type="hidden" name="numberOfQuestions" id="numberOfQuestionsField" value="1">
         <button class="primary-btn">Create Quiz</button>
       </div>
 
-    </div> <!-- END MAIN -->
-  </div> <!-- END WRAPPER -->
+    </div>
+  </div>
 </form>
 
 
 <script>
 
-  /* PANEL SWITCHING */
-  function showPanel(panelId, btn) {
-    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active-panel"));
-    document.getElementById(panelId).classList.add("active-panel");
+function showPanel(id, btn) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active-panel"));
+  document.getElementById(id).classList.add("active-panel");
 
-    document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-  }
+  document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+}
 
-  /* PREVIEW UPDATES */
-  function updateTitle(val) {
-    document.getElementById("previewTitle").textContent = val || "Untitled Quiz";
-  }
+function updateTitle(val) {
+  document.getElementById("previewTitle").textContent = val || "Untitled Quiz";
+}
 
-  function updateCardColor(val) {
-    document.getElementById("previewCard").style.background = val;
-  }
+function updateCardColor(val) {
+  document.getElementById("previewCard").style.background = val;
+}
 
-  function updateCategory(sel) {
-    const txt = sel.options[sel.selectedIndex].text;
-    document.getElementById("previewCategory").textContent = "Category: " + txt;
-  }
+function updateCategory(sel) {
+  const txt = sel.options[sel.selectedIndex].text;
+  document.getElementById("previewCategory").textContent = "Category: " + txt;
+}
 
-  function updateLevel(val) {
-    document.getElementById("previewLevel").textContent = "Required Level: " + val;
-  }
+function updateLevel(val) {
+  document.getElementById("previewLevel").textContent = "Required Level: " + val;
+}
 
-  function updateExpiry(val) {
-    document.getElementById("previewExpiry").textContent = val ? ("Expires: " + val) : "No Expiry";
-  }
+function updateTimer(val) {
+  const v = val || 15;
+  document.getElementById("previewTimer").textContent = v + "s / question";
+}
 
-  /* ADD QUESTION BLOCK */
-  function addQuestionBlock() {
-    const container = document.getElementById("questionsContainer");
+function addQuestionBlock() {
+  const container = document.getElementById("questionsContainer");
 
-    const block = document.createElement("div");
-    block.className = "question-block";
+  const block = document.createElement("div");
+  block.className = "question-block";
 
-    block.innerHTML = `
-      <button type="button" class="remove-question-btn" onclick="removeQuestionBlock(this)">Remove</button>
+  block.innerHTML = `
+    <button type="button" class="remove-question-btn" onclick="removeQuestionBlock(this)">Remove</button>
 
-      <label>Question Text</label>
-      <input type="text" name="questions" required>
+    <label>Question Text</label>
+    <input type="text" name="question[]" required>
 
-      <label>Options</label>
-      <input type="text" name="option1[]" required placeholder="Option 1">
-      <input type="text" name="option2[]" required placeholder="Option 2">
-      <input type="text" name="option3[]" required placeholder="Option 3">
-      <input type="text" name="option4[]" required placeholder="Option 4">
+    <label>Options</label>
+    <input type="text" name="option1[]" required placeholder="Option 1">
+    <input type="text" name="option2[]" required placeholder="Option 2">
+    <input type="text" name="option3[]" required placeholder="Option 3">
+    <input type="text" name="option4[]" required placeholder="Option 4">
 
-      <label>Correct Option</label>
-      <select name="correctOption[]">
-        <option value="1">Option 1</option>
-        <option value="2">Option 2</option>
-        <option value="3">Option 3</option>
-        <option value="4">Option 4</option>
-      </select>
+    <label>Correct Option</label>
+    <select name="correctOption[]">
+      <option value="1">Option 1</option>
+      <option value="2">Option 2</option>
+      <option value="3">Option 3</option>
+      <option value="4">Option 4</option>
+    </select>
 
-      <label>Explanation (optional)</label>
-      <textarea name="explanations[]"></textarea>
-    `;
+    <label>Explanation (optional)</label>
+    <textarea name="explanation[]"></textarea>
+  `;
 
-    container.appendChild(block);
-    updateQuestionCount();
-  }
+  container.appendChild(block);
+  updateQuestionCount();
+}
 
-  function removeQuestionBlock(btn) {
-    btn.closest(".question-block").remove();
-    updateQuestionCount();
-  }
+function removeQuestionBlock(btn) {
+  btn.closest(".question-block").remove();
+  updateQuestionCount();
+}
 
-  function updateQuestionCount() {
-    const count = document.querySelectorAll(".question-block").length;
-    document.getElementById("previewQuestions").textContent = "Questions: " + count;
-    document.getElementById("numberOfQuestionsField").value = count;
-  }
+function updateQuestionCount() {
+  const count = document.querySelectorAll(".question-block").length;
+  document.getElementById("previewQuestions").textContent = "Questions: " + count;
+  document.getElementById("numberOfQuestionsField").value = count;
+}
 
-  function updateTimer(val) {
-    const v = val || 15 ; 
-    document.getElementById("previewTimer").textContent = v + "s / question"
-  }
-
-  /* INIT */
-  document.addEventListener("DOMContentLoaded", () => {
-    addQuestionBlock();
-    updateQuestionCount();
-
-    flatpickr("#expiryDate", {
-      dateFormat: "Y-m-d",
-      minDate: "today",
-      allowInput: true,
-      onChange: (dates, dateStr) => updateExpiry(dateStr)
-    });
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  addQuestionBlock();
+});
 
 </script>
 

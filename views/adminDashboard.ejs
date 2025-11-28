@@ -1,150 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Homepage</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <style>
     body {
-        background-image: url("/images/background.png");
-        background-repeat: no-repeat;
-        background-size: cover; 
-        background-position: center;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-image: url("/uploads/background.png");
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
     }
+
+    /* Welcome message */
+    h3 {
+      text-align: center;
+      margin-top: 30px;
+      color: #333;
+      text-shadow: 1px 1px 3px rgba(255,255,255,0.7);
+    }
+
+    .hero {
+      text-align: center;
+      margin-top: 120px;
+      padding: 40px;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      color: #0b2535;
+      font-weight: 800;
+      margin-bottom: 15px;
+      text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.6);
+    }
+
+    .hero p {
+      font-size: 1.3rem;
+      color: #2e8b57;
+      font-weight: 500;
+      margin-bottom: 35px;
+    }
+
+    /* Card container */
     .card-container {
-        margin-left: 25%;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-top: 5%;
-        max-width: 90%;
-        width: 1000px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      padding: 50px 20px;
+      justify-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-.card {
-    background: #7d9cad;
-    color: #333;
-    border: none;
-    border-radius: 12px;
-    box-shadow: 2px 4px 12px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
+    /* Card styling */
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      width: 100%;
+      max-width: 300px;
+    }
 
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 4px 6px 15px rgba(0, 0, 0, 0.2);
-}
+    .card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+    }
 
-.card-header {
-    background-color: #733E24;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: bold;
-    padding: 12px;
-    border-radius: 12px 12px 0 0;
-}
+    .card-header {
+      background-color: #733E24;
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 600;
+      padding: 15px;
+      border-radius: 15px 15px 0 0;
+    }
 
-.card-body {
-    padding: 20px;
-}
+    .card-body {
+      padding: 25px 20px;
+    }
 
-.card-text {
-    margin-bottom: 15px;
-    font-size: 1rem;
-    color: #555;
-}
+    .card-title {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
 
-.card-link {
-    display: inline-block;
-    background-color: #a2be78;
-    color: white;
-    text-decoration: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: background 0.3s ease-in-out;
-}
+    .card-text {
+      margin-bottom: 20px;
+      font-size: 1rem;
+      color: #555;
+    }
 
-.card-link:hover {
-    background-color: darkgreen;
-}
+    .card-link {
+      display: inline-block;
+      background-color: #4CAF50;
+      color: white;
+      text-decoration: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
 
-    </style>
+    .card-link:hover {
+      background-color: #388E3C;
+      transform: scale(1.05);
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 768px) {
+      .card-container {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        padding: 30px 15px;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <%- include ('partials/navbar.ejs') %>
+  <%- include('partials/navbar.ejs') %>
 
+  
+  <section class="hero">
     <% if (userName) { %>
-  <h3>Welcome, <%= userName %></h3>
+    <h1>Welcome, <%= userName %><br>
+    <%= userType %> Workspace</h1>
   <% } %>
+    
+  </section>
 
-     <div class="card-container">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Publish Content</h5>
-                <p class="card-text"><b>Authorization</b>: Writers</p>
-                <p class="card-text"><b>Description</b> Role for writers to create content</p>
-                <a href="/addContent" class="card-link">Enter</a>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Edit Content</h5>
-                <p class="card-text"><b>Authorization</b>: Writers</p>
-                <p class="card-text"><b>Description</b> Role for writers to edit content</p>
-                <a href="/editContent" class="card-link">Enter</a>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Publish Quiz</h5>
-                <p class="card-text">Click to Add products</p>
-                <a href="/addproduct" class="card-link">Enter</a>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">View Users</h5>
-                <p class="card-text"><b>Authorization</b>: Admin</p>
-                <p class="card-text"><b>Description</b> Role for admin to view all users</p>
-                <a href="/adminUsers" class="card-link">Enter</a>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">View Sales Report</h5>
-                <p class="card-text">Click to Sales Report</p>
-                <a href="/sales" class="card-link">Enter</a>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">View Reviews</h5>
-                <p class="card-text">Click to see admin reviews</p>
-                <a href="/adminreviews" class="card-link">Enter</a>
-            </div>
-        </div>
-        <div class="card">
+  <div class="card-container">
+
+    <% if (userType === 'Writer' || userType === 'Admin') { %>
+    <div class="card">
             <div class="card-body">
                 <h5 class="card-title">Manage Categories</h5>
                 <p class="card-text">Click to Edit Categories</p>
                 <a href="/manageCategories" class="card-link">Enter</a>
             </div>
-        </div>
-        <div class="card">
+      
+      <div class="card">
             <div class="card-body">
-                <h5 class="card-title">Add Categories</h5>
-                <p class="card-text">Click to Add Categories</p>
-                <a href="/addcategory" class="card-link">Enter</a>
+                <h5 class="card-title">Manage Content</h5>
+                <a href="/manageContent" class="card-link">Enter</a>
             </div>
         </div>
-    </div>
-    
+        
+    <% } %>
 
+    <% if (userType === 'Manager' || userType === 'Admin') { %>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Publish Quiz</h5>
+          <a href="/addQuiz" class="card-link">Enter</a>
+        </div>
+      </div>
+    <% } %>
 
- 
+    <% if (userType === "Admin") { %>
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">View Users</h5>
+          <a href="/adminUsers" class="card-link">Enter</a>
+        </div>
+      </div>
+    <% } %>
+
+  </div>
+
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <% if (loginSuccess && loginSuccess.length > 0) { %>
+  <script>
+    Swal.fire({
+      icon: 'success',
+      title: 'Welcome!',
+      text: '<%= loginSuccess %>',
+      timer: 1800,
+      showConfirmButton: false
+    });
+  </script>
+  <% } %>
 
 </body>
 </html>

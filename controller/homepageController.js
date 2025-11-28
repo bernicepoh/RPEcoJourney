@@ -2,13 +2,16 @@
 exports.getHomePage = (req, res) => {
   const username = req.session.user ? req.session.user.userName : null;
   const user = req.session.user 
-  res.render('homepage', { user, username });
+  res.render('homepage', { user, username,
+    loginSuccess: req.flash('loginSuccess'),
+   });
 };
 
 
-// Controller function for About Us page
+
 exports.getAboutPage = (req, res) => {
 
   const user = req.session.user 
-  res.render('aboutus', {user}); // shows aboutus.ejs
+  res.render('aboutus', {user}); 
 };
+

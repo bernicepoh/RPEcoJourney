@@ -12,7 +12,7 @@
   min-height: 100vh;
   margin: 0;
   font-family: 'Georgia', serif;
-  background-image: url("/images/background.png");
+  background-image: url("/uploads/background.png");
   background-repeat: no-repeat;
   background-size: cover; 
   background-position: center;
@@ -36,7 +36,7 @@
             display: flex;
             align-items: center;
             gap: 40px;
-            background: #7d9cad;        /* Card is blue */
+            background: #7d9cad;        
             padding: 40px 60px;
             border-radius: 20px;
             color: white;
@@ -88,7 +88,7 @@
         <% if (user.image) { %>
             <img src="/uploads/<%= user.image %>" alt="Profile Picture">
         <% } else { %>
-            <img src="/images/default.png" alt="Profile Picture">
+            <img src="/uploads/default.png" alt="Profile Picture">
         <% } %>
 
       

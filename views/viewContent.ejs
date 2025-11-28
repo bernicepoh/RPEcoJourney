@@ -11,10 +11,10 @@
       font-size: larger;
       margin: 0;
       padding: 0;
-      background-image: url("/images/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
+      background-image: url("/uploads/background.png");
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;
     }
     .desc-divider {
       border: none;
@@ -117,15 +117,15 @@
           <img src="/uploads/<%= content.contentFile %>">
         <% } else if (ext === 'pdf') { %>
           <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/pdf.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
           </a>
         <% } else if (['doc','docx'].includes(ext)) { %>
           <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/word.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/word.png" style="width: 150px;">
           </a>
         <% } else if (['ppt','pptx'].includes(ext)) { %>
           <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/ppt.png" style="width: 150px;">
+            <img class="file-icon" src="/uploads/ppt.png" style="width: 150px;">
           </a>
         <% } else if (['mp4','mov','avi'].includes(ext)) { %>
           <video autoplay loop muted playsinline>
@@ -133,10 +133,10 @@
           </video>
         <% } else { %>
           <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/images/file.png">
+            <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
           </a>
         <% } %>
-      </div>
+      </div>  
  
       <hr class="desc-divider">
  
@@ -175,7 +175,7 @@
  
         <!-- Avatar -->
         <img
-          src="/images/<%= c.userImage ? c.userImage : 'default-avatar.png' %>"
+          src="/uploads/<%= c.userImage ? c.userImage : 'default-avatar.png' %>"
           style="width:48px; height:48px; border-radius:50%; object-fit:cover;"
         >
  
