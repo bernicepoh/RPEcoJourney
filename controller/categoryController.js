@@ -59,6 +59,26 @@ exports.getCategory = (req, res) => {
     });
 };
 
+// ADMIN/ MANAGER 
+
+// Admin/Manager Manage Categories Page
+exports.getManageCategories = (req, res) => {
+    const sql = "SELECT * FROM category";
+
+    db.query(sql, (err, results) => {
+        if (err) {
+            console.error("Category query error:", err);
+            return res.status(500).send("Database error");
+        }
+
+        res.render("manageCategories", {
+            categories: results,
+            flashSuccess: req.flash("success"),
+            flashError: req.flash("error")
+        });
+    });
+};
+
 // Admin/Manager — Render Add Category Form
 exports.addCategoryForm = (req, res) => {
     res.render('addCategory');
@@ -85,7 +105,7 @@ exports.addCategory = (req, res) => {
         } else {
             // Send a success response
             req.flash('success', 'Category added successfully!');
-            res.redirect('/categories');
+            res.redirect('/manageCategories');
         }
     });
 };
@@ -139,7 +159,7 @@ exports.updateCategory = (req, res) => {
         } else {
             // Send a success response
             req.flash('success', 'Category updated successfully!');
-            res.redirect('/categories');
+            res.redirect('/manageCategories');
         }
     });
 };
@@ -148,62 +168,147 @@ exports.updateCategory = (req, res) => {
 exports.deleteCategory = (req, res) => {
     const categoryID = req.params.id;
 
-    // 1️⃣ Safety Check: Validate ID
     if (!categoryID) {
         req.flash('error', 'Invalid category ID');
-        return res.redirect('/categories');
+        return res.redirect('/manageCategories');
     }
 
-    // 2️⃣ Check if category contains related content before deletion
+    // 1️⃣ Check if category has content
     const contentSql = 'SELECT * FROM content WHERE categoryID = ?';
     db.query(contentSql, [categoryID], (err, contentResults) => {
         if (err) {
             console.error('Content check error:', err.message);
             req.flash('error', 'Server error');
-            return res.redirect('/categories');
+            return res.redirect('/manageCategories');
         }
 
         if (contentResults.length > 0) {
             req.flash('error', 'Unable to delete — category contains content.');
-            return res.redirect('/categories');
+            return res.redirect('/manageCategories');
         }
 
-        // 3️⃣ Get category image for deletion
+        // 2️⃣ Get category image BEFORE deletion
         const getCategorySql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
         db.query(getCategorySql, [categoryID], (err, imageResults) => {
             if (err) {
                 console.error('Image lookup error:', err.message);
                 req.flash('error', 'Server error');
-                return res.redirect('/categories');
+                return res.redirect('/manageCategories');
             }
 
             const imageFile = imageResults[0]?.categoryImage;
             const imagePath = path.join(__dirname, '../public/uploads', imageFile);
 
-            // 4️⃣ Delete category record
+            // 3️⃣ Delete category from DB
             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
             db.query(deleteSql, [categoryID], (err) => {
                 if (err) {
                     console.error('Delete error:', err.message);
                     req.flash('error', 'Server error');
-                    return res.redirect('/categories');
+                    return res.redirect('/manageCategories');
                 }
 
-                // 5️⃣ Delete image if exists & it's not null/default
+                // 4️⃣ Delete image ONLY if:
+                // - it exists
+                // - it's not null
+                // - it's not default.png
                 if (imageFile && imageFile !== 'default.png') {
-                    fs.unlink(imagePath, (unlinkErr) => {
-                        if (unlinkErr) {
-                            console.warn('Failed to remove image:', unlinkErr.message);
-                        }
-                    });
+
+                    // Determine correct image location
+                    const uploadPath = path.join(__dirname, '../public/uploads', imageFile);
+                    const imagesPath = path.join(__dirname, '../public/images', imageFile);
+
+                    let finalPath = null;
+
+                    // Check if image exists in uploads folder
+                    if (fs.existsSync(uploadPath)) {
+                        finalPath = uploadPath;
+                    }
+                    // Or check images folder
+                    else if (fs.existsSync(imagesPath)) {
+                        finalPath = imagesPath;
+                    }
+
+                    // Delete if found
+                    if (finalPath) {
+                        fs.unlink(finalPath, (unlinkErr) => {
+                            if (unlinkErr) {
+                                console.warn("⚠ Failed to delete image:", unlinkErr.message);
+                            }
+                        });
+                    }
                 }
 
                 req.flash('success', 'Category deleted successfully!');
-                res.redirect('/categories');
+                res.redirect('/manageCategories');
             });
         });
     });
 };
+
+// // Admin/Manager — Delete Category (Enhanced)
+// exports.deleteCategory = (req, res) => {
+//     const categoryID = req.params.id;
+
+//     // 1️⃣ Safety Check: Validate ID
+//     if (!categoryID) {
+//         req.flash('error', 'Invalid category ID');
+//         return res.redirect('/manageCategories');
+//     }
+
+//     // 2️⃣ Check if category contains related content before deletion
+//     const contentSql = 'SELECT * FROM content WHERE categoryID = ?';
+//     db.query(contentSql, [categoryID], (err, contentResults) => {
+//         if (err) {
+//             console.error('Content check error:', err.message);
+//             req.flash('error', 'Server error');
+//             return res.redirect('/manageCategories');
+//         }
+
+//         if (contentResults.length > 0) {
+//             req.flash('error', 'Unable to delete — category contains content.');
+//             return res.redirect('/manageCategories');
+//         }
+
+//         // 3️⃣ Get category image for deletion
+//         const getCategorySql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
+//         db.query(getCategorySql, [categoryID], (err, imageResults) => {
+//             if (err) {
+//                 console.error('Image lookup error:', err.message);
+//                 req.flash('error', 'Server error');
+//                 return res.redirect('/manageCategories');
+//             }
+
+//             const imageFile = imageResults[0]?.categoryImage;
+//             const imagePath = path.join(__dirname, '../public/images', imageFile);
+
+//             // 4️⃣ Delete category record
+//             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
+//             db.query(deleteSql, [categoryID], (err) => {
+//                 if (err) {
+//                     console.error('Delete error:', err.message);
+//                     req.flash('error', 'Server error');
+//                     return res.redirect('/manageCategories');
+//                 }
+
+//                 // 5️⃣ Delete image if exists & is not null/default
+//                 if (imageFile && imageFile !== 'default.png') {
+
+//                     const imagePath = path.join(__dirname, '../public/images', imageFile);
+
+//                     fs.unlink(imagePath, (unlinkErr) => {
+//                         if (unlinkErr) {
+//                             console.warn("⚠ Failed to delete image:", unlinkErr.message);
+//                         }
+//                     });
+//                 }
+
+//                 req.flash('success', 'Category deleted successfully!');
+//                 res.redirect('/manageCategories');
+//             });
+//         });
+//     });
+// };
 
 // // Admin/Manager — Delete Category (Enhanced & Safe)
 // exports.deleteCategory = (req, res) => {
@@ -212,7 +317,7 @@ exports.deleteCategory = (req, res) => {
 //     // Safety Check: Validate ID
 //     if (!categoryID) {
 //         req.flash('error', 'Invalid category ID');
-//         return res.redirect('/categories');
+//         return res.redirect('/manageCategories');
 //     }
 
 //     // Check if category has content
@@ -221,7 +326,7 @@ exports.deleteCategory = (req, res) => {
 //         if (err) {
 //             console.error("Error checking category content:", err);
 //             req.flash('error', 'Server error');
-//             return res.redirect('/categories');
+//             return res.redirect('/manageCategories');
 //         }
 
 //         // If content exists → move to Uncategorized (ID = 0)
@@ -232,7 +337,7 @@ exports.deleteCategory = (req, res) => {
 //                 if (moveErr) {
 //                     console.error("Error moving content:", moveErr);
 //                     req.flash('error', 'Could not move content before deletion.');
-//                     return res.redirect('/categories');
+//                     return res.redirect('/manageCategories');
 //                 }
 
 //                 console.log(`Moved ${contentRows.length} item(s) to Uncategorized.`);
@@ -245,7 +350,7 @@ exports.deleteCategory = (req, res) => {
 //             if (err) {
 //                 console.error("Image lookup error:", err);
 //                 req.flash('error', 'Server error');
-//                 return res.redirect('/categories');
+//                 return res.redirect('/manageCategories');
 //             }
 
 //             const imageFile = imgRows[0]?.categoryImage || null;
@@ -257,7 +362,7 @@ exports.deleteCategory = (req, res) => {
 //                 if (delErr) {
 //                     console.error("Delete error:", delErr);
 //                     req.flash('error', 'Could not delete category.');
-//                     return res.redirect('/categories');
+//                     return res.redirect('/manageCategories');
 //                 }
 
 //                 // Remove image file only if it's not default
@@ -270,7 +375,7 @@ exports.deleteCategory = (req, res) => {
 //                 }
 
 //                 req.flash('success', 'Category deleted successfully!');
-//                 res.redirect('/categories');
+//                 res.redirect('/manageCategories');
 //             });
 //         });
 //     });

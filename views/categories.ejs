@@ -6,7 +6,89 @@
   <title>RPEcoJourney | Categories</title>
   <link rel="stylesheet" href="/css/style.css">
   <style>
+    body {
+      background-image: url("/images/background.png");
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;
+      background-size: 100% auto;
+      background-attachment: fixed;
+      margin: 0; 
+      padding: 0;
+      font-family: 'Georgia', serif; 
+      color: #123524;
+    }
+    header h1 { 
+      font-size: 2.2em; 
+      font-weight: bold; 
+    }
+    main { 
+      padding: 60px 100px; 
+      text-align: center; 
+    }
+    h2 { 
+      font-style: italic; 
+      color: #1a4d2e; 
+      font-size: 2em; 
+    }
+    p { 
+      font-size: 1.2em; 
+      line-height: 1.7; 
+      max-width: 850px; 
+      margin: 0 auto; 
+    }
+    .intro { 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      flex-wrap: wrap; 
+      text-align: left; 
+      margin-bottom: 40px; 
+    }
+    .intro-text {
+      flex: 1;
+      min-width: 320px;
+      text-align: left;    /* Ensure left alignment for text */
+      margin-left: 60px;   /* Push both h2 and p right equally */
+    }
+    .intro-text h2 { 
+      margin-left: 430px;      /* Remove extra h2 left margin */
+      text-align: left;    /* Explicit left alignment for header */
+    }  
+    .intro img { 
+        width: 250px; 
+        border-radius: 10px; 
+        margin-left: 40px; 
+    }
+    hr { 
+      border: 0; 
+      border-top: 3px solid #1a4d2e; 
+      margin: 50px 0;
+    }
+    /* Container of all categories */
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 35px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
 
+/* Card layout */
+.category-card {
+  width: 100%;
+  max-width: 1100px;
+  background: white;
+  border-radius: 20px;
+  padding: 25px 40px;
+  margin: 40px auto;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.10);
+  transition: 0.25s ease;
     .flash-msg {
     padding: 12px 18px;
     border-radius: 6px;
@@ -97,103 +179,48 @@
   margin-left: 60px;   /* Push both h2 and p right equally */
 }
 
-.intro-text h2 { 
-  margin-left: 430px;      /* Remove extra h2 left margin */
-  text-align: left;    /* Explicit left alignment for header */
-}  
-  .intro img { 
-    width: 250px; 
-    border-radius: 10px; 
-    margin-left: 40px; 
-  }
-  hr { 
-    border: 0; 
-    border-top: 3px solid #1a4d2e; 
-    margin: 50px 0; }
+.category-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
 
-  /* Category row */
-  .category {
-    display: flex; 
-    justify-content: center; 
-    align-items: center;
-    gap: 60px; 
-    margin: 60px auto; 
-    text-align: left;
-    width: 80%; 
-    max-width: 1100px;
-  }
-  .category div { 
-    flex: 1; 
-  }
-  .category img { 
-    width: 230px; 
-    height: 170px; 
-    object-fit: cover; 
-    border-radius: 12px; }
-  .category a { 
-    font-size: 2em; 
-    color: #1a4d2e; 
-    font-weight: bold; 
-    text-decoration: none; 
-  }
-  .category small { 
-    font-size: 1.2em; 
-    color: #2d6a4f; 
-  }
-  
-  /* Action buttons wrapper */
-  .category-actions {
-    margin-top: 12px;
-    display: flex;
-    gap: 10px;
-  }
+/* LEFT text column */
+.category-left {
+  max-width: 60%;
+}
 
-  /* -------- Edit Button -------- */
-  /* Force smaller size for Edit button */
-  .edit-btn {
-    font-size: 0.8rem !important;
-    font-weight: 500 !important;
-    padding: 4px 10px !important;
-    background-color: #f4a261;
-    color: #1a4d2e !important; 
-    border-radius: 6px;
-    display: inline-block;
-    width: auto !important;
-  }
+.category-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #123524;
+  text-decoration: none;
+}
 
-  .edit-btn:hover {
-    background-color: #e88b3d;
-  }
+.category-title:hover {
+  text-decoration: underline;
+}
 
-  /* -------- Delete Button -------- */
-  .delete-btn,
-  .delete-form button {
-    background-color: #e63946;
-    color: white;
-    font-size: 0.85em;
-    padding: 5px 12px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    transition: 0.25s ease;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
+.category-desc {
+  margin-top: 10px;
+  font-size: 1.25rem;
+  color: #2d6a4f;
+}
 
-  .delete-btn:hover,
-  .delete-form button:hover {
-    background-color: #cc2f3c;
-  }
+/* RIGHT image side */
+.category-img {
+  width: 260px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
 
-  footer { 
-    text-align: center; 
-    padding: 25px; 
-    font-size: 1.1em; 
-    color: #555; 
-  }
+    footer { 
+      text-align: center; 
+      padding: 25px; 
+      font-size: 1.1em; 
+      color: #555; 
+    }
   </style>
 </head>
 <body>
@@ -202,13 +229,6 @@
 
   <!-- Main Content -->
   <main>
-    <% if (flash('error').length > 0) { %>
-        <div class="alert alert-danger"><%= flash('error') %></div>
-    <% } %>
-
-    <% if (flash('success').length > 0) { %>
-        <div class="alert alert-success"><%= flash('success') %></div>
-    <% } %>
 
     <section class="intro">
       <div class="intro-text">
@@ -222,56 +242,50 @@
       <img src="/uploads/rp-green.png" alt="RP Green Plan">
     </section>
 
-    
-      <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
-
-        <!-- ADD CATEGORY BUTTON -->
-        <div class="add-category-wrapper">
-          <a href="/addCategory" class="add-category-btn">
-            + Add Category
-          </a>
-        </div>
-
-      <% } %>
-
     <hr>
 
     <% if (categories && categories.length) { %>
 
-      <% categories.forEach(c => { %>
+    <% categories.forEach(c => { %>
 
-        <section class="category">
-          <div>
+      <% if (c.categoryName === "Uncategorized") return; %>   <!-- SKIP THIS ONE - onnie for admin/manager -->
 
-            <!-- Link to single category page -->
-            <a href="/category/<%= c.categoryID %>/content"><%= c.categoryName %></a><br>
+      <div class="category-card">
 
+        <div class="category-left">
+          <a class="category-title" href="/category/<%= c.categoryID %>/content">
+            <%= c.categoryName %>
+          </a>
+
+          <p class="category-desc">
             <% if (c.categoryDescription) { %>
               <%= c.categoryDescription.split('.')[0] %>
             <% } %>
+          </p>
+        </div>
 
-            <!-- EDIT & DELETE BUTTONS -->
-            <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
-              <div class="category-actions">
-                <a href="/editCategory/<%= c.categoryID %>" class="edit-btn">✏ Edit</a>
+        <% 
+          let imgSrc;
+          if (!c.categoryImage) {
+            imgSrc = "/images/default.png";
+          } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
+            imgSrc = "/images/" + c.categoryImage;
+          } else {
+            imgSrc = "/uploads/" + c.categoryImage;
+          }
+        %>
 
-                <form id="deleteForm-<%= c.categoryID %>" 
-                      action="/deleteCategory/<%= c.categoryID %>" 
-                      method="POST" 
-                      class="delete-form">
-                  <button type="button" 
-                          class="delete-btn" 
-                          onclick="confirmDelete('<%= c.categoryID %>')">
-                    🗑 Delete
-                  </button>
-                </form>
-              </div>
-            <% } %>
+        <img 
+          src="<%= imgSrc %>" 
+          alt="<%= c.categoryName %>" 
+          class="category-img"
+          loading="lazy"
+          onerror="this.src='/images/default.png'"
+        >
 
-          </div>
+      </div>
 
-          <% 
-            let imgSrc;
+    <% }) %>
 
             if (!c.categoryImage) {
               imgSrc = "/uploads/default.png";
@@ -298,71 +312,6 @@
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
-
-  <!-- SweetAlert2 CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <script>
-    // SWEETALERT ADD & UPDATE CONFIRM
-      const successMsg = "<%= flashSuccess ? flashSuccess : '' %>";
-      const errorMsg   = "<%= flashError ? flashError : '' %>";
-
-      if (successMsg) {
-        Swal.fire({
-          icon: 'success',
-          title: successMsg.toLowerCase().includes('updated')
-                 ? 'Updated Successfully!'
-                 : successMsg.toLowerCase().includes('added')
-                 ? 'Category Added!'
-                 : 'Success!',
-          text: successMsg,
-          showConfirmButton: false,
-          timer: 2000
-        });
-      }
-
-      if (errorMsg) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: errorMsg,
-          confirmButtonText: 'OK'
-        });
-      }
-    </script>
-
-  <script>
-  // SWEETALERT DELETE CONFIRM
-  function confirmDelete(categoryID) {
-    Swal.fire({
-      title: "Delete category?",
-      text: "This action cannot be undone.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#e63946",
-      cancelButtonColor: "#6c757d",
-      confirmButtonText: "Yes, delete it"
-    }).then((result) => {
-      if (result.isConfirmed) {
-        document.getElementById(`deleteForm-${categoryID}`).submit();
-      }
-    });
-  }
-  </script>
-
-  <script>
-  // AUTO-HIDE FLASH MESSAGES
-  setTimeout(() => {
-    const flashMessages = document.querySelectorAll('.flash-msg');
-    flashMessages.forEach(msg => {
-      msg.style.transition = 'opacity 0.5s';
-      msg.style.opacity = '0';
-
-      setTimeout(() => msg.remove(), 500);
-    });
-  }, 3500);
-  </script>
-
 
 </body>
 </html>

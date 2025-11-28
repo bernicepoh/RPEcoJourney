@@ -143,8 +143,12 @@ app.post("/comment/edit/:commentID", checkAuthenticated, contentController.editC
 app.get("/comment/delete/:commentID", checkAuthenticated, contentController.deleteComment);
 
 // Category routes
-app.get('/categories', categoryController.getCategories);       // List all categories
+app.get('/categories', categoryController.getCategories);       // List all categories 
 app.get('/categories/:id', categoryController.getCategory);     // View single category
+
+// Admin/Manager List All Categories
+app.get('/manageCategories', allowAdminOrManager, categoryController.getManageCategories)
+
 // ADD Category
 app.get('/addCategory', allowAdminOrManager, categoryController.addCategoryForm);
 app.post('/addCategory', allowAdminOrManager, upload.single('categoryImage'), categoryController.addCategory);
