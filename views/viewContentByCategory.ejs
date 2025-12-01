@@ -169,10 +169,10 @@ const heroBg = (category && category.categoryImage)
 
 <!-- MANAGER SPOTLIGHT -->
 <section class="spotlight">
-  <img class="spotlight__avatar" src="/uploads/manager-irdina.png">
+  <img class="spotlight__avatar" src="/uploads/<%= category.categoryOwnerPic %>">
   <div>
     <h4 style="margin:0; font-weight:700; font-style:italic;">
-      Ms <%= category.categoryOwnerName %> —
+      <%= category.categoryOwnerName %> —
       Head of <%= category.categoryName %> Sustainability
     </h4>
     <p style="margin:0;">

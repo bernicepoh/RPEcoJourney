@@ -9,7 +9,7 @@
       font-family: 'Poppins', system-ui, sans-serif;
       margin: 0;
       padding: 0;
-      background: url("/uploads/quizBackground.jpg") no-repeat center center fixed;
+      background: url("/uploads/background.png") no-repeat center center fixed;
       background-size: cover;
       min-height: 100vh;
       position: relative;
@@ -204,7 +204,7 @@
 
   <!-- PLAYER STATS -->
   <div class="bottom-player-bar">
-    <img src="/uploads/<%= user.image %>" onerror="this.src='/images/defaultpfp.png'">
+    <img src="/uploads/<%= user.image %>" onerror="this.src='/uploads/defaultpfp.png'">
     <div class="player-info-text">
       <div class="player-name"><%= user.userName %></div>
       <div class="player-score">Score: <%= score %></div>
