@@ -96,6 +96,44 @@
     }
 
     .btn-next:hover { background: #6f945a; }
+
+    /* PLAYER BAR */
+    .bottom-player-bar {
+      width: 95%;
+      margin: 25px auto 0 auto;
+      background: #8ccf78;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 18px;
+      border-radius: 18px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .bottom-player-bar img {
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid white;
+    }
+
+    .player-info-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      color: #1f4a24;
+    }
+
+    .player-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .player-score {
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
   </style>
 </head>
 
@@ -107,23 +145,32 @@
 
   <div class="question-box">
 
-    <!-- 🟢 Question Number (now fixed!) -->
+    <!-- TIMER -->
+    <div id="timer" style="
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #c0392b;
+      text-align: right;
+      margin-bottom: 10px;">
+    </div>
+
+    <!-- QUESTION NUMBER -->
     <div class="question-number">
       Question <%= (questionIndex || 0) + 1 %> of <%= totalQuestions %>
     </div>
 
+    <!-- QUESTION TEXT -->
     <div class="question-text"><%= question.question %></div>
 
     <% if (!feedback) { %>
 
-      <!-- 🟢 Answering Form -->
+      <!-- ANSWERING FORM -->
       <form id="quizForm" action="/quiz/game/answer" method="POST">
         <input type="hidden" name="quizID" value="<%= question.quizID %>">
         <input type="hidden" name="categoryID" value="<%= categoryID %>">
         <input type="hidden" name="setNumber" value="<%= setNumber %>">
-        
-        <!-- 🟢 NEW FIX: REAL QUESTION INDEX -->
         <input type="hidden" name="questionIndex" value="<%= questionIndex || 0 %>">
+        <input type="hidden" name="timeTaken" id="timeTaken">
 
         <% for (let i = 1; i <= 4; i++) { %>
           <label class="option">
@@ -137,7 +184,6 @@
 
     <% } else { %>
 
-      <!-- Feedback view -->
       <% for (let i = 1; i <= 4; i++) { %>
         <div class="option 
           <% if (i === question.correctOption) { %> correct 
@@ -146,24 +192,139 @@
         </div>
       <% } %>
 
-      <!-- 🟢 NEXT or FINISH BUTTON -->
-      <% if (nextQuizID && (questionIndex + 1) < totalQuestions) { %>
-        <a href="/quiz/game/next/<%= nextQuizID %>/<%= categoryID %>/<%= setNumber %>?index=<%= questionIndex + 1 %>"class="btn-next">Next Question →</a>
-        
-        <% } else { %>
-          <a href="/quiz/game/complete/<%= categoryID %>/<%= setNumber %>"
-            class="btn-next">Finish Quiz →</a>
-      
+      <% if ((questionIndex + 1) < totalQuestions) { %>
+        <a href="/quiz/game/next/0/<%= categoryID %>/<%= setNumber %>?index=<%= questionIndex + 1 %>" class="btn-next">Next Question →</a>
+      <% } else { %>
+        <a href="/quiz/game/complete/<%= categoryID %>/<%= setNumber %>" class="btn-next">Finish Quiz →</a>
       <% } %>
-
 
     <% } %>
 
   </div>
+
+  <!-- PLAYER STATS -->
+  <div class="bottom-player-bar">
+    <img src="/uploads/<%= user.image %>" onerror="this.src='/images/defaultpfp.png'">
+    <div class="player-info-text">
+      <div class="player-name"><%= user.userName %></div>
+      <div class="player-score">Score: <%= score %></div>
+    </div>
+  </div>
+
 </div>
+
+<!-- ⭐ SWEETALERT2 POPUP -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  <% if (showStreakPopup) { %>
+    Swal.fire({
+      title: "🔥 3 in a row!",
+      text: "Amazing job! Bonus XP awarded!",
+      icon: "success",
+      confirmButtonText: "Continue",
+      allowOutsideClick: false
+    });
+  <% } %>
+
+  // Show PERFECT SCORE alert when user clicks the Finish Quiz link
+  (function() {
+    const finishLink = document.querySelector('a[href*="/quiz/game/complete"]');
+    if (!finishLink) return;
+
+    finishLink.addEventListener('click', function (e) {
+      // Safely get server-rendered values
+      const totalQuestions = Number(<%= JSON.stringify(totalQuestions || 0) %>);
+      const currentScore = Number(<%= JSON.stringify(score || 0) %>);
+
+      // Base points per correct answer is 10. If currentScore is at least
+      // totalQuestions * 10 then the user answered all questions correctly.
+      if (totalQuestions > 0 && currentScore >= (totalQuestions * 10)) {
+        e.preventDefault();
+        Swal.fire({
+          title: "PERFECT SCORE! 🔥",
+          text: "You didn’t miss a single question. WOW!",
+          icon: "success",
+          confirmButtonText: "See Results",
+          allowOutsideClick: false
+        }).then(() => {
+          window.location.href = finishLink.href;
+        });
+      }
+      // otherwise allow the link to navigate normally
+    });
+  })();
+
+});
+</script>
+
+<!-- TIMER SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const quizTimeLimit = Number(<%= JSON.stringify(timeLimit) %>);
+  const timerDisplay = document.getElementById("timer");
+  const form = document.getElementById("quizForm");
+  const timeTakenInput = document.getElementById("timeTaken");
+
+  if (!form) return;
+
+  //disable submit during silent delay to avoid early submits
+  const submitBtn = form.querySelector('button[type="submit"]');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.6';
+  }
+
+  // Silent delay (no visible countdown). After delay, start visible timer.
+  const SILENT_DELAY_MS = 5000; // 5 seconds
+
+  // Start the visible countdown after the silent delay
+  setTimeout(() => {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+    }
+
+    // show initial time immediately when countdown starts (use DB `timeLimit`)
+    if (!Number.isFinite(quizTimeLimit)) {
+      console.error('quizPage: missing or invalid `timeLimit` for question', <%= JSON.stringify(question.quizID) %>);
+      timerDisplay.textContent = 'Timer unavailable';
+      return;
+    }
+
+    let timeRemaining = quizTimeLimit;
+    timerDisplay.textContent = `Time Left: ${timeRemaining} seconds`;
+    if (timeTakenInput) timeTakenInput.value = 0;
+
+    // each second decrement then display (avoids negative immediately)
+    const countdown = setInterval(() => {
+      timeRemaining = timeRemaining - 1;
+
+      // Update hidden input with seconds elapsed (timeTaken)
+      const secondsElapsed = quizTimeLimit - timeRemaining;
+      if (timeTakenInput) timeTakenInput.value = secondsElapsed;
+
+      timerDisplay.textContent = `Time Left: ${timeRemaining} seconds`;
+
+      if (timeRemaining <= 0) {
+        clearInterval(countdown);
+        form.submit();
+      }
+    }, 1000);
+
+  }, SILENT_DELAY_MS);
+
+});
+</script>
+
 
 </body>
 </html>
+
+
+
 
 
 
