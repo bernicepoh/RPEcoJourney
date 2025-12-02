@@ -16,9 +16,6 @@ exports.getContentByCategory = (req, res) => {
                     cat.categoryName,
                     cat.categoryDescription,
                     cat.categoryImage,
-                    cat.userID AS categoryOwnerID,
-                    u.userName AS categoryOwnerName,
-                    u.profilePic AS categoryOwnerPic,
 
                     /* Total like count */
                     (SELECT COUNT(*) 
@@ -67,7 +64,7 @@ exports.getContentByCategory = (req, res) => {
                 const categoryInfo = {
                     categoryName: catRows[0].categoryName,
                     categoryDescription: catRows[0].categoryDescription,
-                    categoryImage: catRows[0].categoryImage
+                    categoryImage: catRows[0].categoryImage,
                 };
                 res.render('viewContentByCategory', {
                     category: categoryInfo,

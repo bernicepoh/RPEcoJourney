@@ -169,10 +169,11 @@ const heroBg = (category && category.categoryImage)
 
 <!-- MANAGER SPOTLIGHT -->
 <section class="spotlight">
-  <img class="spotlight__avatar" src="/images/manager-irdina.png">
+  <img class="spotlight__avatar" src="/uploads/<%= category.categoryOwnerPic %>">
   <div>
     <h4 style="margin:0; font-weight:700; font-style:italic;">
-      MS Irdina — Head of <%= category ? category.categoryName : "" %> Sustainability
+      <%= category.categoryOwnerName %> —
+      Head of <%= category.categoryName %> Sustainability
     </h4>
     <p style="margin:0;">
       Oversees this category in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
