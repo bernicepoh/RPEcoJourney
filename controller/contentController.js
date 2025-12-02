@@ -31,7 +31,20 @@ exports.getContentByCategory = (req, res) => {
                     FROM engagement e 
                     WHERE e.contentID = c.contentID 
                     AND e.userID = ? 
-                    AND e.likes = 1) AS userLiked
+                    AND e.likes = 1) AS userLiked,
+
+                    /* Total comment count */
+                    (SELECT COUNT(*) 
+                    FROM engagement e
+                    WHERE e.contentID = c.contentID 
+                    AND e.comments IS NOT NULL 
+                    AND e.comments != '') AS commentCount
+
+                    /* Total share count */
+                    (SELECT SUM(shareCount)
+                    FROM engagement e
+                    WHERE e.contentID = c.contentID) AS totalShares
+
                 FROM content c
                 JOIN category cat
                     ON c.categoryID = cat.categoryID
@@ -41,6 +54,7 @@ exports.getContentByCategory = (req, res) => {
 
     db.query(sql, [userID, categoryID], (error, results) => {
         if (error) {
+            console.log("🔥 SQL ERROR:", error);
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
@@ -296,6 +310,41 @@ exports.postComment = async (req, res) => {
     }
 };
 
+// ============================
+// SHARE BUTTON
+// ============================
+exports.trackShare = (req, res) => {
+    const userID = req.session.user.userID;
+    const contentID = req.params.contentID;
+
+    const sql = `
+        UPDATE engagement
+        SET shareCount = shareCount + 1
+        WHERE userID = ? AND contentID = ?
+        LIMIT 1
+    `;
+
+    const insertSql = `
+        INSERT INTO engagement (userID, contentID, shareCount)
+        VALUES (?, ?, 1)
+    `;
+
+    // First try to update existing row
+    db.query(sql, [userID, contentID], (err, result) => {
+        if (err) return res.status(500).json({ success: false });
+
+        if (result.affectedRows === 0) {
+            // No row exists → insert new one
+            db.query(insertSql, [userID, contentID], (err2) => {
+                if (err2) return res.status(500).json({ success: false });
+                return res.json({ success: true });
+            });
+        } else {
+            // Updated existing row
+            return res.json({ success: true });
+        }
+    });
+};
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;

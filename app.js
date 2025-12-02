@@ -146,6 +146,14 @@ app.get("/comment/delete/:commentID", checkAuthenticated, contentController.dele
 app.get('/categories', categoryController.getCategories);       // List all categories 
 app.get('/categories/:id', categoryController.getCategory);     // View single category
 
+// Share Button Route
+// Detect ngrok URL automatically
+app.get('/ngrok-url', (req, res) => {
+    const ngrokUrl = process.env.NGROK_URL || null;
+    res.json({ url: ngrokUrl });
+});
+app.post("/share/:contentID", checkAuthenticated, contentController.trackShare);
+
 // Admin/Manager List All Categories
 app.get('/manageCategories', allowAdminOrManager, categoryController.getManageCategories)
 
