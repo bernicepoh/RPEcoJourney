@@ -123,6 +123,42 @@
       border-radius: 12px;
     }
 
+    .engagement-bar {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-top: 10px;
+    }
+
+    .eng-section {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #ffffffc9;
+        padding: 6px 12px;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px #0001;
+        transition: 0.2s;
+    }
+
+    .eng-section:hover {
+        background: #f2f2f2;
+    }
+
+    .eng-section button {
+        border: none;
+        background: none;
+        font-size: 14px;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .eng-section .count {
+        font-weight: 600;
+        color: #444;
+        font-size: 14px;
+    }
+
     .back-link {
       display: inline-block;
       margin-top: 50px;
@@ -190,7 +226,7 @@ const heroBg = (category && category.categoryImage)
         <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
           <img src="/uploads/<%= contentList[i].contentFile %>">
         <% } else if (ext === 'pdf') { %>
-          <a href="/uploads/<%= contentList[i].contenc1c1c11111tFile %>" target="_blank">
+          <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
             <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
           </a>
         <% } else if (['doc','docx'].includes(ext)) { %>
@@ -221,35 +257,46 @@ const heroBg = (category && category.categoryImage)
 
             <p class="mb-2" style="font-style:italic;color:#155f39;font-size:1.03em;"><%= contentList[i].contentDescription.split('.')[0] + '.' %></p>
 
-            <div class="d-flex align-items-center">
-            <!-- LIKE BUTTON -->
-            <button class="like-btn btn btn-light btn-sm me-2" 
-                    data-content-id="<%= contentList[i].contentID %>"
-                    style="display:flex;align-items:center;gap:6px;">
-              <span class="heart-icon"><%= contentList[i].userLiked ? "❤️" : "🤍" %></span>
-              <span class="like-text">Like</span>
-            </button>
+            <div class="engagement-bar">
+            <div class="eng-section">
 
+              <!-- LIKE BUTTON -->
+                <button class="like-btn" data-content-id="<%= contentList[i].contentID %>">
+                    <span class="heart-icon"><%= contentList[i].userLiked ? "❤️" : "🤍" %></span>
+                    Like
+                </button>
+            
             <!-- LIKE COUNT -->
-            <span class="like-count" style="margin-right: 10px;" 
-                  data-content-id="<%= contentList[i].contentID %>">
-                <%= contentList[i].likeCount %> likes
-            </span>
+                    <span class="count"><%= contentList[i].likeCount %></span>
+            </div>
 
               <!-- COMMENT BUTTON -->
-            <a href="/content/<%= contentList[i].contentID %>" class="btn btn-light btn-sm me-2">
-              💬 Comment
-            </a>
+            <div class="eng-section">
+                <button class="comment-btn" onclick="window.location.href='/content/<%= contentList[i].contentID %>#comments'">
+                    💬 Comment
+                </button>
+                
+                <!-- COMMENT COUNT -->
+                <span class="count"><%= contentList[i].commentCount %></span>
+            </div>
 
-            <!-- Placeholder: Comment / Share (future) -->
+            <!-- SHARE BUTTON -->
+            <div class="eng-section">
+                    <button class="share-btn" data-content-id="<%= contentList[i].contentID %>">
+                        ↗️ Share
+                    </button>
+                    
+                    <!-- SHARE COUNT -->
+                    <span class="count"><%= contentList[i].totalShares || 0 %></span>
+                </div>
+            </div>
             
-            <button class="btn btn-light btn-sm" title="Share" style="margin-right: 10px;">↗️</button>
+            <!-- DELETE BUTTON (Admin/Manager only) -->
             <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
               <form action="/deleteContent/<%= contentList[i].contentID %>" method="POST" style="display:inline;">
                 <button type="submit" class="btn btn-light btn-sm" onclick="return confirm('Are you sure you want to delete this content?');" title="Delete" aria-label="Delete">🗑️</button>
               </form>
             <% } %>  
-          </div>
           </div>
         </div>
       <% } %>
@@ -309,6 +356,60 @@ const heroBg = (category && category.categoryImage)
       });
     });
   </script>
+
+  <script>
+  async function getBaseURL() {
+      try {
+          const res = await fetch('/ngrok-url');
+          const data = await res.json();
+
+          if (data.url) {
+              return data.url;  // Use ngrok URL from backend
+          }
+      } catch (err) {
+          console.log("No ngrok URL found, using local");
+      }
+
+      // fallback for localhost mode
+      return window.location.origin;
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+      const baseURL = await getBaseURL();
+
+      document.querySelectorAll('.share-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+              const contentID = btn.dataset.contentId;
+              const shareURL = `${baseURL}/content/${contentID}`;
+
+              // Native share (phone)
+              if (navigator.share) {
+                  try {
+                      await navigator.share({
+                          title: "RPEcoJourney Content",
+                          text: "Check out this sustainability content!",
+                          url: shareURL
+                      });
+
+                      // send to backend for share tracking
+                      await fetch(`/share/${contentID}`, { method: "POST" });
+
+                  } catch (err) {
+                      console.log("Share cancelled");
+                  }
+              } else {
+                  // Desktop fallback - Copy link
+                  await navigator.clipboard.writeText(shareURL);
+                  alert("Link copied!");
+
+                  // also notify backend tracking
+                  await fetch(`/share/${contentID}`, { method: "POST" });
+              }
+          });
+      });
+  });
+  </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   
   <footer>
