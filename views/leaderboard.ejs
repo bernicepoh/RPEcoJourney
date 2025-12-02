@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard | RPEcoJourney</title>
+
+    <style>
+        body {
+            background: url("/uploads/background.png") no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .leaderboard-container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 25px;
+            padding: 30px 40px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.12);
+            backdrop-filter: blur(4px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 35px;
+            color: #1f4b2c;
+            font-weight: 800;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            background: #e3f6df;
+            padding: 8px;
+            border-radius: 40px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            gap: 5px;
+        }
+
+        .tab {
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #1f4b2c;
+            background: transparent;
+            transition: 0.3s;
+        }
+
+        .tab.active {
+            background: #69b578;
+            color: white;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 5px;
+            color: #1f4b2c;
+            font-size: 15px;
+            border-bottom: 2px solid #c8e8c3;
+        }
+
+        td {
+            padding: 12px 5px;
+            border-bottom: 1px solid #e4f2e1;
+            color: #1f4b2c;
+        }
+
+        .profile-pic {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+        }
+
+        .user-flex {
+            display: flex;
+            align-items: center;
+        }
+
+        .fire {
+            color: #ff5722;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+<%- include('partials/navbar') %>
+
+<div class="leaderboard-container">
+
+    <h1>LEADERBOARD</h1>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <div class="tab active">Overall</div>
+        <div class="tab">Monthly</div>
+        <div class="tab">Friends</div>
+    </div>
+
+    <!-- Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Level</th>
+                <th>XP</th>
+                <th>Streak</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        <% users.forEach((u, index) => { %>
+
+            <tr>
+                <!-- Rank -->
+                <td>
+                    <% if (index === 0) { %>
+                        🥇
+                    <% } else if (index === 1) { %>
+                        🥈
+                    <% } else if (index === 2) { %>
+                        🥉
+                    <% } else { %>
+                        <%= index + 1 %>
+                    <% } %>
+                </td>
+
+                <!-- User + Picture -->
+                <td>
+                    <div class="user-flex">
+                        <img class="profile-pic" src="/uploads/<%= u.image %>" alt="">
+                        <%= u.userName %>
+                    </div>
+                </td>
+
+                <!-- Level -->
+                <td>Lv <%= u.level %></td>
+
+                <!-- XP -->
+                <td><%= u.totalXP %> XP</td>
+
+                <!-- Streak -->
+                <td>
+                    <% if (u.streak > 0) { %>
+                        <span class="fire">🔥</span> <%= u.streak %>
+                    <% } else { %>
+                        —
+                    <% } %>
+                </td>
+            </tr>
+
+        <% }) %>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

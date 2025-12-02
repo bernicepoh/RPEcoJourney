@@ -285,6 +285,18 @@
     });
 </script>
 
+<script>
+  <% if (streakMissed === true) { %>
+    Swal.fire({
+      title: "Awww… You lost your streak 😢",
+      text: "Start fresh today and come back tomorrow to rebuild it! 🌱",
+      icon: "warning",
+      confirmButtonColor: "#28a745"
+    });
+  <% } %>
+</script>
+
+
 
 </body>
 </html>

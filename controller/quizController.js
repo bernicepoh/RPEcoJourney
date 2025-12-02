@@ -476,3 +476,224 @@ exports.startAsGuest = (req, res) => {
   });
 };
 
+/* =======================================================
+   MANAGE QUIZ — SHOW CATEGORIES FIRST
+======================================================= */
+exports.manageQuizCategories = (req, res) => {
+  const sql = `SELECT * FROM category ORDER BY categoryName`;
+
+  db.query(sql, (err, categories) => {
+    if (err) return res.status(500).send("Database error (manageQuizCategories)");
+    res.render("manageQuizCategories", { categories });
+  });
+};
+
+/* =======================================================
+   MANAGE QUIZ — SHOW SETS IN SELECTED CATEGORY
+======================================================= */
+exports.manageQuizSets = (req, res) => {
+  const categoryID = req.params.categoryID;
+
+  const sql = `
+    SELECT 
+      setNumber,
+      quizTitle AS title,
+      cardColor,
+      requiredLevel,
+      COUNT(*) AS questionCount
+    FROM quiz
+    WHERE categoryID = ?
+    GROUP BY setNumber, quizTitle, cardColor, requiredLevel
+    ORDER BY setNumber ASC
+  `;
+
+  db.query(sql, [categoryID], (err, sets) => {
+    if (err) return res.status(500).send("Database error (manageQuizSets)");
+
+    res.render("manageQuizSets", {
+      categoryID,
+      sets
+    });
+  });
+};
+
+/* =======================================================
+   MANAGE QUIZ — SHOW QUESTIONS IN ONE SET
+======================================================= */
+exports.manageQuizQuestions = (req, res) => {
+  const { categoryID, setNumber } = req.params;
+
+  const sql = `
+    SELECT 
+      q.quizID,
+      q.question,
+      q.setNumber,
+      c.categoryName
+    FROM quiz q
+    JOIN category c ON q.categoryID = c.categoryID
+    WHERE q.categoryID = ? AND q.setNumber = ?
+    ORDER BY q.quizID ASC
+  `;
+
+  db.query(sql, [categoryID, setNumber], (err, questions) => {
+    if (err) return res.status(500).send("Database error (manageQuizQuestions)");
+
+    res.render("manageQuizQuestions", {
+      categoryID,
+      setNumber,
+      questions,
+      flashSuccess: req.flash("success"),
+      flashError: req.flash("error")
+    });
+  });
+};
+
+exports.updateQuiz = (req, res) => {
+  const quizID = req.params.quizID;
+
+  const {
+    question,
+    option1,
+    option2,
+    option3,
+    option4,
+    correctOption,
+    explanation,
+    timeLimit,
+    quizTitle,
+    cardColor
+  } = req.body;
+
+  // 1) Update THIS single question
+  const updateSingleSql = `
+    UPDATE quiz SET
+      question = ?,
+      option1 = ?,
+      option2 = ?,
+      option3 = ?,
+      option4 = ?,
+      correctOption = ?,
+      explanation = ?,
+      timeLimit = ?,
+      quizTitle = ?,
+      cardColor = ?
+    WHERE quizID = ?
+  `;
+
+  db.query(updateSingleSql, [
+    question,
+    option1,
+    option2,
+    option3,
+    option4,
+    correctOption,
+    explanation,
+    timeLimit,
+    quizTitle,
+    cardColor,
+    quizID
+  ], (err) => {
+
+    if (err) {
+      console.log(err);
+      req.flash("error", "Failed to update quiz question.");
+      return res.redirect(`/editQuiz/${quizID}`);
+    }
+
+    // 2) Get categoryID + setNumber first
+    const getSetInfo = `SELECT categoryID, setNumber FROM quiz WHERE quizID = ?`;
+
+    db.query(getSetInfo, [quizID], (err2, rows) => {
+      if (err2 || rows.length === 0) {
+        req.flash("error", "Could not find quiz set info.");
+        return res.redirect(`/editQuiz/${quizID}`);
+      }
+
+      const { categoryID, setNumber } = rows[0];
+
+      // 3) Update WHOLE SET TITLE + COLOR
+      const updateSetSql = `
+        UPDATE quiz
+        SET quizTitle = ?, cardColor = ?
+        WHERE categoryID = ? AND setNumber = ?
+      `;
+
+      db.query(updateSetSql, [
+        quizTitle,
+        cardColor,
+        categoryID,
+        setNumber
+      ], (err3) => {
+
+        if (err3) {
+          console.log(err3);
+          req.flash("error", "Updated question but failed to update set title/color.");
+          return res.redirect(`/manageQuizQuestions/${categoryID}/${setNumber}`);
+        }
+
+        req.flash("success", "Quiz updated successfully!");
+        res.redirect(`/manageQuizQuestions/${categoryID}/${setNumber}`);
+      });
+    });
+  });
+};
+
+
+
+
+/* =======================================================
+   EDIT QUIZ QUESTION (LOAD FORM)
+======================================================= */
+exports.editQuizForm = (req, res) => {
+  const quizID = req.params.quizID;
+
+  const sql = `SELECT * FROM quiz WHERE quizID = ?`;
+
+  db.query(sql, [quizID], (err, rows) => {
+    if (err) return res.send("Database error loading quiz question");
+    if (rows.length === 0) return res.send("Quiz question not found");
+
+    const question = rows[0];
+
+    res.render("editQuiz", { question });
+  });
+};
+
+exports.deleteQuiz = (req, res) => {
+    const quizID = req.params.quizID;
+
+    // MUST fetch categoryID + setNumber BEFORE deleting
+    const getSql = `SELECT categoryID, setNumber FROM quiz WHERE quizID = ?`;
+
+    db.query(getSql, [quizID], (err, rows) => {
+        if (err || rows.length === 0) {
+            req.flash("error", "Quiz question not found.");
+            return res.redirect("back");
+        }
+
+        const { categoryID, setNumber } = rows[0];
+
+        const deleteSql = `DELETE FROM quiz WHERE quizID = ?`;
+
+        db.query(deleteSql, [quizID], (err2) => {
+            if (err2) {
+                req.flash("error", "Failed to delete question.");
+                return res.redirect("back");
+            }
+
+            req.flash("success", "Question deleted successfully!");
+
+            return res.redirect(`/manageQuizQuestions/${categoryID}/${setNumber}`);
+        });
+    });
+};
+
+
+
+
+
+
+
+ 
+
+

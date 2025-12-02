@@ -3,78 +3,89 @@
 <head>
   <meta charset="UTF-8">
   <title>Register</title>
-  <link rel="stylesheet" href="/styles.css"> <!-- optional -->
+
   <style>
     body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  margin: 0;
-  font-family: 'Georgia', serif;
-  background-image: url("/uploads/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
-}
-
-.card {
-  margin: auto;          /* Center vertically and horizontally */
-  background-color: #fff;
-  padding: 30px 40px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  width: 400px;
-}
-
-    h1 {
-      text-align: center;
-      margin-bottom: 25px;
+      font-family: 'Georgia', serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
     }
 
-    form div {
+    /* LEFT SIDE (same as login) */
+    .left-panel {
+      width: 50%;
+      background: url("/uploads/login.png") no-repeat center center;
+      background-size: cover;
+      position: relative;
+      padding-left: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* DARK OVERLAY */
+    .left-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 40, 0, 0.45);
+      backdrop-filter: blur(1px);
+    }
+
+    .left-panel * {
+      position: relative;
+      color: white;
+    }
+
+    .left-panel h1 {
+      font-size: 60px;
+      font-weight: 700;
+      margin-bottom: 30px;
+    }
+
+    .left-panel p {
+      font-size: 22px;
+      width: 75%;
+      line-height: 1.5;
       margin-bottom: 15px;
     }
 
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: bold;
+    /* RIGHT SIDE */
+    .right-panel {
+      width: 50%;
+      background: #e8dfcf;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
     }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      transition: border-color 0.2s;
+    .register-box {
+      width: 80%;
+      max-width: 450px;
+      animation: fadeIn 0.6s ease-in-out;
     }
 
-    input:focus {
-      border-color: #007bff;
-      outline: none;
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #007bff;
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    button:hover {
-      background-color: #0056b3;
+    h1 {
+      text-align: center;
+      font-size: 34px;
+      font-weight: 800;
+      margin-bottom: 25px;
+      color: #2a2a2a;
     }
 
     .message {
       margin-bottom: 15px;
-      padding: 10px;
+      padding: 12px;
       border-radius: 8px;
+      font-size: 15px;
     }
 
     .message.error {
@@ -87,123 +98,192 @@
       color: #155724;
     }
 
-    .login-link {
-      text-align: center;
-      margin-top: 20px;
-    }
-
-    .login-link a {
-      color: #007bff;
-      text-decoration: none;
-    }
-
-    .login-link a:hover {
-      text-decoration: underline;
-    }
-
-    .error {
-      border-color: red !important;
+    .field-wrapper {
+      margin-bottom: 18px;
     }
 
     .field-wrapper.error {
-      border: 2px solid rgba(255,0,0,0.15);
-      padding: 8px;
-      border-radius: 8px;
-      background-color: #fff6f6;
+      border: 2px solid rgba(255, 0, 0, 0.2);
+      padding: 10px;
+      border-radius: 10px;
+      background: #fff6f6;
     }
 
-    .field-error {
-      color: red;
-      font-size: 12px;
-      margin-top: 5px;
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 15px;
     }
 
-    .confirm-status {
-      margin-top: 5px;
+    input {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #ccc;
+      border-radius: 25px;
+      font-size: 15px;
+      transition: border-color 0.2s;
+    }
+
+    input:focus {
+      border-color: #1b5e20;
+      outline: none;
+    }
+
+    input.error {
+      border-color: red !important;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #1b5e20;
+      border: none;
+      color: #fff;
+      border-radius: 25px;
       font-size: 18px;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #134818;
+    }
+
+    .login-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 15px;
+    }
+
+    .login-link a {
+      text-decoration: underline;
+      color: #004d00;
     }
 
     footer {
-      text-align: center; 
-      padding: 25px; 
-      font-size: 1.1em; 
-      color: #555; 
+      text-align: center;
+      padding: 18px;
+      font-size: 1em;
+      color: #555;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
     }
+
+    .confirm-status {
+      margin-left: 5px;
+      font-size: 18px;
+    }
+
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <h1>Register</h1>
 
-    <!-- Display errors -->
-    <% if (errors && errors.length > 0) { %>
-      <% errors.forEach(err => { %>
-        <div class="message error"><%= err %></div>
-      <% }) %>
-    <% } %>
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <h1>Join RPEcoJourney</h1>
+    <p>Start your sustainability adventure with XP, badges & missions</p>
+    <p>Create an account to begin your EcoJourney 🌱</p>
+  </div>
 
-    <!-- Display success messages -->
-    <% if (messages && messages.length > 0) { %>
-      <% messages.forEach(msg => { %>
-        <div class="message success"><%= msg %></div>
-      <% }) %>
-    <% } %>
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="register-box">
 
-    <%
-    const fieldErrors = {};
-    if (errors) {
-      errors.forEach(err => {
-        if (err.includes('Gmail')) fieldErrors.email = err;
-        else if (err.includes('Password must')) fieldErrors.password = err;
-        else if (err.includes('Passwords do not match')) fieldErrors.confirmPassword = err;
-        else if (err.includes('8-digit')) fieldErrors.contactNo = err;
-        else if (err.includes('All fields')) fieldErrors.all = err;
-        else if (err.includes('Email is already in use')) fieldErrors.email = 'EMAIL TAKEN';
-        else if (err.includes('Contact number is already in use')) fieldErrors.contactNo = 'CONTACT TAKEN';
-        else if (err.toLowerCase().includes('username')) fieldErrors.userName = err;
-      });
-    }
-    %>
+      <h1>Create Account</h1>
 
-    <!-- Registration Form -->
-    <form action="/register" method="POST">
-      <div class="field-wrapper <%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>">
-        <label for="userName">Username:</label>
-        <input type="text" id="userName" name="userName" value="<%= formData?.userName || '' %>" placeholder="<%= fieldErrors.userName || fieldErrors.all || 'Enter username' %>" class="<%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>" required>
+      <!-- Display errors -->
+      <% if (errors && errors.length > 0) { %>
+        <% errors.forEach(err => { %>
+          <div class="message error"><%= err %></div>
+        <% }) %>
+      <% } %>
+
+      <!-- Display success messages -->
+      <% if (messages && messages.length > 0) { %>
+        <% messages.forEach(msg => { %>
+          <div class="message success"><%= msg %></div>
+        <% }) %>
+      <% } %>
+
+      <!-- ERROR PROCESSING (kept exactly as your original logic) -->
+      <%
+      const fieldErrors = {};
+      if (errors) {
+        errors.forEach(err => {
+          if (err.includes('Gmail')) fieldErrors.email = err;
+          else if (err.includes('Password must')) fieldErrors.password = err;
+          else if (err.includes('Passwords do not match')) fieldErrors.confirmPassword = err;
+          else if (err.includes('8-digit')) fieldErrors.contactNo = err;
+          else if (err.includes('All fields')) fieldErrors.all = err;
+          else if (err.includes('Email is already in use')) fieldErrors.email = 'EMAIL TAKEN';
+          else if (err.includes('Contact number is already in use')) fieldErrors.contactNo = 'CONTACT TAKEN';
+          else if (err.toLowerCase().includes('username')) fieldErrors.userName = err;
+        });
+      }
+      %>
+
+      <!-- REGISTRATION FORM -->
+      <form action="/register" method="POST">
+
+        <div class="field-wrapper <%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>">
+          <label for="userName">Username:</label>
+          <input type="text" id="userName" name="userName"
+            value="<%= formData?.userName || '' %>"
+            placeholder="<%= fieldErrors.userName || 'Enter username' %>"
+            class="<%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>" required>
+        </div>
+
+        <div class="field-wrapper <%= fieldErrors.email ? 'error' : '' %>">
+          <label for="email">Email:</label>
+          <input type="email" id="email" name="email"
+            value="<%= formData?.email || '' %>"
+            placeholder="<%= fieldErrors.email || 'Enter your email' %>"
+            class="<%= fieldErrors.email ? 'error' : '' %>" required>
+        </div>
+
+        <div class="field-wrapper <%= fieldErrors.password ? 'error' : '' %>">
+          <label for="password">Password:</label>
+          <input type="password" id="password" name="password"
+            placeholder="<%= fieldErrors.password || 'Enter password' %>"
+            class="<%= fieldErrors.password ? 'error' : '' %>" required>
+        </div>
+
+        <div class="field-wrapper <%= fieldErrors.confirmPassword ? 'error' : '' %>">
+          <label for="confirmPassword">Confirm Password:
+            <span id="confirmIcon" class="confirm-status"></span>
+          </label>
+          <input type="password" id="confirmPassword" name="confirmPassword"
+            placeholder="<%= fieldErrors.confirmPassword || 'Confirm password' %>"
+            class="<%= fieldErrors.confirmPassword ? 'error' : '' %>" required>
+        </div>
+
+        <div class="field-wrapper <%= fieldErrors.contactNo ? 'error' : '' %>">
+          <label for="contactNo">Contact Number:</label>
+          <input type="text" id="contactNo" name="contactNo"
+            value="<%= formData?.contactNo || '' %>"
+            placeholder="<%= fieldErrors.contactNo || 'Enter contact number' %>"
+            class="<%= fieldErrors.contactNo ? 'error' : '' %>">
+        </div>
+
+        <button type="submit">Register</button>
+      </form>
+
+      <div class="login-link">
+        <p>Already have an account? <a href="/">Login here</a></p>
       </div>
 
-      <div class="field-wrapper <%= fieldErrors.email ? 'error' : '' %>">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="<%= formData?.email || '' %>" placeholder="<%= fieldErrors.email || 'Enter your email' %>" class="<%= fieldErrors.email ? 'error' : '' %>" required>
-      </div>
-
-      <div class="field-wrapper <%= fieldErrors.password ? 'error' : '' %>">
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" placeholder="<%= fieldErrors.password || 'Enter password' %>" class="<%= fieldErrors.password ? 'error' : '' %>" required>
-      </div>
-
-      <div class="field-wrapper <%= fieldErrors.confirmPassword ? 'error' : '' %>">
-        <label for="confirmPassword">Confirm Password:</label>
-        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="<%= fieldErrors.confirmPassword || 'Confirm password' %>" class="<%= fieldErrors.confirmPassword ? 'error' : '' %>" required>
-      </div>
-
-      <div class="field-wrapper <%= fieldErrors.contactNo ? 'error' : '' %>">
-        <label for="contactNo">Contact Number:</label>
-        <input type="text" id="contactNo" name="contactNo" value="<%= formData?.contactNo || '' %>" placeholder="<%= fieldErrors.contactNo || 'Enter contact number' %>" class="<%= fieldErrors.contactNo ? 'error' : '' %>">
-      </div>
-
-      
-
-      <button type="submit">Register</button>
-    </form>
-
-    <div class="login-link">
-      <p>Already have an account? <a href="/">Login here</a></p>
     </div>
   </div>
+
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+
+  <!-- YOUR ORIGINAL JS KEPT EXACTLY SAME -->
   <script>
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
@@ -225,19 +305,19 @@
 
     confirmPassword.addEventListener('input', checkMatch);
     password.addEventListener('input', checkMatch);
-    
-   
+
     document.querySelectorAll('.field-wrapper input').forEach(input => {
       input.addEventListener('input', (e) => {
         const wrapper = e.target.closest('.field-wrapper');
         if (wrapper && wrapper.classList.contains('error')) {
           wrapper.classList.remove('error');
           e.target.classList.remove('error');
-        }
-      });
+        }}
+      );
     });
   </script>
-  
+
 </body>
 </html>
+
 
