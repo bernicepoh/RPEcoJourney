@@ -54,7 +54,8 @@ exports.getCheckInBoard = (req, res) => {
             user: {
                 ...req.session.user,
                 profilePhoto: progress.profilePhoto
-            }
+            }, 
+            streakMissed: req.query.miss === "true"
         });
     });
 };
@@ -130,6 +131,12 @@ exports.doCheckIn = (req, res) => {
 
             let newStreak = (last === yesterday) ? p.streak + 1 : 1;
 
+            //streak broken
+            let streakBroken= false;
+            if (newStreak === 1 && p.streak > 1) {
+                streakBroken = true;
+            }
+
             // XP logic
             const baseXP = 3;
             const streakBonus = Math.min(newStreak, 7);
@@ -154,7 +161,7 @@ exports.doCheckIn = (req, res) => {
                 if (err) return db.rollback(() => res.send("DB error"));
                 db.commit((err) => {
                     if (err) return db.rollback(() => res.send("DB error"));
-                    return res.redirect("/checkin-board");
+                    return res.redirect(`/checkin-board?miss=${streakBroken}`);
                 });
             });
 
