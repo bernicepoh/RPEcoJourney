@@ -272,9 +272,10 @@ const heroBg = (category && category.categoryImage)
 
               <!-- COMMENT BUTTON -->
             <div class="eng-section">
-                <button class="comment-btn">
+                <button class="comment-btn" onclick="window.location.href='/content/<%= contentList[i].contentID %>#comments'">
                     💬 Comment
                 </button>
+                
                 <!-- COMMENT COUNT -->
                 <span class="count"><%= contentList[i].commentCount %></span>
             </div>
@@ -284,6 +285,7 @@ const heroBg = (category && category.categoryImage)
                     <button class="share-btn" data-content-id="<%= contentList[i].contentID %>">
                         ↗️ Share
                     </button>
+                    
                     <!-- SHARE COUNT -->
                     <span class="count"><%= contentList[i].totalShares || 0 %></span>
                 </div>
