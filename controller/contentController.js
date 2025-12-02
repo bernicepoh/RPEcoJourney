@@ -41,7 +41,7 @@ exports.getContentByCategory = (req, res) => {
                     AND e.comments != '') AS commentCount,
 
                     /* Total share count */
-                    (SELECT SUM(shareCount)
+                    (SELECT SUM(share)
                     FROM engagement e
                     WHERE e.contentID = c.contentID) AS totalShares
 
@@ -319,13 +319,13 @@ exports.trackShare = (req, res) => {
 
     const sql = `
         UPDATE engagement
-        SET shareCount = shareCount + 1
+        SET share = share + 1
         WHERE userID = ? AND contentID = ?
         LIMIT 1
     `;
 
     const insertSql = `
-        INSERT INTO engagement (userID, contentID, shareCount)
+        INSERT INTO engagement (userID, contentID, share)
         VALUES (?, ?, 1)
     `;
 
