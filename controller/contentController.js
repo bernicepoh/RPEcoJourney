@@ -38,7 +38,7 @@ exports.getContentByCategory = (req, res) => {
                     FROM engagement e
                     WHERE e.contentID = c.contentID 
                     AND e.comments IS NOT NULL 
-                    AND e.comments != '') AS commentCount
+                    AND e.comments != '') AS commentCount,
 
                     /* Total share count */
                     (SELECT SUM(shareCount)
