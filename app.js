@@ -7,6 +7,7 @@ const homepageController = require('./controller/homepageController');
 const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
 const profileController = require('./controller/profileController');
+const leaderboardController = require('./controller/leaderboardController');
 const db = require('./db'); 
 
 const multer = require('multer');
@@ -222,6 +223,9 @@ app.post('/createQuiz', quizController.createQuiz);
 //CHECK IN DASHBOARD ROUTES
 app.get('/checkin-board', checkinController.getCheckInBoard);
 app.post('/do-checkin', checkinController.doCheckIn);
+
+//leaderboard 
+app.get('/leaderboard', leaderboardController.getLeaderboard);
 
 
 // Error route
