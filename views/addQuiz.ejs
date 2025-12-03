@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Add Quiz | RPEcoJourney</title>
-
   <style>
     body {
       background: url('/uploads/background.png') no-repeat center center fixed;
       background-size: cover;
+      font-family: 'Georgia', serif;
+      margin: 0;
+      padding: 0;
     }
 
     .add-quiz-wrapper {
+      display: flex;
+      gap: 40px;
       max-width: 1500px;
       margin: 40px auto;
       padding: 20px;
-      display: flex;
-      gap: 40px;
     }
 
+    /* LEFT MENU */
     .add-quiz-left {
       width: 300px;
       background: #e3f5e1;
@@ -37,8 +40,8 @@
       display: block;
       width: 100%;
       padding: 15px;
-      font-size: 1rem;
       margin-bottom: 12px;
+      font-size: 1rem;
       border-radius: 12px;
       border: 1px solid #60a85c;
       cursor: pointer;
@@ -58,6 +61,7 @@
       transform: translateX(5px);
     }
 
+    /* MAIN PANEL */
     .add-quiz-main {
       flex: 1;
     }
@@ -69,47 +73,33 @@
     }
 
     .quiz-card-preview {
-        width: 100%;
-        max-width: 420px;
-        border-radius: 25px;
-        padding: 0;
-        text-align: center;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.20);
-        background: none;
-        overflow: hidden;
-        margin-bottom: 25px;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 25px;
+      text-align: center;
+      overflow: hidden;
+      margin-bottom: 25px;
+      background: #fff;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      padding: 20px;
     }
-    
-    .quiz-card-title {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #0b2535;
-    }
-    
-    .quiz-card-meta {
-        font-size: 1rem;
-        color: #456a49;
-    }
-    
+
     .badge-row {
-        display: flex;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 12px;
-        padding-bottom: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
     }
-    
+
     .badge {
-        padding: 6px 12px;
-        background: #eaf7e9;
-        border-radius: 999px;
-        font-size: 0.85rem;
-        color: #1f4a24;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
     }
-    
+
     .badge.level {
-        background: #d3e6ff;
-        color: #1b3f66;
+      background: #d3e6ff;
+      color: #1b3f66;
     }
 
     .panel {
@@ -126,13 +116,11 @@
     }
 
     .panel label {
+      display: block;
       font-size: 1rem;
       margin-top: 15px;
-      display: block;
       color: #2f5b33;
     }
-
-    #questionsContainer { margin-top: 15px; }
 
     .question-block {
       background: #f6fbf6;
@@ -148,15 +136,14 @@
       color: #b73535;
       float: right;
       cursor: pointer;
-      margin-bottom: 10px;
       font-size: 0.95rem;
+      margin-bottom: 10px;
     }
 
     .bottom-row {
       margin-top: 35px;
       display: flex;
       justify-content: flex-end;
-      align-items: center;
     }
 
     .primary-btn {
@@ -169,40 +156,18 @@
       font-size: 1rem;
       transition: 0.25s;
     }
-
-    body {
-      margin-top: 0 ;
-      padding-top: top 0;
-    }
-
-    .add-quiz-wrapper {
-      margin-top:40px;
-    }
-
-    body { 
-      margin:0 ;
-      padding:0 ; 
-    }
-
-    .add-quiz-wrapper {
-      padding-left:0 ; 
-      padding-right: 0;
-    }
-
   </style>
 </head>
 
-
 <body>
-    <%- include('partials/navbar') %>
+<%- include('partials/navbar') %>
 
 <form action="/createQuiz" method="POST">
-
   <div class="add-quiz-wrapper">
 
+    <!-- LEFT MENU -->
     <div class="add-quiz-left">
       <h2>Quiz Builder</h2>
-
       <button type="button" class="menu-btn active" onclick="showPanel('titlePanel', this)">Add Title</button>
       <button type="button" class="menu-btn" onclick="showPanel('colorPanel', this)">Card Colour</button>
       <button type="button" class="menu-btn" onclick="showPanel('levelPanel', this)">Required Level</button>
@@ -211,36 +176,43 @@
       <button type="button" class="menu-btn" onclick="showPanel('timerPanel', this)">Timer</button>
     </div>
 
+    <!-- MAIN PANEL -->
     <div class="add-quiz-main">
 
       <div class="preview-section">
         <h3>Live Quiz Card Preview</h3>
-
         <div class="quiz-card-preview" id="previewCard">
-          <div class="quiz-card-title" id="previewTitle">Untitled Quiz</div>
-          <div class="quiz-card-meta" id="previewCategory">Category: Environmental</div>
-          <div class="quiz-card-meta" id="previewQuestions">Questions: 1</div>
-
+          <div id="previewTitle">Untitled Quiz</div>
+          <div id="previewCategory">Category: Environmental</div>
+          <div id="previewSet">Set: 1</div>
+          <div id="previewQuestions">Questions: 1</div>
           <div class="badge-row">
             <div class="badge level" id="previewLevel">Required Level: 1</div>
-            <div class="badge" id="previewTimer"> 15s / question</div>
+            <div class="badge" id="previewTimer">15s / question</div>
           </div>
         </div>
       </div>
 
-      <!-- TITLE -->
+      <!-- PANELS -->
       <div class="panel active-panel" id="titlePanel">
         <label>Quiz Title</label>
         <input type="text" name="title" required oninput="updateTitle(this.value)">
       </div>
 
-      <!-- COLOR -->
       <div class="panel" id="colorPanel">
         <label>Card Colour</label>
         <input type="color" name="cardColor" value="#b7e4c7" onchange="updateCardColor(this.value)">
       </div>
 
-      <!-- CATEGORY -->
+      <div class="panel" id="levelPanel">
+        <label>Required Level</label>
+        <select name="requiredLevel" onchange="updateLevel(this.value)">
+          <option value="1">Level 1</option>
+          <option value="2">Level 2</option>
+          <option value="3">Level 3</option>
+        </select>
+      </div>
+
       <div class="panel" id="categoryPanel">
         <label>Choose Category</label>
         <select name="categoryID" onchange="updateCategory(this)">
@@ -248,35 +220,16 @@
           <option value="2">Social</option>
           <option value="3">Governance</option>
         </select>
+        <label>Set Number</label>
+        <input type="number" name="setNumber" min="1" value="1" oninput="updateSetNumber(this.value)">
       </div>
 
-      <!-- LEVEL -->
-      <div class="panel" id="levelPanel">
-        <label>Required Level</label>
-        <select name="requiredLevel" onchange="updateLevel(this.value)">
-          <option value="1">Level 1</option>
-          <option value="2">Level 2</option>
-          <option value="3">Level 3</option>
-          <option value="4">Level 4</option>
-          <option value="5">Level 5</option>
-          <option value="6">Level 6</option>
-          <option value="7">Level 7</option>
-          <option value="8">Level 8</option>
-          <option value="9">Level 9</option>
-          <option value="10">Level 10</option>
-        </select>
-      </div>
-
-      <!-- QUESTIONS -->
       <div class="panel" id="questionPanel">
         <label>Multiple-Choice Questions</label>
-
         <div id="questionsContainer"></div>
-
         <button type="button" class="menu-btn" onclick="addQuestionBlock()">+ Add another question</button>
       </div>
 
-      <!-- TIMER -->
       <div class="panel" id="timerPanel">
         <label>Time Per Question (seconds)</label>
         <input type="number" min="5" max="120" name="timeLimit" value="15" oninput="updateTimer(this.value)">
@@ -292,69 +245,44 @@
   </div>
 </form>
 
-
 <script>
-
 function showPanel(id, btn) {
   document.querySelectorAll(".panel").forEach(p => p.classList.remove("active-panel"));
   document.getElementById(id).classList.add("active-panel");
-
   document.querySelectorAll(".menu-btn").forEach(b => b.classList.remove("active"));
   btn.classList.add("active");
 }
 
-function updateTitle(val) {
-  document.getElementById("previewTitle").textContent = val || "Untitled Quiz";
-}
-
-function updateCardColor(val) {
-  document.getElementById("previewCard").style.background = val;
-}
-
-function updateCategory(sel) {
-  const txt = sel.options[sel.selectedIndex].text;
-  document.getElementById("previewCategory").textContent = "Category: " + txt;
-}
-
-function updateLevel(val) {
-  document.getElementById("previewLevel").textContent = "Required Level: " + val;
-}
-
-function updateTimer(val) {
-  const v = val || 15;
-  document.getElementById("previewTimer").textContent = v + "s / question";
-}
+function updateTitle(val) { document.getElementById("previewTitle").textContent = val || "Untitled Quiz"; }
+function updateCardColor(val) { document.getElementById("previewCard").style.background = val; }
+function updateCategory(sel) { document.getElementById("previewCategory").textContent = "Category: " + sel.options[sel.selectedIndex].text; }
+function updateLevel(val) { document.getElementById("previewLevel").textContent = "Required Level: " + val; }
+function updateTimer(val) { document.getElementById("previewTimer").textContent = (val || 15) + "s / question"; }
+function updateSetNumber(val) { document.getElementById("previewSet").textContent = "Set: " + (val || "1"); }
 
 function addQuestionBlock() {
   const container = document.getElementById("questionsContainer");
-
   const block = document.createElement("div");
   block.className = "question-block";
-
   block.innerHTML = `
     <button type="button" class="remove-question-btn" onclick="removeQuestionBlock(this)">Remove</button>
-
     <label>Question Text</label>
     <input type="text" name="question[]" required>
-
     <label>Options</label>
     <input type="text" name="option1[]" required placeholder="Option 1">
     <input type="text" name="option2[]" required placeholder="Option 2">
     <input type="text" name="option3[]" required placeholder="Option 3">
     <input type="text" name="option4[]" required placeholder="Option 4">
-
     <label>Correct Option</label>
-    <select name="correctOption[]">
+    <select name="correctOption[]" required>
       <option value="1">Option 1</option>
       <option value="2">Option 2</option>
       <option value="3">Option 3</option>
       <option value="4">Option 4</option>
     </select>
-
     <label>Explanation (optional)</label>
     <textarea name="explanation[]"></textarea>
   `;
-
   container.appendChild(block);
   updateQuestionCount();
 }
@@ -370,17 +298,7 @@ function updateQuestionCount() {
   document.getElementById("numberOfQuestionsField").value = count;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  addQuestionBlock();
-});
-
+document.addEventListener("DOMContentLoaded", () => { addQuestionBlock(); });
 </script>
-
 </body>
 </html>
-
-
-
-
-
-
