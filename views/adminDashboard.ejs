@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
+
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" type="text/css" href="styles.css">
+
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -18,167 +19,192 @@
       padding: 0;
     }
 
-    /* Welcome message */
-    h3 {
-      text-align: center;
-      margin-top: 30px;
-      color: #333;
-      text-shadow: 1px 1px 3px rgba(255,255,255,0.7);
+    /* ------------------------ HAMBURGER BUTTON ------------------------ */
+    #menu-btn {
+      position: fixed;
+      top: 85px; 
+      left: 25px;
+      font-size: 28px;
+      cursor: pointer;
+      z-index: 2000;
+      background: rgba(255,255,255,0.85);
+      padding: 8px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
 
-    .hero {
+    /* ------------------------ SIDEBAR ------------------------ */
+    .sidebar {
+      width: 260px;
+      background-color: #733E24; 
+      color: white;
+      min-height: 100vh;
+      padding: 30px 20px;
+      position: fixed;
+      top: 0;
+      left: -260px; 
+      transition: 0.3s ease;
+      z-index: 1500;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 30px;
       text-align: center;
-      margin-top: 120px;
-      padding: 40px;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 12px 15px;
+      margin: 8px 0;
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateX(5px);
+    }
+
+    /* ------------------------ MAIN CONTENT ------------------------ */
+    .main-content {
+      padding: 40px 30px;
+      transition: 0.3s ease;
+    }
+
+    /* HERO INSIDE SAME CONTAINER AS CARDS */
+    .hero {
+      margin-top: 10px;   /* just vertical spacing */
+      margin-bottom: 20px;
     }
 
     .hero h1 {
-      font-size: 3.5rem;
+      font-size: 3rem;
       color: #0b2535;
       font-weight: 800;
-      margin-bottom: 15px;
+      margin-bottom: 10px;
       text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.6);
+      line-height: 1.2;
     }
 
-    .hero p {
-      font-size: 1.3rem;
-      color: #2e8b57;
-      font-weight: 500;
-      margin-bottom: 35px;
-    }
-
-    /* Card container */
-    .card-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      padding: 50px 20px;
-      justify-items: center;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* Card styling */
     .card {
       background: rgba(255, 255, 255, 0.9);
       color: #333;
       border: none;
       border-radius: 15px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      width: 100%;
-      max-width: 300px;
+      transition: 0.3s ease;
     }
 
     .card:hover {
-      transform: translateY(-8px) scale(1.02);
+      transform: translateY(-5px);
       box-shadow: 0 12px 25px rgba(0,0,0,0.35);
     }
 
-    .card-header {
-      background-color: #733E24;
-      color: white;
-      font-size: 1.25rem;
-      font-weight: 600;
-      padding: 15px;
-      border-radius: 15px 15px 0 0;
-    }
-
-    .card-body {
-      padding: 25px 20px;
-    }
-
     .card-title {
+      color: #733E24;
       font-size: 1.3rem;
-      margin-bottom: 15px;
-      font-weight: 600;
-    }
-
-    .card-text {
-      margin-bottom: 20px;
-      font-size: 1rem;
-      color: #555;
-    }
-
-    .card-link {
-      display: inline-block;
-      background-color: #4CAF50;
-      color: white;
-      text-decoration: none;
-      padding: 12px 25px;
-      border-radius: 10px;
-      font-weight: 500;
-      transition: all 0.3s ease;
-    }
-
-    .card-link:hover {
-      background-color: #388E3C;
-      transform: scale(1.05);
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 768px) {
-      .card-container {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        padding: 30px 15px;
-      }
+      font-weight: 700;
     }
   </style>
 </head>
 
 <body>
-  <%- include('partials/navbar.ejs') %>
 
-  
-  <section class="hero">
-    <% if (userName) { %>
-    <h1>Welcome, <%= userName %><br>
-    <%= userType %> Workspace</h1>
-  <% } %>
-    
-  </section>
+  <!-- NAVBAR -->
+  <%- include('partials/navbar') %>
 
-  <div class="card-container">
+  <!-- HAMBURGER BUTTON -->
+  <div id="menu-btn">☰</div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <h2>Workspace</h2>
 
     <% if (userType === 'Writer' || userType === 'Admin') { %>
-      <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Manage Content</h5>
-                <a href="/manageContent" class="card-link">Enter</a>
-            </div>
-        </div>
-        
+      <a href="/manageContent">Manage Content</a>
     <% } %>
 
     <% if (userType === 'Manager' || userType === 'Admin') { %>
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Manage Quiz</h5>
-          <a href="/manageQuizCategories" class="card-link">Enter</a>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Manage Categories</h5>
-          <a href="/manageCategories" class="card-link">Enter</a>
-        </div>
-      </div>
+      <a href="/manageQuizCategories">Manage Quiz</a>
+      <a href="/manageCategories">Manage Categories</a>
     <% } %>
 
-    <% if (userType === "Admin") { %>
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">View Users</h5>
-          <a href="/adminUsers" class="card-link">Enter</a>
-        </div>
-      </div>
+    <% if (userType === 'Admin') { %>
+      <a href="/adminUsers">View Users</a>
     <% } %>
-
   </div>
 
-  <!-- SweetAlert2 -->
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- NOW HERO + CARDS SHARE SAME CONTAINER -->
+    <div class="container-fluid mt-4" style="max-width:1100px;">
+
+      <section class="hero">
+        <% if (userName) { %>
+          <h1>Welcome, <%= userName %><br><%= userType %> Workspace</h1>
+        <% } %>
+      </section>
+
+      <div class="row g-4">
+
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h5 class="card-title">👋 Total Visitors Today</h5>
+            <p style="font-size: 2rem; margin:0;">0</p>
+            <p style="opacity: 0.7;">(Google Analytics Placeholder)</p>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="card p-4">
+            <h5 class="card-title">🍂 Weekly Active Users</h5>
+            <p style="font-size: 2rem; margin:0;">0</p>
+            <p style="opacity: 0.7;">(Placeholder)</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card p-4 mt-4">
+        <h5 class="card-title">👜 Requests Overview</h5>
+
+        <ul style="list-style:none; padding-left:0; margin-top:15px;">
+          <li class="mb-2">📄 Pending Content Approvals — <b>0</b></li>
+          <li class="mb-2">✏️ Pending Quiz Submissions — <b>0</b></li>
+          <li class="mb-2">👥 Role Change Requests — <b>0</b></li>
+          <li class="mb-2">📨 Feedback Tickets — <b>0</b></li>
+        </ul>
+
+        <a href="/adminRequests" class="btn btn-success" style="background:#4CAF50; border-radius:8px;">
+          Go to Requests Page
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SIDEBAR TOGGLE SCRIPT -->
+  <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const sidebar = document.getElementById('sidebar');
+
+    menuBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+    });
+  </script>
+
+  <!-- SweetAlert -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <% if (loginSuccess && loginSuccess.length > 0) { %>
   <script>
@@ -194,3 +220,9 @@
 
 </body>
 </html>
+
+
+
+
+
+
