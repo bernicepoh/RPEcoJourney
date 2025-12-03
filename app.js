@@ -235,7 +235,6 @@ app.post('/do-checkin', checkinController.doCheckIn);
 //leaderboard 
 app.get('/leaderboard', leaderboardController.getLeaderboard);
 
-
 // Error route
 app.get('/401', (req, res) => {
     res.render('401', { errors: req.flash('error') });
