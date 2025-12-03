@@ -289,14 +289,7 @@ const heroBg = (category && category.categoryImage)
                     <!-- SHARE COUNT -->
                     <span class="count"><%= contentList[i].totalShares || 0 %></span>
                 </div>
-            </div>
-                                                              
-            <!-- DELETE BUTTON (Admin/Manager only) -->
-            <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
-              <form action="/deleteContent/<%= contentList[i].contentID %>" method="POST" style="display:inline;">
-                <button type="submit" class="btn btn-light btn-sm" onclick="return confirm('Are you sure you want to delete this content?');" title="Delete" aria-label="Delete">🗑️</button>
-              </form>
-            <% } %>  
+            </div> 
           </div>
         </div>
       <% } %>
