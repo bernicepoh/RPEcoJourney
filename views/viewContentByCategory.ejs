@@ -13,9 +13,9 @@
       margin: 0;
       padding: 0;
       background-image: url("/uploads/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover; 
+      background-position: center;
       min-height: 100vh;
     }
 
@@ -124,10 +124,10 @@
     }
 
     .engagement-bar {
-    display: flex;
-    align-items: center;
-    gap: 25px;
-    margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 25px;
+        margin-top: 10px;
     }
 
     .eng-section {
@@ -261,20 +261,18 @@ const heroBg = (category && category.categoryImage)
             <div class="eng-section">
 
               <!-- LIKE BUTTON -->
-                <button class="like-btn" data-content-id="<%= contentList[i].contentID %>">
-                    <span class="heart-icon"><%= contentList[i].userLiked ? "❤️" : "🤍" %></span>
-                    Like
-                </button>
-            
-            <!-- LIKE COUNT -->
-                    <span class="count like-count" data-content-id="<%= contentList[i].contentID %>">
-                      <%= contentList[i].likeCount %>
-                    </span>
+              <button class="like-btn" data-content-id="<%= contentList[i].contentID %>">
+                  <span class="heart-icon"><%= contentList[i].userLiked ? "❤️" : "🤍" %></span>
+
+                  <!-- LIKE COUNT -->
+                  <span class="like-count"><%= contentList[i].likeCount %></span>
+                  Like
+              </button>
             </div>
 
               <!-- COMMENT BUTTON -->
             <div class="eng-section">
-                <button class="comment-btn" onclick="window.location.href='/content/<%= contentList[i].contentID %>#comments'">
+                <button class="comment-btn" onclick="addComment('<%= contentList[i].contentID %>')">
                     💬 Comment
                 </button>
 
@@ -292,7 +290,7 @@ const heroBg = (category && category.categoryImage)
                     <span class="count"><%= contentList[i].totalShares || 0 %></span>
                 </div>
             </div>
-            
+                                                              
             <!-- DELETE BUTTON (Admin/Manager only) -->
             <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
               <form action="/deleteContent/<%= contentList[i].contentID %>" method="POST" style="display:inline;">
@@ -342,14 +340,9 @@ const heroBg = (category && category.categoryImage)
               heartSpan.textContent = '🤍';
             }
 
-            // Update count text
-            const countSpan = document.querySelector(
-              `.like-count[data-content-id="${contentID}"]`
-            );
-            if (countSpan) {
-              const count = data.likeCount;
-              countSpan.textContent = `${count} like${count === 1 ? "" : "s"}`;
-            }
+            // Update count text (number only)
+            const countSpan = btn.querySelector('.like-count');
+            countSpan.textContent = data.likeCount;
           })
           .catch(err => {
             console.error('Error toggling like:', err);
@@ -360,19 +353,20 @@ const heroBg = (category && category.categoryImage)
   </script>
 
   <script>
+  function addComment(contentID) {
+      window.location.href = `/content/${contentID}?from=category`;
+  }
+  </script>
+
+  <script>
   async function getBaseURL() {
       try {
           const res = await fetch('/ngrok-url');
           const data = await res.json();
-
-          if (data.url) {
-              return data.url;  // Use ngrok URL from backend
-          }
-      } catch (err) {
-          console.log("No ngrok URL found, using local");
+          if (data.url) return data.url;
+      } catch (error) {
+        console.log("No ngrok URL found, using local");
       }
-
-      // fallback for localhost mode
       return window.location.origin;
   }
 
@@ -384,7 +378,7 @@ const heroBg = (category && category.categoryImage)
               const contentID = btn.dataset.contentId;
               const shareURL = `${baseURL}/content/${contentID}`;
 
-              // Native share (phone)
+              // PHONE SHARE
               if (navigator.share) {
                   try {
                       await navigator.share({
@@ -392,21 +386,21 @@ const heroBg = (category && category.categoryImage)
                           text: "Check out this sustainability content!",
                           url: shareURL
                       });
-
-                      // send to backend for share tracking
-                      await fetch(`/share/${contentID}`, { method: "POST" });
-
-                  } catch (err) {
-                      console.log("Share cancelled");
-                  }
-              } else {
-                  // Desktop fallback - Copy link
+                  } catch (err) {}
+              } 
+              // DESKTOP
+              else {
                   await navigator.clipboard.writeText(shareURL);
                   alert("Link copied!");
-
-                  // also notify backend tracking
-                  await fetch(`/share/${contentID}`, { method: "POST" });
               }
+
+              // UPDATE BACKEND
+              await fetch(`/share/${contentID}`, { method: "POST" });
+
+              // 🔥 UPDATE UI COUNTER
+              const countSpan = btn.parentElement.querySelector('.count');
+              const current = parseInt(countSpan.textContent);
+              countSpan.textContent = current + 1;
           });
       });
   });

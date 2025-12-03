@@ -136,7 +136,7 @@ app.get('/manageContent', allowAdminOrWriter, contentController.manageContent);
 
 // Like toggle route
 app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggleLike);
-//app.get('/likes/:id', contentController.getLikesList);
+// app.get('/likes-list/:id', contentController.getLikesList);
 
 // Comment route
 app.post('/content/:id/comment', checkAuthenticated, contentController.postComment);
