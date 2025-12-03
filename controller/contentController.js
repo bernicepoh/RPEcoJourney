@@ -254,6 +254,13 @@ exports.postComment = async (req, res) => {
     const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
+    // manual profanity filter (regex for variations)
+    const profanityRegex = /\b(f+[\W_]*u+[\W_]*c+[\W_]*k+|s+[\W_]*h+[\W_]*i+[\W_]*t+|b+[\W_]*i+[\W_]*t+[\W_]*c+[\W_]*h+|a+[\W_]*s+[\W_]*s+[\W_]*h+[\W_]*o+[\W_]*l+e+)\b/gi;
+
+    if (profanityRegex.test(commentText)) {
+        return res.redirect(`/content/${contentID}?error=inappropriate`);
+    }
+
     try {
         // ============================
         // GPT-4o-mini Moderation
@@ -264,19 +271,21 @@ exports.postComment = async (req, res) => {
                 {
                     role: "system",
                     content: `
-                        You are a strict moderation system. 
-                        Your job is to classify the user's comment. 
-                        If the comment contains ANY of these:
-                        - hate speech
-                        - harassment or bullying
-                        - sexual or NSFW content
-                        - violence
-                        - threats
-                        - self-harm mention
-                        - spam or scams
+                    You are a strict moderation system. 
+                    Your job is to classify the user's comment. 
+                    If the comment contains ANY of these:
+                    - hate speech
+                    - harassment or bullying
+                    - sexual or NSFW content
+                    - violence
+                    - threats
+                    - self-harm mention
+                    - spam or scams
+                    - profanity or offensive language (e.g., curse words)
+                    - rude or disrespectful expressions
 
-                        Respond ONLY with: "unsafe"
-                        Otherwise, respond ONLY: "safe"
+                    Respond ONLY with: "unsafe"
+                    Otherwise, respond ONLY: "safe"
                     `
                 },
                 { role: "user", content: commentText }
