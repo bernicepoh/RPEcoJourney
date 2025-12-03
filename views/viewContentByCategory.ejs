@@ -267,7 +267,9 @@ const heroBg = (category && category.categoryImage)
                 </button>
             
             <!-- LIKE COUNT -->
-                    <span class="count"><%= contentList[i].likeCount %></span>
+                    <span class="count like-count" data-content-id="<%= contentList[i].contentID %>">
+                      <%= contentList[i].likeCount %>
+                    </span>
             </div>
 
               <!-- COMMENT BUTTON -->
@@ -275,7 +277,7 @@ const heroBg = (category && category.categoryImage)
                 <button class="comment-btn" onclick="window.location.href='/content/<%= contentList[i].contentID %>#comments'">
                     💬 Comment
                 </button>
-                
+
                 <!-- COMMENT COUNT -->
                 <span class="count"><%= contentList[i].commentCount %></span>
             </div>
