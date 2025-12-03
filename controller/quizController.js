@@ -409,6 +409,9 @@ exports.createQuiz = (req, res) => {
   const correctOption = req.body["correctOption[]"];
   const explanation = req.body["explanation[]"];
 
+  // Ensure arrays
+  const qArr = Array.isArray(questions) ? questions : [questions];
+
   const sql = `
     INSERT INTO quiz 
     (categoryID, setNumber, question, option1, option2, option3, option4, correctOption, explanation,
@@ -416,7 +419,9 @@ exports.createQuiz = (req, res) => {
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
 
-  for (let i = 0; i < questions.length; i++) {
+  qArr.forEach((_, i) => {
+    const correctVal = correctOption[i] ? correctOption[i] : 1;
+
     db.query(sql, [
       categoryID,
       setNumber,
@@ -425,19 +430,20 @@ exports.createQuiz = (req, res) => {
       option2[i],
       option3[i],
       option4[i],
-      correctOption[i],
+      correctVal,
       explanation[i] || "",
       title,
       requiredLevel,
       numberOfQuestions,
       timeLimit,
       cardColor
-    ]);
-  }
+    ], (err) => {
+      if (err) console.log("Insert error:", err);
+    });
+  });
 
   res.redirect(`/quiz/category/${categoryID}`);
 };
-
 
 
 /* =======================================================
