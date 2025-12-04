@@ -87,6 +87,28 @@
       margin-top: 50px;
     }
 
+    .file-box {
+  width: 350px;              /* all previews share SAME width */
+  height: 260px;             /* adjust height if needed */
+  display: flex;
+  align-items: center;       /* center vertically */
+  justify-content: center;   /* center horizontally */
+  margin: 40px auto 16px auto; /* centers horizontally with bottom space */
+}
+ 
+.file-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+ 
+.file-box video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
     footer {
       text-align: center; 
       padding: 25px; 
