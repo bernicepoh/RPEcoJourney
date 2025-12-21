@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sustainability Quiz</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #e8f7e4 url("/uploads/background.png");
+            background-size: cover;
+            padding: 40px 0;
+            color: #333;
+        }
+
+        .quiz-container {
+            max-width: 850px;
+            margin: auto;
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0px 5px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 34px;
+            color: #0b3d2e;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
+        }
+
+        .question-card {
+            background: #d9e8f5;
+            padding: 30px;
+            border-radius: 20px;
+            position: relative;
+            margin-bottom: 30px;
+            transition: 0.2s;
+        }
+
+        .timer {
+            position: absolute;
+            right: 30px;
+            top: 20px;
+            font-size: 18px;
+            color: #b71c1c;
+            font-weight: bold;
+        }
+
+        .option {
+            background: white;
+            padding: 14px 20px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover {
+            border-color: #4caf50;
+        }
+
+        .submit-btn {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            float: right;
+            margin-top: 10px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .submit-btn:disabled {
+            background: #9ccc9c;
+            cursor: not-allowed;
+        }
+
+        #feedback {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        #errorMsg {
+            display: none;
+            background: #ffdddd;
+            color: #b71c1c;
+            border-left: 5px solid #b71c1c;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        .user-card {
+            background: #8bc34a;
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .pfp {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="quiz-container">
+
+    <h1>Sustainability Quiz</h1>
+    <p class="subtitle">Test your knowledge about sustainability!</p>
+
+    <div class="question-card" id="questionCard">
+
+        <span class="timer">Time Left: <span id="timer">10</span> seconds</span>
+
+        <h3>Question <span id="qNum"></span> of <%= quiz.questions.length %></h3>
+        <h2 id="questionText" style="margin-top:10px;"></h2>
+
+        <div id="errorMsg">⚠ Cannot be empty! Please select an answer.</div>
+
+        <div id="optionsBox"></div>
+
+        <div id="feedback"></div>
+
+        <button class="submit-btn" id="submitBtn" disabled>Submit →</button>
+    </div>
+
+    <div class="user-card">
+        <div class="pfp"></div>
+        <div>
+            <strong><%= user.userName %></strong><br>
+            Score: <span id="score">0</span>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    let qList = <%- JSON.stringify(quiz.questions) %>;
+    // Capture the difficulty passed from the controller
+    let difficulty = "<%= difficulty %>"; 
+    
+    let current = 0;
+    let score = 0;
+    let timer = 10;
+    let interval;
+
+    // ⭐ STREAK SYSTEM
+    let streak = 0;
+    let streakBonus = 0;
+    let perfectBonus = 0;
+
+    // ⭐ USER ANSWER STORAGE
+    let userAnswers = [];
+
+    const feedbackBox = document.getElementById("feedback");
+    const errorMsg = document.getElementById("errorMsg");
+    const questionCard = document.getElementById("questionCard");
+
+    function loadQuestion() {
+        let q = qList[current];
+
+        feedbackBox.style.display = "none";
+        errorMsg.style.display = "none";
+        feedbackBox.innerHTML = "";
+        document.getElementById("submitBtn").disabled = true;
+
+        document.getElementById("qNum").innerText = current + 1;
+        document.getElementById("questionText").innerText = q.question;
+
+        let html = "";
+        q.options.forEach((opt, i) => {
+            html += `
+            <label class="option">
+                <input type="radio" name="answer" value="${i}">
+                ${opt}
+            </label>`;
+        });
+        document.getElementById("optionsBox").innerHTML = html;
+
+        document.querySelectorAll("input[name='answer']").forEach(radio => {
+            radio.addEventListener("change", () => {
+                document.getElementById("submitBtn").disabled = false;
+                errorMsg.style.display = "none";
+            });
+        });
+
+        timer = 10;
+        document.getElementById("timer").innerText = timer;
+
+        clearInterval(interval);
+        interval = setInterval(() => {
+            timer--;
+            document.getElementById("timer").innerText = timer;
+            if (timer <= 0) handleSubmit();
+        }, 1000);
+    }
+
+    function handleSubmit() {
+        clearInterval(interval);
+
+        let selected = document.querySelector("input[name='answer']:checked");
+
+        if (!selected) {
+            errorMsg.style.display = "block";
+            questionCard.classList.add("shake");
+
+            setTimeout(() => {
+                questionCard.classList.remove("shake");
+            }, 400);
+
+            return;
+        }
+
+        let selectedValue = parseInt(selected.value);
+        userAnswers.push(selectedValue); // ⭐ SAVE ANSWER
+
+        let correctIndex = qList[current].answerIndex;
+        let correctAnswer = qList[current].options[correctIndex];
+        let isCorrect = selectedValue === correctIndex;
+
+        if (isCorrect) {
+            score += 10;
+            streak++;
+
+            if (streak === 3) {
+                streakBonus += 5;
+
+                Swal.fire({
+                    icon: "success",
+                    title: "🔥 Streak Bonus!",
+                    text: "You answered 3 correct in a row! +5 XP!",
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+
+                streak = 0;
+            }
+
+            feedbackBox.style.background = "#c8f7c5";
+            feedbackBox.style.color = "#2e7d32";
+            feedbackBox.innerHTML = `✅ Correct!`;
+
+        } else {
+            streak = 0;
+
+            feedbackBox.style.background = "#ffcccc";
+            feedbackBox.style.color = "#b71c1c";
+            feedbackBox.innerHTML = `❌ Wrong!<br><br>Correct Answer: <b>${correctAnswer}</b>`;
+        }
+
+        feedbackBox.style.display = "block";
+        document.getElementById("score").innerText = score;
+
+        document.getElementById("submitBtn").disabled = true;
+        document.querySelectorAll("input[name='answer']").forEach(r => r.disabled = true);
+
+        // NEXT QUESTION AFTER 4s
+        setTimeout(() => {
+            current++;
+            if (current < qList.length) {
+                loadQuestion();
+            } else {
+
+                if (score === qList.length * 10) {
+                    perfectBonus = 20;
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "🌟 PERFECT SCORE!",
+                        text: "+20 XP Bonus for getting all questions correct!",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+
+                // ⭐ SAVE FULL REVIEW BEFORE REDIRECT
+                const reviewData = {
+                    questions: qList,
+                    userAnswers: userAnswers
+                };
+                localStorage.setItem("aiQuizReview", JSON.stringify(reviewData));
+
+                // 🚀 PASS DIFFICULTY TO RESULTS SO DB CAN SAVE IT
+                setTimeout(() => {
+                    window.location.href =
+                        `/aiQuizResult?score=${score}&streakBonus=${streakBonus}&perfectBonus=${perfectBonus}&difficulty=${difficulty}`;
+                }, 2000);
+            }
+        }, 4000);
+    }
+
+    document.getElementById("submitBtn").onclick = handleSubmit;
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

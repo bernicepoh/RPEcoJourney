@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Results</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #e8f7e4 url("/uploads/background.png") no-repeat center center fixed;
+            background-size: cover;
+            margin: 0;
+            padding: 40px;
+        }
+
+        /* ============================
+           2-COLUMN MAIN LAYOUT
+        =============================*/
+        .results-container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            max-width: 1400px;
+            margin: auto;
+        }
+
+        /* LEFT PANEL (40%) */
+        .left-panel {
+            flex: 0 0 40%;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        /* RIGHT PANEL (60%) */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* ============================
+           SCORE BOXES
+        =============================*/
+        h1 { color: #1b5e20; font-size: 30px; margin-bottom: 25px; }
+
+        .score-box {
+            background: #d9e8f5;
+            padding: 30px 20px;
+            border-radius: 18px;
+            font-size: 40px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .xp-box {
+            background: #fff7c2;
+            padding: 15px 25px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            border: 2px dashed #fbc02d;
+        }
+
+        .stat-box {
+            background: #f1f8e9;
+            padding: 15px 20px;
+            border-radius: 15px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-area { margin-top: 30px; }
+        .btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        .home-btn { background: #1b5e20; color: white; transition: 0.3s; }
+        .home-btn:hover { background: #2e7d32; }
+
+        /* ============================
+           QUESTION REVIEW CARD
+        =============================*/
+        .review-card {
+            padding: 25px;
+            border-radius: 20px;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: left;
+        }
+
+        .correct-card {
+            background: #eaffea;
+            border-left: 10px solid #2e7d32;
+        }
+
+        .wrong-card {
+            background: #ffecec;
+            border-left: 10px solid #d9534f;
+        }
+
+        .karaoke { padding: 2px 3px; border-radius: 4px; cursor: pointer; }
+        .highlight-word {
+            background: linear-gradient(90deg, #4caf50, #a8ff78);
+        }
+
+        #reviewExplanation {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: #f7f7f7;
+            border-left: 6px solid #777;
+            line-height: 1.5;
+        }
+
+        #playPauseBtn {
+            background: #ffd65a;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .speed-control {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .speed-control input { width: 150px; }
+
+        .nav-arrows { display: flex; justify-content: space-between; margin-top: 15px; }
+        .arrow-btn {
+            background: #66bb6a;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ============================
+           AI FEEDBACK BOX
+        =============================*/
+        .ai-box {
+            padding: 20px;
+            border-radius: 20px;
+            background: #eef7ea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: left;
+        }
+
+        .ai-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+   <%- include('partials/navbar') %>
+
+<div class="results-container">
+
+    <div class="left-panel">
+
+        <h1>🎉 Quiz Completed!</h1>
+
+        <div class="score-box">
+            <%= score %> / 50
+            <div style="font-size:14px;">Total Points Scored</div>
+        </div>
+
+        <div class="xp-box">
+            🌟 Total XP: <%= xpEarned %><br>
+            <span style="font-size: 12px; font-weight: normal; color: #795548;">
+                (Base: <%= score * 2 %> + Streak: <%= streakBonus %> + Perfect: <%= perfectBonus %>)
+            </span>
+        </div>
+
+        <div class="stat-box"><span>📅 Completed On:</span> <b><%= completedAt %></b></div>
+        <div class="stat-box"><span>⏳ User:</span> <b><%= user.userName %></b></div>
+        <div class="stat-box"><span>🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
+
+        <div class="btn-area">
+            <button class="btn home-btn" onclick="window.location.href='/ai/select'">Back to Quiz Selection</button>
+        </div>
+
+    </div>
+
+    <div class="right-panel">
+
+        <div id="reviewCard" class="review-card">
+            <h3 id="reviewQuestion">Question Review</h3>
+            <p id="reviewStatus"></p>
+            <p id="reviewYourAnswer"></p>
+            <p id="reviewCorrectAnswer"></p>
+
+            <div id="reviewExplanation"></div>
+
+            <button id="playPauseBtn">▶️ Play</button>
+
+            <div class="speed-control">
+                <label>Speed:</label>
+                <input type="range" id="speedSlider" min="0.7" max="1.5" step="0.1" value="1">
+                <span id="speedValue">1.0x</span>
+            </div>
+
+            <div class="nav-arrows">
+                <button class="arrow-btn" onclick="prevReview()">← Prev</button>
+                <button class="arrow-btn" onclick="nextReview()">Next →</button>
+            </div>
+        </div>
+
+        <div class="ai-box">
+            <div class="ai-title">🤖 AI Feedback & Eco Tips</div>
+            <div id="aiFeedback">Loading AI insights...</div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+const review = JSON.parse(localStorage.getItem("aiQuizReview"));
+let index = 0;
+let aiExplanations = [];
+
+let currentUtterance = null;
+let currentWordIndex = 0;
+let words = [];
+let isPaused = false;
+let speedRate = 1;
+
+document.getElementById("speedSlider").addEventListener("input", (e) => {
+    speedRate = parseFloat(e.target.value);
+    document.getElementById("speedValue").innerText = speedRate.toFixed(1) + "x";
+
+    if (currentUtterance && !isPaused) {
+        window.speechSynthesis.cancel();
+        startSpeech(aiExplanations[index], currentWordIndex);
+    }
+});
+
+function loadReviewCard() {
+    let q = review.questions[index];
+    const isCorrect = review.userAnswers[index] === q.answerIndex;
+
+    document.getElementById("reviewCard").className =
+        "review-card " + (isCorrect ? "correct-card" : "wrong-card");
+
+    document.getElementById("reviewStatus").innerHTML =
+        isCorrect ? "✔ Correct!" : "❌ Incorrect";
+
+    document.getElementById("reviewQuestion").innerHTML =
+        `<b>Q${index+1}:</b> ${q.question}`;
+
+    document.getElementById("reviewYourAnswer").innerHTML =
+        `Your Answer: <b>${q.options[review.userAnswers[index]] ?? "Not answered"}</b>`;
+
+    document.getElementById("reviewCorrectAnswer").innerHTML =
+        `Correct Answer: <b>${q.options[q.answerIndex]}</b>`;
+
+    document.getElementById("reviewExplanation").innerHTML =
+        `<b>💡 Explanation:</b><br>${aiExplanations[index]}`;
+
+    resetSpeech();
+}
+
+function resetSpeech() {
+    window.speechSynthesis.cancel();
+    currentUtterance = null;
+    currentWordIndex = 0;
+    isPaused = false;
+    document.getElementById("playPauseBtn").innerHTML = "▶️ Play";
+}
+
+function nextReview() { if (index < review.questions.length - 1) { index++; loadReviewCard(); } }
+function prevReview() { if (index > 0) { index--; loadReviewCard(); } }
+
+async function loadAIInsights() {
+    const res = await fetch("/ai/insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(review)
+    });
+
+    const data = await res.json();
+    aiExplanations = data.explanations;
+
+    document.getElementById("aiFeedback").innerHTML = data.feedback;
+
+    loadReviewCard();
+}
+loadAIInsights();
+
+document.getElementById("playPauseBtn").addEventListener("click", () => {
+    const text = aiExplanations[index];
+
+    if (!currentUtterance) startSpeech(text, 0);
+    else if (isPaused) resumeSpeech();
+    else pauseSpeech();
+});
+
+function startSpeech(text, startIndex = 0) {
+    words = text.split(/\s+/);
+
+    const wrapped = words.map((w, i) =>
+        `<span class="karaoke" data-index="${i}" id="word${i}">${w}</span>`
+    ).join(" ");
+
+    document.getElementById("reviewExplanation").innerHTML =
+        `<b>💡 Explanation:</b><br>` + wrapped;
+
+    attachWordListeners();
+
+    const remainingText = words.slice(startIndex).join(" ");
+    const utter = new SpeechSynthesisUtterance(remainingText);
+
+    utter.lang = "en-US";
+    utter.rate = speedRate;
+
+    currentUtterance = utter;
+    currentWordIndex = startIndex;
+
+    utter.onboundary = () => {
+        highlightWord(currentWordIndex);
+        currentWordIndex++;
+    };
+
+    utter.onend = () => resetSpeech();
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+
+    document.getElementById("playPauseBtn").innerHTML = "⏸ Pause";
+    isPaused = false;
+}
+
+function pauseSpeech() {
+    window.speechSynthesis.pause();
+    isPaused = true;
+    document.getElementById("playPauseBtn").innerHTML = "▶️ Resume";
+}
+
+function resumeSpeech() {
+    window.speechSynthesis.resume();
+    isPaused = false;
+    document.getElementById("playPauseBtn").innerHTML = "⏸ Pause";
+}
+
+function highlightWord(i) {
+    document.querySelectorAll(".karaoke")
+        .forEach(el => el.classList.remove("highlight-word"));
+
+    const el = document.getElementById("word" + i);
+    if (el) el.classList.add("highlight-word");
+}
+
+function attachWordListeners() {
+    document.querySelectorAll(".karaoke").forEach(span => {
+
+        let pressTimer = null;
+        let longPress = false;
+
+        const start = (e) => {
+            longPress = false;
+            e.preventDefault();
+
+            pressTimer = setTimeout(() => {
+                longPress = true;
+                showWordMeaning(span.innerText);
+            }, 600);
+        };
+
+        const end = () => {
+            clearTimeout(pressTimer);
+
+            if (!longPress) {
+                const idx = parseInt(span.dataset.index);
+                startSpeech(aiExplanations[index], idx);
+            }
+        };
+
+        span.addEventListener("mousedown", start);
+        span.addEventListener("mouseup", end);
+        span.addEventListener("mouseleave", end);
+
+        span.addEventListener("touchstart", start, { passive: false });
+        span.addEventListener("touchend", end);
+        span.addEventListener("touchcancel", end);
+    });
+}
+
+async function showWordMeaning(word) {
+    const res = await fetch("/ai/word-meaning", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ word })
+    });
+
+    const data = await res.json();
+
+    Swal.fire({
+        title: `📘 ${word}`,
+        html: `<p style="font-size:16px;">${data.meaning}</p>`,
+        confirmButtonText: "OK"
+    });
+}
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -4,10 +4,10 @@ const userController = require('./controller/userController');
 const contentController = require('./controller/contentController');
 const categoryController = require('./controller/categoryController');
 const homepageController = require('./controller/homepageController');
-const quizController = require('./controller/quizController');
 const checkinController = require('./controller/checkinController');
 const profileController = require('./controller/profileController');
 const leaderboardController = require('./controller/leaderboardController');
+const aiQuizController = require('./controller/aiQuizController');
 const db = require('./db'); 
 
 const multer = require('multer');
@@ -172,61 +172,19 @@ app.get('/homepage', homepageController.getHomePage);
 // About Us page
 app.get('/aboutus', homepageController.getAboutPage);
 
-/* =======================
-      QUIZ ROUTES
-======================== */
 
-// Main quiz page
-app.get('/quiz', quizController.getQuiz);
-
-// Category → sets
-app.get('/quiz/category/:id', quizController.getSetByCategory);
-
-// Start game (handles guest + real user )
-app.get('/startGame/:categoryID/:setNumber', quizController.startGame);
-
-// Actual quiz page (first question)
-app.get('/quizPage/:categoryID/:setNumber', quizController.showQuizPage);
-
-// Submit answer
-app.post('/quiz/game/answer', quizController.answerGame);
-
-// Next question
-app.get('/quiz/game/next/:currentID/:categoryID/:setNumber',quizController.nextGameQuestion);
-
-// Completed quiz
-app.get('/quiz/game/complete/:categoryID/:setNumber', quizController.completeGame);
-
-/* =======================
-      QR QUIZ ROUTES
-======================== */
-
-app.get('/quiz-start', quizController.showQuizStart);     // TV QR screen
-app.get('/quiz-access', quizController.showQuizAccess);   // Phone: choose guest/login
-app.get('/guest-start', quizController.startAsGuest);     // Create guest session
-
-// Guest welcome screen (reuse quiz-access.ejs)
-app.get('/guest-welcome', (req, res) => {
-    res.render("quiz-access", { guestMode: true });
+app.get('/ai/select', (req, res) => {
+    res.render('aiQuizSelect');
 });
 
-//Manage Quiz Questions 
-app.get('/manageQuizCategories', allowAdminOrManager, quizController.manageQuizCategories);
-app.get('/manageQuizSets/:categoryID', allowAdminOrManager, quizController.manageQuizSets);
-app.get('/manageQuizQuestions/:categoryID/:setNumber', allowAdminOrManager, quizController.manageQuizQuestions);
+app.post('/ai/start', aiQuizController.generateAIQuiz);
 
-// Edit Quiz Question (form page)
-app.get('/editQuiz/:quizID', allowAdminOrManager, quizController.editQuizForm);
-app.post('/editQuiz/:quizID', allowAdminOrManager, quizController.updateQuiz);
-app.post('/deleteQuiz/:quizID', allowAdminOrManager, quizController.deleteQuiz);
+app.get("/aiQuizResult", aiQuizController.showQuizResult);
 
-// Add Quiz (form page)
-app.get('/addQuiz', (req, res) => {
-    res.render('addQuiz');
-});
+app.post("/ai/insights", aiQuizController.generateInsights);
 
-// Add Quiz (submit form)
-app.post('/createQuiz', quizController.createQuiz);
+app.post("/ai/word-meaning", aiQuizController.getWordMeaning);
+
 
 //CHECK IN DASHBOARD ROUTES
 app.get('/checkin-board', checkinController.getCheckInBoard);
