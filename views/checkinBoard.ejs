@@ -121,7 +121,7 @@
 
         .missions {
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 18px;
             margin-top: 30px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -129,14 +129,25 @@
 
         .mission-item {
             font-size: 1.1rem;
-            padding: 10px 0;
+            padding: 15px 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #eee;
+        }
+
+        .mission-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 5px 12px;
+            border-radius: 20px;
         }
     </style>
 </head>
-
 
 <body>
 
@@ -152,7 +163,6 @@
             Keep growing your green habits! 🌱
         </p>
 
-        <!-- PROFILE SECTION -->
         <div style="
             background:white;
             padding:25px;
@@ -190,10 +200,8 @@
 
         </div>
 
-        <!-- XP & STREAK -->
         <div class="top-grid">
 
-            <!-- XP -->
             <div class="card">
                 <h2>Level <%= progress.level %></h2>
 
@@ -204,12 +212,10 @@
                 <p><%= progress.xp %> / <%= xpNeeded %> XP</p>
             </div>
 
-            <!-- STREAK -->
             <div class="card">
                 <h2>🔥 Streak: <%= progress.streak %> days</h2>
                 <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
 
-                <!-- FIXED ONE-TIME CHECK-IN BUTTON -->
                 <%
                     let last = progress.lastCheckinDate
                         ? new Date(progress.lastCheckinDate).toISOString().slice(0, 10)
@@ -230,7 +236,6 @@
 
         </div>
 
-        <!-- ACTION BUTTONS -->
         <div class="action-grid">
             <a href="/quiz" style="text-decoration:none;">
                 <div class="action-card">📘 Take a Quiz</div>
@@ -241,30 +246,33 @@
             </a>
         </div>
 
-        <!-- DAILY MISSIONS -->
         <div class="missions">
-            <h2>📋 Daily Missions</h2>
+            <h2 style="margin-bottom: 5px;">📋 Your Random Missions</h2>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">These change every week! Complete them for bonus XP.</p>
 
-            <div class="mission-item">
-                <span>Daily Check-In</span>
-                <span><%= missions.checkinDone ? "Completed" : "Not Completed" %></span>
-            </div>
-
-            <div class="mission-item">
-                <span>📗 Read 1 Content</span>
-                <span><%= missions.contentRead ? "Completed" : "Not Completed" %></span>
-            </div>
-
-            <div class="mission-item">
-                <span>📝 Complete 1 Quiz</span>
-                <span><%= missions.quizDone ? "Completed" : "Not Completed" %></span>
-            </div>
+            <% if (missions && missions.length > 0) { %>
+                <% missions.forEach(m => { %>
+                    <div class="mission-item">
+                        <span>
+                            <%= m.missionType.includes('Quiz') ? '📝' : '🌿' %> 
+                            <%= m.missionType %>
+                        </span>
+                        
+                        <% if (m.xpEarned > 0) { %>
+                            <span class="status-badge" style="background:#e8f6e8; color:#28a745;">✅ Completed</span>
+                        <% } else { %>
+                            <span class="status-badge" style="background:#f0f0f0; color:#888;">⚪ In Progress</span>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p style="text-align: center; color: #888;">No missions assigned yet. Try refreshing!</p>
+            <% } %>
         </div>
 
     </div>
 
-    <!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     if (window.location.search.includes("already")) {
@@ -296,10 +304,9 @@
   <% } %>
 </script>
 
-
-
 </body>
 </html>
+
 
 
 

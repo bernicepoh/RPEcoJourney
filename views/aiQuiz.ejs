@@ -176,7 +176,8 @@
 
 <script>
     let qList = <%- JSON.stringify(quiz.questions) %>;
-    // Capture the difficulty passed from the controller
+    
+    // ⭐ THE FIX: Capture the difficulty from EJS so JavaScript knows what it is
     let difficulty = "<%= difficulty %>"; 
     
     let current = 0;
@@ -320,7 +321,7 @@
                 };
                 localStorage.setItem("aiQuizReview", JSON.stringify(reviewData));
 
-                // 🚀 PASS DIFFICULTY TO RESULTS SO DB CAN SAVE IT
+                // 🚀 REDIRECT TO RESULTS PAGE
                 setTimeout(() => {
                     window.location.href =
                         `/aiQuizResult?score=${score}&streakBonus=${streakBonus}&perfectBonus=${perfectBonus}&difficulty=${difficulty}`;

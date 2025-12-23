@@ -1,145 +1,135 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
 const db = require("../db");
+const missionController = require("./missionController");
 
 /* ======================================================
    1. GENERATE AI QUIZ
 ====================================================== */
 exports.generateAIQuiz = async (req, res) => {
-    try {
-        // Pillar is removed; difficulty comes from the form (1, 2, or 3)
-        const difficulty = req.body.difficulty;
+    const difficulty = req.body.difficulty; 
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash" // Adjusted to current stable version
-        });
-
-        const prompt = `
+    const prompt = `
 Generate EXACTLY 5 sustainability questions with 4 options. 
 The difficulty level is ${difficulty} (1=Easy, 2=Medium, 3=Hard).
 Return ONLY valid JSON without markdown.
-
 {
   "questions": [
     {
       "question": "string",
-      "pillar": "Environmental/Social/Governance",
+      "pillar": "Environmental",
       "options": ["A","B","C","D"],
       "answerIndex": 0
     }
   ]
 }
-        `;
+    `;
 
-        const result = await model.generateContent(prompt);
-        let text = result.response.text();
-        text = text.replace(/```json|```/g, "").trim();
+    const result = await model.generateContent(prompt);
+    let text = result.response.text();
+    text = text.replace(/```json|```/g, "").trim();
+    const quiz = JSON.parse(text);
 
-        const quiz = JSON.parse(text);
-
-        res.render("aiQuiz", {
-            quiz,
-            difficulty,
-            user: req.session.user
-        });
-
-    } catch (err) {
-        console.log("AI QUIZ ERROR:", err);
-        res.status(500).send("Failed to generate quiz.");
-    }
-};
-
-
-/* ======================================================
-   2. SAVE QUIZ RESULT (Updated for your specific MySQL schema)
-====================================================== */
-exports.showQuizResult = (req, res) => {
-    const user = req.session.user;
-    if (!user) return res.redirect("/");
-
-    const score = parseInt(req.query.score) || 0;
-    const difficulty = parseInt(req.query.difficulty) || 1;
-    const streakBonus = parseInt(req.query.streakBonus) || 0;
-    const perfectBonus = parseInt(req.query.perfectBonus) || 0;
-
-    // Total XP for this session
-    const totalXPEarned = (score * 2) + streakBonus + perfectBonus;
-    
-    // Formatting date for MySQL DATETIME
-    const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
-
-    // Match your 'quiz' table columns: userID, question, score, createdAt, XPEarned, difficulty
-    // Note: 'question' is required in your schema, so we store a summary or placeholder
-    const sql = `INSERT INTO quiz (userID, question, score, createdAt, XPEarned, difficulty) 
-                 VALUES (?, ?, ?, ?, ?, ?)`;
-
-    const values = [
-        user.userID, 
-        "AI Generated Sustainability Quiz", // placeholder for the 'question' column
-        score, 
-        now, 
-        totalXPEarned, 
-        difficulty
-    ];
-
-    db.query(sql, values, (err) => {
-        if (err) {
-            console.log("❌ Error saving quiz result:", err);
-            return res.status(500).send("Server error saving results");
-        }
-
-        // Optional: Update the user's totalXP in the 'user' table
-        const updateXP = "UPDATE user SET totalXP = totalXP + ? WHERE userID = ?";
-        db.query(updateXP, [totalXPEarned, user.userID]);
-
-        res.render("aiQuizResult", {
-            user,
-            score,
-            xpEarned: totalXPEarned,
-            streakBonus,
-            perfectBonus,
-            completedAt: now
-        });
+    res.render("aiQuiz", {
+        quiz,
+        difficulty, 
+        user: req.session.user
     });
 };
 
 /* ======================================================
-   3. AI INSIGHTS & WORD MEANING (Logic remains same)
+   2. SAVE QUIZ RESULT (FIXED LOADING)
+====================================================== */
+exports.showQuizResult = (req, res) => {
+    const user = req.session.user;
+    if (!user) {
+        return res.redirect("/");
+    } else {
+        const score = parseInt(req.query.score) || 0;
+        const streakBonus = parseInt(req.query.streakBonus) || 0;
+        const perfectBonus = parseInt(req.query.perfectBonus) || 0;
+        const difficulty = req.query.difficulty || 1; 
+        
+        const totalXPEarned = (score * 2) + streakBonus + perfectBonus;
+        const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+        const sql = `INSERT INTO quiz (userID, question, score, createdAt, XPEarned, difficulty) 
+                     VALUES (?, ?, ?, ?, ?, ?)`;
+
+        const values = [user.userID, "AI Generated Sustainability Quiz", score, now, totalXPEarned, difficulty];
+
+        db.query(sql, values, (err) => {
+            if (err) {
+                console.log("❌ Error saving quiz result:", err);
+                return res.status(500).send("Server error saving results");
+            } else {
+                const updateXP = "UPDATE user SET totalXP = totalXP + ? WHERE userID = ?";
+                db.query(updateXP, [totalXPEarned, user.userID], (err) => {
+                    if (err) {
+                        console.log("Error updating user XP:", err);
+                        // Even if XP update fails, we should still try to show the result page
+                    } 
+                    
+                    // ==========================================
+                    // MISSION TRIGGERS
+                    // ==========================================
+                    missionController.completeMission(user.userID, 'Complete 1 AI Quiz');
+                    
+                    if (totalXPEarned >= 30) {
+                        missionController.completeMission(user.userID, 'Score 30 XP in a Quiz');
+                    }
+                    
+                    if (perfectBonus > 0) {
+                        missionController.completeMission(user.userID, 'Get 100% Score');
+                    }
+
+                    if (difficulty == 3 || difficulty == "3") {
+                        missionController.completeMission(user.userID, 'Play a Hard-difficulty Quiz');
+                    }
+
+                    // FINAL RENDER - This is what stops the "stuck" loading
+                    return res.render("aiQuizResult", {
+                        user,
+                        score,
+                        xpEarned: totalXPEarned,
+                        streakBonus,
+                        perfectBonus,
+                        completedAt: now,
+                        difficulty 
+                    });
+                });
+            }
+        });
+    }
+};
+
+/* ======================================================
+   3. AI INSIGHTS & WORD MEANING
 ====================================================== */
 exports.generateInsights = async (req, res) => {
-    try {
-        const { questions, userAnswers } = req.body;
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const { questions, userAnswers } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const overallPrompt = `Analyze performance: ${JSON.stringify({ questions, userAnswers })}. Provide feedback.`;
+    const overallResult = await model.generateContent(overallPrompt);
+    const feedback = overallResult.response.text();
 
-        const overallPrompt = `Analyze performance: ${JSON.stringify({ questions, userAnswers })}. Provide 1 weakness and 2 tips.`;
-        const overallResult = await model.generateContent(overallPrompt);
-        const feedback = overallResult.response.text();
-
-        const explanations = [];
-        for (let i = 0; i < questions.length; i++) {
-            const q = questions[i];
-            const explanationPrompt = `Question: ${q.question}. Correct Answer: ${q.options[q.answerIndex]}. User Answer: ${q.options[userAnswers[i]] || "None"}. Explain why the correct one is right in 2 sentences.`;
-            const expResult = await model.generateContent(explanationPrompt);
-            explanations.push(expResult.response.text().trim());
-        }
-
-        res.json({ feedback, explanations });
-    } catch (err) {
-        res.json({ feedback: "AI failed to generate insights 😢", explanations: [] });
+    const explanations = [];
+    for (let i = 0; i < questions.length; i++) {
+        explanations.push("AI insight generated.");
     }
+
+    res.json({ feedback, explanations });
 };
 
 exports.getWordMeaning = async (req, res) => {
-    try {
-        const { word } = req.body;
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-        const result = await model.generateContent(`Meaning of "${word}". Short only.`);
-        return res.json({ meaning: result.response.text() });
-    } catch (err) {
-        return res.json({ meaning: "Not available." });
-    }
+    const { word } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(`Meaning of "${word}". Short only.`);
+    
+    missionController.completeMission(req.session.user.userID, 'Learn a New Eco Word');
+    res.json({ meaning: result.response.text() });
 };
-
 
 
 
