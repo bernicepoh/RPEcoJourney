@@ -2,10 +2,10 @@ const db = require('../db');
 const nodemailer = require('nodemailer');
 
 // ============================
-// GET CONTENT BY CATEGORY
+// GET CONTENT BY content_type
 // ============================
-exports.getContentByCategory = (req, res) => {
-    const categoryID = req.params.id;
+exports.getContentBycontent_type = (req, res) => {
+    const contentTypeID = req.params.id;
     const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
 
     const sql = `SELECT 
@@ -13,12 +13,12 @@ exports.getContentByCategory = (req, res) => {
                     c.contentTitle, 
                     c.contentDescription, 
                     c.contentFile,
-                    cat.categoryName,
-                    cat.categoryDescription,
-                    cat.categoryImage,
-                    cat.userID AS categoryOwnerID,
-                    u.userName AS categoryOwnerName,
-                    u.image AS categoryOwnerPic,
+                    cat.content_typeName,
+                    cat.content_typeDescription,
+                    cat.content_typeImage,
+                    cat.userID AS content_typeOwnerID,
+                    u.userName AS content_typeOwnerName,
+                    u.image AS content_typeOwnerPic,
 
                     /* Total like count */
                     (SELECT COUNT(*) 
@@ -46,47 +46,47 @@ exports.getContentByCategory = (req, res) => {
                     WHERE e.contentID = c.contentID) AS totalShares
 
                 FROM content c
-                JOIN category cat
-                    ON c.categoryID = cat.categoryID
+                JOIN content_type cat
+                    ON c.contentTypeID = cat.contentTypeID
                 LEFT JOIN user u ON cat.userID = u.userID
-                WHERE cat.categoryID = ?
+                WHERE cat.contentTypeID = ?
             `;
 
-    db.query(sql, [userID, categoryID], (error, results) => {
+    db.query(sql, [userID, contentTypeID], (error, results) => {
         if (error) {
             console.log("🔥 SQL ERROR:", error);
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
-            // Use data from first item for category info
-            const categoryInfo = {
-                categoryName: results[0].categoryName,
-                categoryDescription: results[0].categoryDescription,
-                categoryImage: results[0].categoryImage,
-                categoryOwnerName: results[0].categoryOwnerName || "Category Manager",
-                categoryOwnerPic: results[0].categoryOwnerPic || "defaultUser.png"
+            // Use data from first item for content_type info
+            const content_typeInfo = {
+                content_typeName: results[0].content_typeName,
+                content_typeDescription: results[0].content_typeDescription,
+                content_typeImage: results[0].content_typeImage,
+                content_typeOwnerName: results[0].content_typeOwnerName || "content_type Manager",
+                content_typeOwnerPic: results[0].content_typeOwnerPic || "defaultUser.png"
             };
-            res.render('viewContentByCategory', {
-                category: categoryInfo,
+            res.render('viewContentBycontent_type', {
+                content_type: content_typeInfo,
                 contentList: results,
                 user: req.session.user || null
             });
         } else {
-            // No content, but still try to get category info for banner, etc.
-            const catSql = 'SELECT * FROM category WHERE categoryID = ?';
-            db.query(catSql, [categoryID], (catError, catRows) => {
+            // No content, but still try to get content_type info for banner, etc.
+            const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
+            db.query(catSql, [contentTypeID], (catError, catRows) => {
                 if (catError || catRows.length === 0) {
-                    return res.status(404).send('Category not found');
+                    return res.status(404).send('content_type not found');
                 }
-                const categoryInfo = {
-                    categoryName: catRows[0].categoryName,
-                    categoryDescription: catRows[0].categoryDescription,
-                    categoryImage: catRows[0].categoryImage,
-                    categiryOwnerName: catRows[0].categoryOwnerName || "Category Manager",
-                    categoryOwnerPic: catRows[0].categoryOwnerPic || "defaultUser.png",
+                const content_typeInfo = {
+                    content_typeName: catRows[0].content_typeName,
+                    content_typeDescription: catRows[0].content_typeDescription,
+                    content_typeImage: catRows[0].content_typeImage,
+                    categiryOwnerName: catRows[0].content_typeOwnerName || "content_type Manager",
+                    content_typeOwnerPic: catRows[0].content_typeOwnerPic || "defaultUser.png",
                 };
-                res.render('viewContentByCategory', {
-                    category: categoryInfo,
+                res.render('viewContentBycontent_type', {
+                    content_type: content_typeInfo,
                     contentList: [],
                     user: req.session.user || null
                 });
@@ -112,8 +112,8 @@ exports.getContentByCategory = (req, res) => {
                 //         };
                 //     });
 
-                //     res.render('viewContentByCategory', {
-                //         category: categoryInfo,
+                //     res.render('viewContentBycontent_type', {
+                //         content_type: content_typeInfo,
                 //         contentList: updatedContentList,
                 //         user: req.session.user || null
                 //     });
@@ -359,9 +359,9 @@ exports.getContent = (req, res) => {
     const contentID = req.params.id;
 
     const contentSql = `
-        SELECT c.*, cat.categoryName, cat.categoryDescription, cat.categoryImage
+        SELECT c.*, cat.content_typeName, cat.content_typeDescription, cat.content_typeImage
         FROM content c
-        JOIN category cat ON c.categoryID = cat.categoryID
+        JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
         WHERE c.contentID = ?
     `;
 
@@ -490,7 +490,7 @@ exports.deleteComment = (req, res) => {
 };
 
 exports.addContentForm = (req, res) => {
-    const sql = 'SELECT * FROM category';
+    const sql = 'SELECT * FROM content_type';
     const user = req.session.user 
     db.query(sql, (error, results) => {
         if (error) {
@@ -504,7 +504,7 @@ exports.addContentForm = (req, res) => {
 };
 
 exports.addContent = (req, res) => {
-    const { categoryID, contentTitle, contentDescription } = req.body;
+    const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile;
     if (req.file) {
         contentFile = req.file.filename; // Save only the filename
@@ -512,11 +512,11 @@ exports.addContent = (req, res) => {
         contentFile = null;
     }
 
-    const sql = 'INSERT INTO content (categoryID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
    
 
     // Insert the new content into the database
-    db.query(sql, [categoryID, contentTitle, contentDescription, contentFile], (error, results) => {
+    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error("Error adding content:", error);
@@ -528,8 +528,8 @@ exports.addContent = (req, res) => {
     });
 };
 
-const getAllCategories = (db, callback) => {
-    const sql = 'SELECT * FROM category';
+const getAllContent = (db, callback) => {
+    const sql = 'SELECT * FROM content_type';
 
     // Fetch data from MySQL
     db.query(sql, (error, results) => {
@@ -578,16 +578,16 @@ exports.editContentForm = async (req, res) => {
 exports.editContent = (req, res) => {
 
     const contentID = req.params.id;
-    const { categoryID, contentTitle, contentDescription } = req.body;
+    const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile = req.body.currentFile; //retrieve current image filename
     if (req.file) { //if new image is uploaded
         contentFile = req.file.filename; // set image to be new image filename
     }
     console.log("new file: " + contentFile);
-    const sql = 'UPDATE content SET categoryID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
+    const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
 
     // Updated the content into the database
-    db.query(sql, [categoryID, contentTitle, contentDescription, contentFile, contentID], (error, results) => {
+    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error("Error updating content:", error);
@@ -603,17 +603,17 @@ exports.editContent = (req, res) => {
 
 exports.deleteContent = (req, res) => {
     const contentID = req.params.id;
-    // First, get the categoryID of the content
-    const getCategorySql = 'SELECT categoryID FROM content WHERE contentID = ?';
-    db.query(getCategorySql, [contentID], (getError, getResults) => {
+    // First, get the contentTypeID of the content
+    const getcontent_typeSql = 'SELECT contentTypeID FROM content WHERE contentID = ?';
+    db.query(getcontent_typeSql, [contentID], (getError, getResults) => {
         if (getError) {
-            console.error("Error fetching categoryID:", getError);
+            console.error("Error fetching contentTypeID:", getError);
             return res.status(500).send('Error deleting content');
         }
         if (getResults.length === 0) {
             return res.status(404).send('Content not found');
         }
-        const categoryID = getResults[0].categoryID;
+        const contentTypeID = getResults[0].contentTypeID;
         // Now delete the content
         const deleteSql = 'DELETE FROM content WHERE contentID = ?';
         db.query(deleteSql, [contentID], (deleteError, deleteResults) => {
@@ -621,7 +621,7 @@ exports.deleteContent = (req, res) => {
                 console.error("Error deleting content:", deleteError);
                 return res.status(500).send('Error deleting content');
             } else {
-                // Redirect to viewContentByCategory for the category
+                // Redirect to viewContentBycontent_type for the content_type
                 req.flash('success', 'Content deleted successfully!');
                 res.redirect(`/manageContent`);
             }
@@ -634,7 +634,7 @@ exports.manageContent = (req, res) => {
     const sql = `
         SELECT *
         FROM content c
-        JOIN category cat ON c.categoryID = cat.categoryID
+        JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
     `;
 
     db.query(sql, (error, results) => {

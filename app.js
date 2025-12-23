@@ -177,7 +177,7 @@ app.get('/aboutus', homepageController.getAboutPage);
 ======================== */
 
 // Main quiz page
-app.get('/quiz', quizController.getQuiz);
+app.get('/quiz',checkUser, quizController.getQuiz);
 
 // Category → sets
 app.get('/quiz/category/:id', quizController.getSetByCategory);
