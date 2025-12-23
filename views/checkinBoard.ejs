@@ -56,6 +56,7 @@
             background: #dcdcdc;
             border-radius: 10px;
             margin: 15px 0;
+            cursor: pointer; /* Added this so users know they can hover */
         }
 
         .xp-fill {
@@ -121,7 +122,7 @@
 
         .missions {
             background: white;
-            padding: 20px;
+            padding: 25px;
             border-radius: 18px;
             margin-top: 30px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -129,14 +130,25 @@
 
         .mission-item {
             font-size: 1.1rem;
-            padding: 10px 0;
+            padding: 15px 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-bottom: 1px solid #eee;
+        }
+
+        .mission-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            font-weight: bold;
+            font-size: 0.9rem;
+            padding: 5px 12px;
+            border-radius: 20px;
         }
     </style>
 </head>
-
 
 <body>
 
@@ -144,77 +156,46 @@
 
     <div class="container">
 
-        <h1 style="text-align:center; font-size:2.4rem; color:#0b2535;">
-            <%= user.userName %>'s Sustainability Journey 🌿
-        </h1>
+        <h1><%= user.userName %>'s Sustainability Journey 🌿</h1>
 
         <p style="text-align:center; color:#4fa34b; margin-top:10px;">
             Keep growing your green habits! 🌱
         </p>
 
-        <!-- PROFILE SECTION -->
-        <div style="
-            background:white;
-            padding:25px;
-            border-radius:18px;
-            margin:30px auto;
-            width:85%;
-            display:flex;
-            align-items:center;
-            gap:20px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.1);
-        ">
+        <div style="background:white; padding:25px; border-radius:18px; margin:30px auto; width:85%; display:flex; align-items:center; gap:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
 
-            <img src="/uploads/<%= user.image %>" 
-                 style="width:110px; height:110px; border-radius:50%; border:4px solid #e6f7e6;">
+            <img src="<%= user.profilePhoto %>" 
+                 style="width:110px; height:110px; border-radius:50%; border:4px solid #e6f7e6; object-fit: cover;">
 
             <div>
                 <h2 style="margin:0; font-size:1.8rem; color:#0b2535;">
                     <%= user.userName %>
                 </h2>
 
-                <div style="
-                    margin-top:10px;
-                    background:#e8f6e8;
-                    padding:8px 12px;
-                    border-radius:10px;
-                    display:inline-flex;
-                    align-items:center;
-                    gap:8px;
-                    font-weight:600;
-                ">
+                <div style="margin-top:10px; background:#e8f6e8; padding:8px 12px; border-radius:10px; display:inline-flex; align-items:center; gap:8px; font-weight:600;">
                     <img src="/uploads/levelbadge/<%= progress.levelBadge %>" style="width:30px;">
                     <span>Level <%= progress.level %> – <%= progress.levelTitle %></span>
                 </div>
             </div>
-
         </div>
 
-        <!-- XP & STREAK -->
         <div class="top-grid">
-
-            <!-- XP -->
             <div class="card">
                 <h2>Level <%= progress.level %></h2>
-
-                <div class="xp-bar">
+                <div class="xp-bar" title="<%= xpNeeded - progress.xp %> XP until Level <%= progress.level + 1 %>! Keep going! 🌿">
                     <div class="xp-fill" style="width:<%= xpPercent %>%"></div>
                 </div>
-
-                <p><%= progress.xp %> / <%= xpNeeded %> XP</p>
+                <p><strong><%= progress.xp %> / <%= xpNeeded %> XP</strong></p>
             </div>
 
-            <!-- STREAK -->
             <div class="card">
                 <h2>🔥 Streak: <%= progress.streak %> days</h2>
                 <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
 
-                <!-- FIXED ONE-TIME CHECK-IN BUTTON -->
                 <%
                     let last = progress.lastCheckinDate
                         ? new Date(progress.lastCheckinDate).toISOString().slice(0, 10)
                         : null;
-
                     let today = new Date().toISOString().slice(0, 10);
                 %>
 
@@ -225,12 +206,9 @@
                         <button class="check-btn">Check In Today</button>
                     </form>
                 <% } %>
-
             </div>
-
         </div>
 
-        <!-- ACTION BUTTONS -->
         <div class="action-grid">
             <a href="/quiz" style="text-decoration:none;">
                 <div class="action-card">📘 Take a Quiz</div>
@@ -241,62 +219,70 @@
             </a>
         </div>
 
-        <!-- DAILY MISSIONS -->
         <div class="missions">
-            <h2>📋 Daily Missions</h2>
+            <h2 style="margin-bottom: 5px;">📋 Your Random Missions</h2>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">These change every week! Complete them for bonus XP.</p>
 
-            <div class="mission-item">
-                <span>Daily Check-In</span>
-                <span><%= missions.checkinDone ? "Completed" : "Not Completed" %></span>
-            </div>
-
-            <div class="mission-item">
-                <span>📗 Read 1 Content</span>
-                <span><%= missions.contentRead ? "Completed" : "Not Completed" %></span>
-            </div>
-
-            <div class="mission-item">
-                <span>📝 Complete 1 Quiz</span>
-                <span><%= missions.quizDone ? "Completed" : "Not Completed" %></span>
-            </div>
+            <% if (missions && missions.length > 0) { %>
+                <% missions.forEach(m => { %>
+                    <div class="mission-item">
+                        <span>
+                            <%= m.missionType.includes('Quiz') ? '📝' : '🌿' %> 
+                            <%= m.missionType %>
+                        </span>
+                        
+                        <% if (m.xpEarned > 0) { %>
+                            <span class="status-badge" style="background:#e8f6e8; color:#28a745;">✅ Completed</span>
+                        <% } else { %>
+                            <span class="status-badge" style="background:#f0f0f0; color:#888;">⚪ In Progress</span>
+                        <% } %>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p style="text-align: center; color: #888;">No missions assigned yet. Try refreshing!</p>
+            <% } %>
         </div>
 
     </div>
 
-    <!-- SweetAlert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    if (window.location.search.includes("already")) {
-        history.replaceState(null, "", "/checkin-board?already=true");
-    }
-    document.addEventListener("DOMContentLoaded", function () {
-        const urlParams = new URLSearchParams(window.location.search);
-        const already = urlParams.get("already");
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get("already") === "true") {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Already Checked In!',
+                    text: 'You can only check in once per day. Come back tomorrow! 🌿',
+                    confirmButtonColor: '#6bbf59'
+                });
+            }
 
-        if (already === "true") {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Already Checked In!',
-                text: 'You can only check in once per day 🌿',
-                confirmButtonColor: '#6bbf59'
-            });
-        }
-    });
-</script>
+            <% if (streakMissed) { %>
+                Swal.fire({
+                    title: "Awww… You lost your streak 😢",
+                    text: "Start fresh today and come back tomorrow to rebuild it! 🌱",
+                    icon: "warning",
+                    confirmButtonColor: "#28a745"
+                });
+            <% } %>
 
-<script>
-  <% if (streakMissed === true) { %>
-    Swal.fire({
-      title: "Awww… You lost your streak 😢",
-      text: "Start fresh today and come back tomorrow to rebuild it! 🌱",
-      icon: "warning",
-      confirmButtonColor: "#28a745"
-    });
-  <% } %>
-</script>
-
-
+            <% if (leveledUp) { %>
+                Swal.fire({
+                    title: 'LEVEL UP! 🎉',
+                    html: 'Congratulations <b><%= user.userName %></b>!<br>You have reached <b>Level <%= progress.level %></b>: <br>✨ <i><%= progress.levelTitle %></i> ✨',
+                    icon: 'success',
+                    confirmButtonText: 'Keep going!',
+                    confirmButtonColor: '#6bbf59',
+                    backdrop: `rgba(0,123,0,0.2) url("/uploads/confetti.gif") center/cover`
+                });
+            <% } %>
+            
+            window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    </script>
 
 </body>
 </html>
