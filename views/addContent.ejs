@@ -103,12 +103,12 @@
     <h2>Publish Content</h2>
     <form action="/addContent" method="POST" enctype="multipart/form-data" class="form-container">
 
-      <label for="categoryID">Category:</label>
-      <select name="categoryID" id="categoryID" required class="custom-input">
-        <option value="">Select Category</option> <!-- Empty value ensures it's invalid -->
-        <% categories.forEach(category => { %>
-        <option value="<%= category.categoryID %>"><%= category.categoryName %></option>
-        <% }) %>
+      <label for="contentTypeID">Category:</label>
+      <select name="contentTypeID" id="contentTypeID" required class="custom-input">
+        <option value="">Select category</option> <!-- Empty value ensures it's invalid -->
+        <option value="1">Environmental</option>
+        <option value="2">Social</option>
+        <option value="3">Governance</option>
       </select>
 
 

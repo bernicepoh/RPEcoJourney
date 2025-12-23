@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 // ============================
 // GET CONTENT BY content_type
 // ============================
-exports.getContentBycontent_type = (req, res) => {
+exports.getContentByContentType = (req, res) => {
     const contentTypeID = req.params.id;
     const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
 
@@ -13,12 +13,9 @@ exports.getContentBycontent_type = (req, res) => {
                     c.contentTitle, 
                     c.contentDescription, 
                     c.contentFile,
-                    cat.content_typeName,
-                    cat.content_typeDescription,
-                    cat.content_typeImage,
-                    cat.userID AS content_typeOwnerID,
-                    u.userName AS content_typeOwnerName,
-                    u.image AS content_typeOwnerPic,
+                    cat.contentTypeName,
+                    cat.contentTypeDescription,
+                    cat.contentTypeImage,
 
                     /* Total like count */
                     (SELECT COUNT(*) 
@@ -48,7 +45,6 @@ exports.getContentBycontent_type = (req, res) => {
                 FROM content c
                 JOIN content_type cat
                     ON c.contentTypeID = cat.contentTypeID
-                LEFT JOIN user u ON cat.userID = u.userID
                 WHERE cat.contentTypeID = ?
             `;
 
@@ -59,15 +55,13 @@ exports.getContentBycontent_type = (req, res) => {
         }
         if (results.length > 0) {
             // Use data from first item for content_type info
-            const content_typeInfo = {
-                content_typeName: results[0].content_typeName,
-                content_typeDescription: results[0].content_typeDescription,
-                content_typeImage: results[0].content_typeImage,
-                content_typeOwnerName: results[0].content_typeOwnerName || "content_type Manager",
-                content_typeOwnerPic: results[0].content_typeOwnerPic || "defaultUser.png"
+            const contentTypeInfo = {
+                contentTypeName: results[0].contentTypeName,
+                contentTypeDescription: results[0].contentTypeDescription,
+                contentTypeImage: results[0].contentTypeImage
             };
-            res.render('viewContentBycontent_type', {
-                content_type: content_typeInfo,
+            res.render('viewContentByContentType', {
+                contentType: contentTypeInfo,
                 contentList: results,
                 user: req.session.user || null
             });
@@ -78,51 +72,20 @@ exports.getContentBycontent_type = (req, res) => {
                 if (catError || catRows.length === 0) {
                     return res.status(404).send('content_type not found');
                 }
-                const content_typeInfo = {
-                    content_typeName: catRows[0].content_typeName,
-                    content_typeDescription: catRows[0].content_typeDescription,
-                    content_typeImage: catRows[0].content_typeImage,
-                    categiryOwnerName: catRows[0].content_typeOwnerName || "content_type Manager",
-                    content_typeOwnerPic: catRows[0].content_typeOwnerPic || "defaultUser.png",
+                const contentTypeInfo = {
+                    contentTypeName: catRows[0].contentTypeName,
+                    contentTypeDescription: catRows[0].contentTypeDescription,
+                    contentTypeImage: catRows[0].contentTypeImage,
                 };
-                res.render('viewContentBycontent_type', {
-                    content_type: content_typeInfo,
+                res.render('viewContentByContentType', {
+                    contentType: contentTypeInfo,
                     contentList: [],
                     user: req.session.user || null
                 });
-                // // After we get content list, fetch likers for ALL content
-                // const likerSql = `
-                //     SELECT e.contentID, u.userID, u.userName, u.profilePic
-                //     FROM engagement e
-                //     JOIN user u ON u.userID = e.userID
-                //     WHERE e.likes = 1
-                // `;
-
-                // db.query(likerSql, (err2, likerRows) => {
-                //     if (err2) {
-                //         console.error("Error loading liker list:", err2);
-                //         return res.status(500).send("Error retrieving likes");
-                //     }
-
-                //     // Attach likers to each content item
-                //     const updatedContentList = results.map(content => {
-                //         return {
-                //             ...content,
-                //             likers: likerRows.filter(l => l.contentID == content.contentID)
-                //         };
-                //     });
-
-                //     res.render('viewContentBycontent_type', {
-                //         content_type: content_typeInfo,
-                //         contentList: updatedContentList,
-                //         user: req.session.user || null
-                //     });
-                //});
             });
         }
     });
 };
-
 // ============================
 // TOGGLE LIKE (Correct Version)
 // ============================
@@ -359,7 +322,7 @@ exports.getContent = (req, res) => {
     const contentID = req.params.id;
 
     const contentSql = `
-        SELECT c.*, cat.content_typeName, cat.content_typeDescription, cat.content_typeImage
+        SELECT c.*, cat.contentTypeName, cat.contentTypeDescription, cat.contentTypeImage
         FROM content c
         JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
         WHERE c.contentID = ?
@@ -406,7 +369,7 @@ exports.getContent = (req, res) => {
                     content,
                     comments,
                     likeCount,
-                    sessionUser: req.session.user || null   // <-- FIX HERE
+                    sessionUser: req.session.user || null
                 });
             });
         });
@@ -653,62 +616,3 @@ exports.manageContent = (req, res) => {
         }
     });
 };
-
-
-// exports.postForgotPassword = (req, res) => {
-//     const { email } = req.body;
-
-//     if (!email) {
-//         req.flash('error', 'Please enter your email.');
-//         return res.redirect('/forgot-password');
-//     }
-
-//     db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-//         if (err) throw err;
-
-//         if (results.length === 0) {
-//             req.flash('error', 'Email not found.');
-//             return res.redirect('/forgot-password');
-//         }
-
-//         const tempPassword = generateTempPassword(8);
-
-        
-//         db.query('UPDATE users SET password = SHA(?) WHERE email = ?', [tempPassword, email], (err) => {
-//             if (err) throw err;
-
-//             // Configure mail
-//             const transporter = nodemailer.createTransport({
-//                 service: 'gmail',
-//                 auth: {
-//                     user: 'fyptesting13@gmail.com',
-//                     pass: 'fjbjltcfxfofwiho' 
-//                 }
-//             });
-
-//             const mailOptions = {
-//                 from: 'fyptesting13@gmail.com',
-//                 to: email,
-//                 subject: 'Temporary Password',
-//                 text: Your temporary password is: ${tempPassword}\nPlease use this to log in and reset your password.
-//             };
-
-//             // Send email
-//             transporter.sendMail(mailOptions, (error) => {
-//                 if (error) {
-//                     console.log(error);
-//                     req.flash('error', 'Error sending email.');
-//                     return res.redirect('/forgot-password');
-//                 }
-
-//                 // Render page showing step 2
-//                 res.render('forgot_password', { 
-//                     step: 2,
-//                     email: email,
-//                     errors: [],
-//                     success: ['Temporary password sent to your email.']
-//                 });
-//             });
-//         });
-//     });
-// };

@@ -37,7 +37,7 @@
       background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0));
     }
 
-    /* Category Description */
+    /* contentType Description */
     .cat-card {
       position: relative;
       z-index: 1;
@@ -63,7 +63,7 @@
       font-size:1.05rem;
     }
 
-    /* Spotlight (Category Manager) */
+    /* Spotlight (contentType Manager) */
     .spotlight {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -186,18 +186,18 @@
     <%- include ('partials/navbar.ejs') %>  
 
     <%
-const heroBg = (category && category.categoryImage) 
-    ? '/uploads/' + category.categoryImage 
+const heroBg = (contentType && contentType.contentTypeImage) 
+    ? '/uploads/' + contentType.contentTypeImage 
     : '/uploads/default.png';
 %>
 
 <!-- HERO -->
 <section class="hero" style="background-image: url('<%= heroBg %>');">
   <div class="cat-card">
-    <h2><%= category && category.categoryName ? category.categoryName.toUpperCase() : "Category Not Found" %></h2>
+    <h2><%= contentType && contentType.contentTypeName ? contentType.contentTypeName.toUpperCase() : "contentType Not Found" %></h2>
     <p>
-      <% if (category.categoryDescription) { %>
-        <%= category.categoryDescription.split('.').slice(1).join('.').trim() %>
+      <% if (contentType.contentTypeDescription) { %>
+        <%= contentType.contentTypeDescription.split('.').slice(1).join('.').trim() %>
       <% } %>
     </p>
   </div>
@@ -205,14 +205,14 @@ const heroBg = (category && category.categoryImage)
 
 <!-- MANAGER SPOTLIGHT -->
 <section class="spotlight">
-  <img class="spotlight__avatar" src="/uploads/<%= category.categoryOwnerPic %>">
+  <img class="spotlight__avatar" src="/uploads/<%= contentType.contentTypeOwnerPic %>">
   <div>
     <h4 style="margin:0; font-weight:700; font-style:italic;">
-      <%= category.categoryOwnerName %> —
-      Head of <%= category.categoryName %> Sustainability
+      <%= contentType.contentTypeOwnerName %> —
+      Head of <%= contentType.contentTypeName %> Sustainability
     </h4>
     <p style="margin:0;">
-      Oversees this category in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
+      Oversees this contentType in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
     </p>
   </div>
 </section>
@@ -347,7 +347,7 @@ const heroBg = (category && category.categoryImage)
 
   <script>
   function addComment(contentID) {
-      window.location.href = `/content/${contentID}?from=category`;
+      window.location.href = `/content/${contentID}?from=contentType`;
   }
   </script>
 

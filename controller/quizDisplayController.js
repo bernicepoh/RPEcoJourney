@@ -30,5 +30,5 @@ exports.startAsGuest = (req, res) => {
     // MUST save session before redirect
     req.session.save(() => {
         res.redirect("/guest-welcome");
-    });
+    });berredirect("/guest-open")
 };
