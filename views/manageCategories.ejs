@@ -120,37 +120,37 @@
                             <% 
                                 let imgSrc;
 
-                                if (!c.categoryImage) {
+                                if (!c.contentTypeImage) {
                                     imgSrc = "/uploads/default.png";        // if no image, NULL
                                 } 
-                                else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
-                                    imgSrc = "/uploads/" + c.categoryImage; // preset icons
+                                else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.contentTypeImage)) {
+                                    imgSrc = "/uploads/" + c.contentTypeImage; // preset icons
                                 } 
                                 else {
-                                    imgSrc = "/uploads/" + c.categoryImage; // ALL uploaded images
+                                    imgSrc = "/uploads/" + c.contentTypeImage; // ALL uploaded images
                                 }
                             %>
 
-                            <img src="<%= imgSrc %>" alt="<%= c.categoryName %>">
+                            <img src="<%= imgSrc %>" alt="<%= c.contentTypeName %>">
 
 
                             <!-- Body -->
                             <div class="category-body">
-                                <h5 class="fw-bold"><%= c.categoryName %></h5>
-                                <p><%= c.categoryDescription %></p>
+                                <h5 class="fw-bold"><%= c.contentTypeName %></h5>
+                                <p><%= c.contentTypeDescription %></p>
                             </div>
 
                             <!-- Edit/Delete Buttons -->
                             <div class="category-actions">
-                                <a href="/editCategory/<%= c.categoryID %>" class="btn btn-primary btn-sm">✏ Edit</a>
+                                <a href="/editCategory/<%= c.contentTypeID %>" class="btn btn-primary btn-sm">✏ Edit</a>
 
-                                <form id="deleteForm-<%= c.categoryID %>" 
-                                    action="/deleteCategory/<%= c.categoryID %>" 
+                                <form id="deleteForm-<%= c.contentTypeID %>" 
+                                    action="/deleteCategory/<%= c.contentTypeID %>" 
                                     method="POST" 
                                     class="delete-form">
                                 <button type="button" 
                                         class="delete-btn" 
-                                        onclick="confirmDelete('<%= c.categoryID %>')">
+                                        onclick="confirmDelete('<%= c.contentTypeID %>')">
                                     🗑 Delete
                                 </button>
                                 </form>
@@ -202,7 +202,7 @@
 
     <script>
     // SWEETALERT DELETE CONFIRM
-    function confirmDelete(categoryID) {
+    function confirmDelete(contentTypeID) {
         Swal.fire({
         title: "Delete category?",
         text: "This action cannot be undone.",
@@ -213,7 +213,7 @@
         confirmButtonText: "Yes, delete it"
         }).then((result) => {
         if (result.isConfirmed) {
-            document.getElementById(`deleteForm-${categoryID}`).submit();
+            document.getElementById(`deleteForm-${contentTypeID}`).submit();
         }
         });
     }

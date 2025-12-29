@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 // GET CONTENT BY CATEGORY
 // ============================
 exports.getContentByCategory = (req, res) => {
-    const categoryID = req.params.id;
+    const contentTypeID = req.params.id;
     const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
 
     const sql = `SELECT 
@@ -13,12 +13,9 @@ exports.getContentByCategory = (req, res) => {
                     c.contentTitle, 
                     c.contentDescription, 
                     c.contentFile,
-                    cat.categoryName,
-                    cat.categoryDescription,
-                    cat.categoryImage,
-                    cat.userID AS categoryOwnerID,
-                    u.userName AS categoryOwnerName,
-                    u.image AS categoryOwnerPic,
+                    cat.contentTypeName,
+                    cat.contentTypeDescription,
+                    cat.contentTypeImage,
 
                     /* Total like count */
                     (SELECT COUNT(*) 
@@ -46,13 +43,12 @@ exports.getContentByCategory = (req, res) => {
                     WHERE e.contentID = c.contentID) AS totalShares
 
                 FROM content c
-                JOIN category cat
-                    ON c.categoryID = cat.categoryID
-                LEFT JOIN user u ON cat.userID = u.userID
-                WHERE cat.categoryID = ?
+                JOIN content_type cat
+                ON c.contentTypeID = cat.contentTypeID
+                WHERE cat.contentTypeID = ?
             `;
 
-    db.query(sql, [userID, categoryID], (error, results) => {
+    db.query(sql, [userID, contentTypeID], (error, results) => {
         if (error) {
             console.log("🔥 SQL ERROR:", error);
             return res.status(500).send('Error retrieving content');
@@ -60,11 +56,9 @@ exports.getContentByCategory = (req, res) => {
         if (results.length > 0) {
             // Use data from first item for category info
             const categoryInfo = {
-                categoryName: results[0].categoryName,
-                categoryDescription: results[0].categoryDescription,
-                categoryImage: results[0].categoryImage,
-                categoryOwnerName: results[0].categoryOwnerName || "Category Manager",
-                categoryOwnerPic: results[0].categoryOwnerPic || "defaultUser.png"
+                contentTypeName: results[0].contentTypeName,
+                contentTypeDescription: results[0].contentTypeDescription,
+                contentTypeImage: results[0].contentTypeImage
             };
             res.render('viewContentByCategory', {
                 category: categoryInfo,
@@ -73,17 +67,15 @@ exports.getContentByCategory = (req, res) => {
             });
         } else {
             // No content, but still try to get category info for banner, etc.
-            const catSql = 'SELECT * FROM category WHERE categoryID = ?';
-            db.query(catSql, [categoryID], (catError, catRows) => {
+            const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
+            db.query(catSql, [contentTypeID], (catError, catRows) => {
                 if (catError || catRows.length === 0) {
                     return res.status(404).send('Category not found');
                 }
                 const categoryInfo = {
-                    categoryName: catRows[0].categoryName,
-                    categoryDescription: catRows[0].categoryDescription,
-                    categoryImage: catRows[0].categoryImage,
-                    categiryOwnerName: catRows[0].categoryOwnerName || "Category Manager",
-                    categoryOwnerPic: catRows[0].categoryOwnerPic || "defaultUser.png",
+                    contentTypeName: catRows[0].contentTypeName,
+                    contentTypeDescription: catRows[0].contentTypeDescription,
+                    contentTypeImage: catRows[0].contentTypeImage
                 };
                 res.render('viewContentByCategory', {
                     category: categoryInfo,
@@ -358,26 +350,46 @@ exports.trackShare = (req, res) => {
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
 
+    // ✅ SORT LOGIC MUST LIVE HERE
+    const sort = req.query.sort || "newest";
+
+    let orderBy = "e.createdAt DESC"; // default
+
+    if (sort === "oldest") {
+        orderBy = "e.createdAt ASC";
+    } else if (sort === "az") {
+        orderBy = "u.userName ASC";
+    } else if (sort === "za") {
+        orderBy = "u.userName DESC";
+    }
+
     const contentSql = `
-        SELECT c.*, cat.categoryName, cat.categoryDescription, cat.categoryImage
+        SELECT c.*, cat.contentTypeName, cat.contentTypeDescription, cat.contentTypeImage
         FROM content c
-        JOIN category cat ON c.categoryID = cat.categoryID
+        JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
         WHERE c.contentID = ?
     `;
 
     const commentSql = `
-        SELECT 
-            e.engagementID AS commentID,
-            e.comments AS commentText,
-            e.createdAt,
-            u.userID,
-            u.userName,
-            u.image AS userImage
-        FROM engagement e
-        JOIN user u ON e.userID = u.userID
-        WHERE e.contentID = ? AND e.comments IS NOT NULL AND e.comments != ''
-        ORDER BY e.createdAt DESC
-    `;
+            SELECT 
+                e.engagementID AS commentID,
+                e.comments AS commentText,
+                e.isBlocked,
+                DATE_FORMAT(e.createdAt, '%d %b %Y, %h:%i %p') AS createdAt,
+                u.userID,
+                u.userName,
+                u.userType,
+                u.image AS userImage
+            FROM engagement e
+            JOIN user u ON e.userID = u.userID
+            WHERE e.contentID = ?
+                AND (
+                e.isBlocked = 0
+                OR e.userID = ?
+                OR ? IN ('Admin', 'Manager')
+                )
+            ORDER BY ${orderBy}
+        `;
 
     const likeSql = `
         SELECT COUNT(*) AS likeCount
@@ -394,26 +406,92 @@ exports.getContent = (req, res) => {
 
         const content = contentRows[0];
 
-        db.query(commentSql, [contentID], (err2, comments) => {
-            if (err2) return res.status(500).send("Error loading comments");
+        const viewerUserID = req.session.user ? req.session.user.userID : 0;
+        const viewerRole = req.session.user ? req.session.user.userType : 'User';
 
-            db.query(likeSql, [contentID], (err3, likeRows) => {
-                if (err3) return res.status(500).send("Error loading likes");
-
-                const likeCount = likeRows[0].likeCount;
-
-                res.render("viewContent", {
-                    content,
-                    comments,
-                    likeCount,
-                    sessionUser: req.session.user || null   // <-- FIX HERE
-                });
-            });
+        console.log("👀 Viewer:", {
+            viewerUserID,
+            viewerRole
         });
+
+        db.query(
+            commentSql,
+            [contentID, viewerUserID, viewerRole],
+            (err2, comments) => {
+                if (err2) { 
+                    console.log("🔥 COMMENT SQL ERROR:", err2);
+                    return res.status(500).send("Error loading comments");
+                }
+
+                db.query(likeSql, [contentID], (err3, likeRows) => {
+                    if (err3) return res.status(500).send("Error loading likes");
+
+                    const likeCount = likeRows[0].likeCount;
+
+                    res.render("viewContent", {
+                        content,
+                        comments: comments || [],
+                        likeCount,
+                        sessionUser: req.session.user || null,
+                        sort
+                    });
+                });
+            }
+        );
     });
 };
 
+// ======================================
+// BLOCKED COMMENT - ADMIN/MANAGER ONLY
+// ======================================
+exports.blockComment = (req, res) => {
+  const commentID = req.params.id;
+  const contentID = req.body.contentID;
+  const userType = req.session.user.userType;
 
+  if (!['Admin', 'Manager'].includes(userType)) {
+    return res.status(403).send('Forbidden');
+  }
+
+  const sql = `
+    UPDATE engagement
+    SET isBlocked = 1
+    WHERE engagementID = ?
+  `;
+
+    db.query(sql, [commentID], () => {
+        res.redirect(`/content/${contentID}?moderation=blocked`);
+    });
+};
+
+// ======================================
+// UNBLOCK COMMENT - ADMIN / MANAGER ONLY
+// ======================================
+exports.unblockComment = (req, res) => {
+  const commentID = req.params.commentID;
+  const userType = req.session.user.userType;
+  const contentID = req.body.contentID; // 👈 IMPORTANT
+
+  if (!['Admin', 'Manager'].includes(userType)) {
+    return res.status(403).send('Forbidden');
+  }
+
+  const sql = `
+    UPDATE engagement
+    SET isBlocked = 0
+    WHERE engagementID = ?
+  `;
+
+  db.query(sql, [commentID], (err) => {
+    if (err) {
+      console.error("Unblock error:", err);
+      return res.status(500).send("Failed to unblock comment");
+    }
+
+    // ✅ Redirect properly
+    res.redirect(`/content/${contentID}?moderation=unblocked`);
+  });
+};
 
 exports.editComment = (req, res) => {
     const commentID = req.params.commentID;
@@ -449,7 +527,7 @@ exports.editComment = (req, res) => {
             if (err2) return res.status(500).send("Failed to update");
 
             // Redirect back to the SAME content page
-            res.redirect(`/content/${contentID}`);
+            res.redirect(`/content/${contentID}?success=edited`);
         });
     });
 };
@@ -490,7 +568,7 @@ exports.deleteComment = (req, res) => {
 };
 
 exports.addContentForm = (req, res) => {
-    const sql = 'SELECT * FROM category';
+    const sql = 'SELECT * FROM content_type';
     const user = req.session.user 
     db.query(sql, (error, results) => {
         if (error) {
@@ -504,7 +582,7 @@ exports.addContentForm = (req, res) => {
 };
 
 exports.addContent = (req, res) => {
-    const { categoryID, contentTitle, contentDescription } = req.body;
+    const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile;
     if (req.file) {
         contentFile = req.file.filename; // Save only the filename
@@ -512,11 +590,11 @@ exports.addContent = (req, res) => {
         contentFile = null;
     }
 
-    const sql = 'INSERT INTO content (categoryID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
+    const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
    
 
     // Insert the new content into the database
-    db.query(sql, [categoryID, contentTitle, contentDescription, contentFile], (error, results) => {
+    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error("Error adding content:", error);
@@ -529,7 +607,7 @@ exports.addContent = (req, res) => {
 };
 
 const getAllCategories = (db, callback) => {
-    const sql = 'SELECT * FROM category';
+    const sql = 'SELECT * FROM content_type';
 
     // Fetch data from MySQL
     db.query(sql, (error, results) => {
@@ -578,16 +656,16 @@ exports.editContentForm = async (req, res) => {
 exports.editContent = (req, res) => {
 
     const contentID = req.params.id;
-    const { categoryID, contentTitle, contentDescription } = req.body;
+    const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile = req.body.currentFile; //retrieve current image filename
     if (req.file) { //if new image is uploaded
         contentFile = req.file.filename; // set image to be new image filename
     }
     console.log("new file: " + contentFile);
-    const sql = 'UPDATE content SET categoryID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
+    const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
 
     // Updated the content into the database
-    db.query(sql, [categoryID, contentTitle, contentDescription, contentFile, contentID], (error, results) => {
+    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error("Error updating content:", error);
@@ -604,16 +682,16 @@ exports.editContent = (req, res) => {
 exports.deleteContent = (req, res) => {
     const contentID = req.params.id;
     // First, get the categoryID of the content
-    const getCategorySql = 'SELECT categoryID FROM content WHERE contentID = ?';
+    const getCategorySql = 'SELECT contentTypeID FROM content WHERE contentID = ?';
     db.query(getCategorySql, [contentID], (getError, getResults) => {
         if (getError) {
-            console.error("Error fetching categoryID:", getError);
+            console.error("Error fetching contentTypeID:", getError);
             return res.status(500).send('Error deleting content');
         }
         if (getResults.length === 0) {
             return res.status(404).send('Content not found');
         }
-        const categoryID = getResults[0].categoryID;
+        const contentTypeID = getResults[0].contentTypeID;
         // Now delete the content
         const deleteSql = 'DELETE FROM content WHERE contentID = ?';
         db.query(deleteSql, [contentID], (deleteError, deleteResults) => {
@@ -634,7 +712,7 @@ exports.manageContent = (req, res) => {
     const sql = `
         SELECT *
         FROM content c
-        JOIN category cat ON c.categoryID = cat.categoryID
+        JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
     `;
 
     db.query(sql, (error, results) => {

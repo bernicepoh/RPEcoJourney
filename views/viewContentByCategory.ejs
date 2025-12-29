@@ -183,27 +183,32 @@
   </style>
 </head>
 <body>
-    <%- include ('partials/navbar.ejs') %>  
+  <%- include ('partials/navbar.ejs') %>  
 
-    <%
-const heroBg = (category && category.categoryImage) 
-    ? '/uploads/' + category.categoryImage 
-    : '/uploads/default.png';
-%>
+  <%
+    const heroBg = (category && category.contentTypeImage) 
+      ? '/uploads/' + category.contentTypeImage 
+      : '/uploads/default.png';
+  %>
 
-<!-- HERO -->
-<section class="hero" style="background-image: url('<%= heroBg %>');">
-  <div class="cat-card">
-    <h2><%= category && category.categoryName ? category.categoryName.toUpperCase() : "Category Not Found" %></h2>
-    <p>
-      <% if (category.categoryDescription) { %>
-        <%= category.categoryDescription.split('.').slice(1).join('.').trim() %>
-      <% } %>
-    </p>
-  </div>
-</section>
+  <!-- HERO -->
+  <section class="hero" style="background-image: url('<%= heroBg %>');">
+    <div class="cat-card">
+      <h2>
+        <%= category && category.contentTypeName 
+            ? category.contentTypeName.toUpperCase() 
+            : "Category Not Found" %>
+      </h2>
 
-<!-- MANAGER SPOTLIGHT -->
+      <p>
+        <% if (category && category.contentTypeDescription) { %>
+          <%= category.contentTypeDescription.split('.').slice(1).join('.').trim() %>
+        <% } %>
+      </p>
+    </div>
+  </section>
+
+<!-- MANAGER SPOTLIGHT
 <section class="spotlight">
   <img class="spotlight__avatar" src="/uploads/<%= category.categoryOwnerPic %>">
   <div>
@@ -215,7 +220,7 @@ const heroBg = (category && category.categoryImage)
       Oversees this category in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
     </p>
   </div>
-</section>
+</section> -->
 
 <div class="container">
   <br>
