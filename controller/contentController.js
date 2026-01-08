@@ -54,7 +54,7 @@ exports.getContentByContentType = (req, res) => {
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
-            // Use data from first item for content_type info
+            // Use data from first item for content type info
             const contentTypeInfo = {
                 contentTypeName: results[0].contentTypeName,
                 contentTypeDescription: results[0].contentTypeDescription,
@@ -70,7 +70,7 @@ exports.getContentByContentType = (req, res) => {
             const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
             db.query(catSql, [contentTypeID], (catError, catRows) => {
                 if (catError || catRows.length === 0) {
-                    return res.status(404).send('content_type not found');
+                    return res.status(404).send('content type not found');
                 }
                 const contentTypeInfo = {
                     contentTypeName: catRows[0].contentTypeName,
@@ -321,6 +321,19 @@ exports.trackShare = (req, res) => {
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
 
+    // ✅ SORT LOGIC MUST LIVE HERE
+    const sort = req.query.sort || "newest";
+
+    let orderBy = "e.createdAt DESC"; // default
+
+    if (sort === "oldest") {
+        orderBy = "e.createdAt ASC";
+    } else if (sort === "az") {
+        orderBy = "u.userName ASC";
+    } else if (sort === "za") {
+        orderBy = "u.userName DESC";
+    }
+
     const contentSql = `
         SELECT c.*, cat.contentTypeName, cat.contentTypeDescription, cat.contentTypeImage
         FROM content c
@@ -329,18 +342,25 @@ exports.getContent = (req, res) => {
     `;
 
     const commentSql = `
-        SELECT 
-            e.engagementID AS commentID,
-            e.comments AS commentText,
-            e.createdAt,
-            u.userID,
-            u.userName,
-            u.image AS userImage
-        FROM engagement e
-        JOIN user u ON e.userID = u.userID
-        WHERE e.contentID = ? AND e.comments IS NOT NULL AND e.comments != ''
-        ORDER BY e.createdAt DESC
-    `;
+            SELECT 
+                e.engagementID AS commentID,
+                e.comments AS commentText,
+                e.isBlocked,
+                DATE_FORMAT(e.createdAt, '%d %b %Y, %h:%i %p') AS createdAt,
+                u.userID,
+                u.userName,
+                u.userType,
+                u.image AS userImage
+            FROM engagement e
+            JOIN user u ON e.userID = u.userID
+            WHERE e.contentID = ?
+                AND (
+                e.isBlocked = 0
+                OR e.userID = ?
+                OR ? IN ('Admin', 'Manager')
+                )
+            ORDER BY ${orderBy}
+        `;
 
     const likeSql = `
         SELECT COUNT(*) AS likeCount
@@ -357,26 +377,92 @@ exports.getContent = (req, res) => {
 
         const content = contentRows[0];
 
-        db.query(commentSql, [contentID], (err2, comments) => {
-            if (err2) return res.status(500).send("Error loading comments");
+        const viewerUserID = req.session.user ? req.session.user.userID : 0;
+        const viewerRole = req.session.user ? req.session.user.userType : 'User';
 
-            db.query(likeSql, [contentID], (err3, likeRows) => {
-                if (err3) return res.status(500).send("Error loading likes");
-
-                const likeCount = likeRows[0].likeCount;
-
-                res.render("viewContent", {
-                    content,
-                    comments,
-                    likeCount,
-                    sessionUser: req.session.user || null
-                });
-            });
+        console.log("👀 Viewer:", {
+            viewerUserID,
+            viewerRole
         });
+
+        db.query(
+            commentSql,
+            [contentID, viewerUserID, viewerRole],
+            (err2, comments) => {
+                if (err2) { 
+                    console.log("🔥 COMMENT SQL ERROR:", err2);
+                    return res.status(500).send("Error loading comments");
+                }
+
+                db.query(likeSql, [contentID], (err3, likeRows) => {
+                    if (err3) return res.status(500).send("Error loading likes");
+
+                    const likeCount = likeRows[0].likeCount;
+
+                    res.render("viewContent", {
+                        content,
+                        comments: comments || [],
+                        likeCount,
+                        sessionUser: req.session.user || null,
+                        sort
+                    });
+                });
+            }
+        );
     });
 };
 
+// ======================================
+// BLOCKED COMMENT - ADMIN/MANAGER ONLY
+// ======================================
+exports.blockComment = (req, res) => {
+  const commentID = req.params.id;
+  const contentID = req.body.contentID;
+  const userType = req.session.user.userType;
 
+  if (!['Admin', 'Manager'].includes(userType)) {
+    return res.status(403).send('Forbidden');
+  }
+
+  const sql = `
+    UPDATE engagement
+    SET isBlocked = 1
+    WHERE engagementID = ?
+  `;
+
+    db.query(sql, [commentID], () => {
+        res.redirect(`/content/${contentID}?moderation=blocked`);
+    });
+};
+
+// ======================================
+// UNBLOCK COMMENT - ADMIN / MANAGER ONLY
+// ======================================
+exports.unblockComment = (req, res) => {
+  const commentID = req.params.commentID;
+  const userType = req.session.user.userType;
+  const contentID = req.body.contentID; // 👈 IMPORTANT
+
+  if (!['Admin', 'Manager'].includes(userType)) {
+    return res.status(403).send('Forbidden');
+  }
+
+  const sql = `
+    UPDATE engagement
+    SET isBlocked = 0
+    WHERE engagementID = ?
+  `;
+
+  db.query(sql, [commentID], (err) => {
+    if (err) {
+      console.error("Unblock error:", err);
+      return res.status(500).send("Failed to unblock comment");
+    }
+
+    // ✅ Redirect properly
+    res.redirect(`/content/${contentID}?moderation=unblocked`);
+  });
+};
 
 exports.editComment = (req, res) => {
     const commentID = req.params.commentID;
@@ -412,7 +498,7 @@ exports.editComment = (req, res) => {
             if (err2) return res.status(500).send("Failed to update");
 
             // Redirect back to the SAME content page
-            res.redirect(`/content/${contentID}`);
+            res.redirect(`/content/${contentID}?success=edited`);
         });
     });
 };
@@ -491,7 +577,7 @@ exports.addContent = (req, res) => {
     });
 };
 
-const getAllContent = (db, callback) => {
+const getAllCategories = (db, callback) => {
     const sql = 'SELECT * FROM content_type';
 
     // Fetch data from MySQL
@@ -566,9 +652,9 @@ exports.editContent = (req, res) => {
 
 exports.deleteContent = (req, res) => {
     const contentID = req.params.id;
-    // First, get the contentTypeID of the content
-    const getcontent_typeSql = 'SELECT contentTypeID FROM content WHERE contentID = ?';
-    db.query(getcontent_typeSql, [contentID], (getError, getResults) => {
+    // First, get the categoryID of the content
+    const getCategorySql = 'SELECT contentTypeID FROM content WHERE contentID = ?';
+    db.query(getCategorySql, [contentID], (getError, getResults) => {
         if (getError) {
             console.error("Error fetching contentTypeID:", getError);
             return res.status(500).send('Error deleting content');

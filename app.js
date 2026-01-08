@@ -141,7 +141,11 @@ app.post('/toggle-like/:contentID', checkAuthenticated, contentController.toggle
 // Comment route
 app.post('/content/:id/comment', checkAuthenticated, contentController.postComment);
 app.post("/comment/edit/:commentID", checkAuthenticated, contentController.editComment);
-app.get("/comment/delete/:commentID", checkAuthenticated, contentController.deleteComment);
+app.post("/comment/delete/:commentID", checkAuthenticated, contentController.deleteComment);
+app.post("/comment/unblock/:commentID", checkAuthenticated, contentController.unblockComment);
+
+// Admin/Manager block comment
+app.post('/comment/block/:id', contentController.blockComment);
 
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories 
