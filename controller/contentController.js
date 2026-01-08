@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 // ============================
 // GET CONTENT BY content_type
 // ============================
-exports.getContentBycontent_type = (req, res) => {
+exports.getContentByContentType = (req, res) => {
     const contentTypeID = req.params.id;
     const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
 
@@ -55,13 +55,13 @@ exports.getContentBycontent_type = (req, res) => {
         }
         if (results.length > 0) {
             // Use data from first item for category info
-            const categoryInfo = {
+            const contentTypeInfo = {
                 contentTypeName: results[0].contentTypeName,
                 contentTypeDescription: results[0].contentTypeDescription,
                 contentTypeImage: results[0].contentTypeImage
             };
-            res.render('viewContentBycontent_type', {
-                content_type: content_typeInfo,
+            res.render('viewContentBycontentType', {
+                contentType: contentTypeInfo,
                 contentList: results,
                 user: req.session.user || null
             });
@@ -70,15 +70,15 @@ exports.getContentBycontent_type = (req, res) => {
             const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
             db.query(catSql, [contentTypeID], (catError, catRows) => {
                 if (catError || catRows.length === 0) {
-                    return res.status(404).send('content_type not found');
+                    return res.status(404).send('content type not found');
                 }
-                const categoryInfo = {
+                const contentTypeInfo = {
                     contentTypeName: catRows[0].contentTypeName,
                     contentTypeDescription: catRows[0].contentTypeDescription,
                     contentTypeImage: catRows[0].contentTypeImage
                 };
-                res.render('viewContentBycontent_type', {
-                    content_type: content_typeInfo,
+                res.render('viewContentBycontentType', {
+                    contentType: contentTypeInfo,
                     contentList: [],
                     user: req.session.user || null
                 });

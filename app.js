@@ -125,7 +125,7 @@ function simpleHash(str) {
 }
 
 // Content Routes
-app.get('/category/:id/content', contentController.getContentByCategory);
+app.get('/contentType/:id/content', contentController.getContentByContentType);
 app.get('/content/:id', contentController.getContent);
 app.get('/addContent', allowAdminOrWriter, contentController.addContentForm);
 app.post('/addContent', allowAdminOrWriter, upload.single('contentFile'), contentController.addContent);

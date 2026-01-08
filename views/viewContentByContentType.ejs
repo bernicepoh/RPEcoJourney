@@ -37,7 +37,7 @@
       background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0));
     }
 
-    /* Category Description */
+    /* Content Type Description */
     .cat-card {
       position: relative;
       z-index: 1;
@@ -63,7 +63,7 @@
       font-size:1.05rem;
     }
 
-    /* Spotlight (Category Manager) */
+    /* Spotlight (Content Type Manager) */
     .spotlight {
       display: grid;
       grid-template-columns: auto 1fr;
@@ -186,8 +186,8 @@
   <%- include ('partials/navbar.ejs') %>  
 
   <%
-    const heroBg = (category && category.contentTypeImage) 
-      ? '/uploads/' + category.contentTypeImage 
+    const heroBg = (contentType && contentType.contentTypeImage) 
+      ? '/uploads/' + contentType.contentTypeImage 
       : '/uploads/default.png';
   %>
 
@@ -195,14 +195,14 @@
   <section class="hero" style="background-image: url('<%= heroBg %>');">
     <div class="cat-card">
       <h2>
-        <%= category && category.contentTypeName 
-            ? category.contentTypeName.toUpperCase() 
-            : "Category Not Found" %>
+        <%= contentType && contentType.contentTypeName 
+            ? contentType.contentTypeName.toUpperCase() 
+            : "Content Type Not Found" %>
       </h2>
 
       <p>
-        <% if (category && category.contentTypeDescription) { %>
-          <%= category.contentTypeDescription.split('.').slice(1).join('.').trim() %>
+        <% if (contentType && contentType.contentTypeDescription) { %>
+          <%= contentType.contentTypeDescription.split('.').slice(1).join('.').trim() %>
         <% } %>
       </p>
     </div>
@@ -210,14 +210,14 @@
 
 <!-- MANAGER SPOTLIGHT
 <section class="spotlight">
-  <img class="spotlight__avatar" src="/uploads/<%= category.categoryOwnerPic %>">
+  <img class="spotlight__avatar" src="/uploads/<%= contentType.contentTypeOwnerPic %>">
   <div>
     <h4 style="margin:0; font-weight:700; font-style:italic;">
-      <%= category.categoryOwnerName %> —
-      Head of <%= category.categoryName %> Sustainability
+      <%= contentType.contentTypeOwnerName %> —
+      Head of <%= contentType.contentTypeName %> Sustainability
     </h4>
     <p style="margin:0;">
-      Oversees this category in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
+      Oversees this content type in RPEcoJourney, leading initiatives promoting eco-awareness within RP.
     </p>
   </div>
 </section> -->
@@ -352,7 +352,7 @@
 
   <script>
   function addComment(contentID) {
-      window.location.href = `/content/${contentID}?from=category`;
+      window.location.href = `/content/${contentID}?from=contentType`;
   }
   </script>
 
