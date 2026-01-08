@@ -4,7 +4,7 @@ const path = require('path');
 
 // Public — List all categories
 exports.getCategories = (req, res) => {
-    const sql = 'SELECT * FROM category';
+    const sql = 'SELECT * FROM content_type';
     const user = req.session.user 
 
     // Fetch data from MySQL
@@ -33,12 +33,13 @@ exports.getCategories = (req, res) => {
 
 // Public — Get single category by ID
 exports.getCategory = (req, res) => {
-    const categoryID = req.params.id;
-    const sql = 'SELECT * FROM category WHERE categoryID = ?';
+    const contentTypeID = req.params.id;
+     console.log("🟢 PARAM ID:", contentTypeID);
+    const sql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
     const user = req.session.user 
     
     // Fetch data from MySQL
-    db.query(sql, [categoryID], (error, results) => {
+    db.query(sql, [contentTypeID], (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
             return res.status(500).send('Error retrieving category by ID');
@@ -63,7 +64,7 @@ exports.getCategory = (req, res) => {
 
 // Admin/Manager Manage Categories Page
 exports.getManageCategories = (req, res) => {
-    const sql = "SELECT * FROM category";
+    const sql = "SELECT * FROM content_type";
 
     db.query(sql, (err, results) => {
         if (err) {
@@ -86,18 +87,18 @@ exports.addCategoryForm = (req, res) => {
 
 // Admin/Manager — Add new category (IF NEED, but in this case no since only fixed to 3 categories)
 exports.addCategory = (req, res) => {
-    const { categoryName, categoryDescription } = req.body;
-    let categoryImage;
+    const { contentTypeName, contentTypeDescription } = req.body;
+    let contentTypeImage;
     if (req.file) {
-        categoryImage = req.file.filename; 
+        contentTypeImage = req.file.filename; 
     } else {
-        categoryImage = null;
+        contentTypeImage = null;
     }
 
-    const sql = 'INSERT INTO category (categoryName, categoryDescription, categoryImage) VALUES (?, ?, ?)';
+    const sql = 'INSERT INTO content_type (contentTypeName, contentTypeDescription, contentTypeImage) VALUES (?, ?, ?)';
     
     // Insert the new category into the database
-    db.query(sql, [categoryName, categoryDescription, categoryImage], (error, results) => {
+    db.query(sql, [contentTypeName, contentTypeDescription, contentTypeImage], (error, results) => {
         if (error) {
             console.error("FULL MYSQL ERROR:", error);
             return res.status(500).send(error.sqlMessage || error.message || "Error adding category");
@@ -112,11 +113,11 @@ exports.addCategory = (req, res) => {
 
 // Admin/Manager — Render Edit Category Form
 exports.editCategoryForm = (req, res) => {
-    const categoryID = req.params.id;
-    const sql = 'SELECT * FROM category WHERE categoryID = ?';
+    const contentTypeID = req.params.id;
+    const sql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
     //const category = db.Category.findByPk(categoryId);
     
-    db.query(sql, [categoryID], (error, results) => {
+    db.query(sql, [contentID], (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
             return res.status(500).send('Error retrieving category');
@@ -140,18 +141,18 @@ exports.editCategoryForm = (req, res) => {
 
 // Admin/Manager — Update existing category
 exports.updateCategory = (req, res) => {
-    const categoryID = req.params.id;
-    const { categoryName, categoryDescription } = req.body;
-    let categoryImage = req.body.currentImage; //retrieve current image filename
+    const contentID = req.params.id;
+    const { contentName, contentDescription } = req.body;
+    let contentTypeImage = req.body.currentImage; //retrieve current image filename
     if (req.file) { //if new image is uploaded
-        categoryImage = req.file.filename; // set image to be new image filename
+        contentTypeImage = req.file.filename; // set image to be new image filename
     }
-    console.log("new file: " + categoryImage);
+    console.log("new file: " + contentTypeImage);
     
-    const sql = 'UPDATE category SET categoryName = ?, categoryDescription = ?, categoryImage = ? WHERE categoryID = ?';
+    const sql = 'UPDATE content_type SET contentName = ?, contentDescription = ?, contentTypeImage = ? WHERE contentID = ?';
     
     // Insert the new category into the database
-    db.query(sql, [categoryName, categoryDescription, categoryImage, categoryID], (error, results) => {
+    db.query(sql, [contentName, contentDescription, contentTypeImage, contentID], (error, results) => {
         if (error) {
             // Handle any error that occurs during the database operation
             console.error('Error updating category:', error.message);
@@ -166,16 +167,16 @@ exports.updateCategory = (req, res) => {
 
 // Admin/Manager — Delete Category (Enhanced)
 exports.deleteCategory = (req, res) => {
-    const categoryID = req.params.id;
+    const contentTypeID = req.params.id;
 
-    if (!categoryID) {
+    if (!contentTypeID) {
         req.flash('error', 'Invalid category ID');
         return res.redirect('/manageCategories');
     }
 
     // 1️⃣ Check if category has content
-    const contentSql = 'SELECT * FROM content WHERE categoryID = ?';
-    db.query(contentSql, [categoryID], (err, contentResults) => {
+    const contentSql = 'SELECT * FROM content WHERE contentTypeID = ?';
+    db.query(contentSql, [contentTypeID], (err, contentResults) => {
         if (err) {
             console.error('Content check error:', err.message);
             req.flash('error', 'Server error');
@@ -188,20 +189,20 @@ exports.deleteCategory = (req, res) => {
         }
 
         // 2️⃣ Get category image BEFORE deletion
-        const getCategorySql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
-        db.query(getCategorySql, [categoryID], (err, imageResults) => {
+        const getCategorySql = 'SELECT contentTypeImage FROM content_type WHERE contentTypeID = ?';
+        db.query(getCategorySql, [contentTypeID], (err, imageResults) => {
             if (err) {
                 console.error('Image lookup error:', err.message);
                 req.flash('error', 'Server error');
                 return res.redirect('/manageCategories');
             }
 
-            const imageFile = imageResults[0]?.categoryImage;
+            const imageFile = imageResults[0]?.contentTypeImage;
             const imagePath = path.join(__dirname, '../public/uploads', imageFile);
 
             // 3️⃣ Delete category from DB
-            const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
-            db.query(deleteSql, [categoryID], (err) => {
+            const deleteSql = 'DELETE FROM content_type WHERE contentTypeID = ?';
+            db.query(deleteSql, [contentTypeID], (err) => {
                 if (err) {
                     console.error('Delete error:', err.message);
                     req.flash('error', 'Server error');
@@ -245,138 +246,3 @@ exports.deleteCategory = (req, res) => {
         });
     });
 };
-
-// // Admin/Manager — Delete Category (Enhanced)
-// exports.deleteCategory = (req, res) => {
-//     const categoryID = req.params.id;
-
-//     // 1️⃣ Safety Check: Validate ID
-//     if (!categoryID) {
-//         req.flash('error', 'Invalid category ID');
-//         return res.redirect('/manageCategories');
-//     }
-
-//     // 2️⃣ Check if category contains related content before deletion
-//     const contentSql = 'SELECT * FROM content WHERE categoryID = ?';
-//     db.query(contentSql, [categoryID], (err, contentResults) => {
-//         if (err) {
-//             console.error('Content check error:', err.message);
-//             req.flash('error', 'Server error');
-//             return res.redirect('/manageCategories');
-//         }
-
-//         if (contentResults.length > 0) {
-//             req.flash('error', 'Unable to delete — category contains content.');
-//             return res.redirect('/manageCategories');
-//         }
-
-//         // 3️⃣ Get category image for deletion
-//         const getCategorySql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
-//         db.query(getCategorySql, [categoryID], (err, imageResults) => {
-//             if (err) {
-//                 console.error('Image lookup error:', err.message);
-//                 req.flash('error', 'Server error');
-//                 return res.redirect('/manageCategories');
-//             }
-
-//             const imageFile = imageResults[0]?.categoryImage;
-//             const imagePath = path.join(__dirname, '../public/images', imageFile);
-
-//             // 4️⃣ Delete category record
-//             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
-//             db.query(deleteSql, [categoryID], (err) => {
-//                 if (err) {
-//                     console.error('Delete error:', err.message);
-//                     req.flash('error', 'Server error');
-//                     return res.redirect('/manageCategories');
-//                 }
-
-//                 // 5️⃣ Delete image if exists & is not null/default
-//                 if (imageFile && imageFile !== 'default.png') {
-
-//                     const imagePath = path.join(__dirname, '../public/images', imageFile);
-
-//                     fs.unlink(imagePath, (unlinkErr) => {
-//                         if (unlinkErr) {
-//                             console.warn("⚠ Failed to delete image:", unlinkErr.message);
-//                         }
-//                     });
-//                 }
-
-//                 req.flash('success', 'Category deleted successfully!');
-//                 res.redirect('/manageCategories');
-//             });
-//         });
-//     });
-// };
-
-// // Admin/Manager — Delete Category (Enhanced & Safe)
-// exports.deleteCategory = (req, res) => {
-//     const categoryID = req.params.id;
-
-//     // Safety Check: Validate ID
-//     if (!categoryID) {
-//         req.flash('error', 'Invalid category ID');
-//         return res.redirect('/manageCategories');
-//     }
-
-//     // Check if category has content
-//     const checkSql = 'SELECT contentID FROM content WHERE categoryID = ?';
-//     db.query(checkSql, [categoryID], (err, contentRows) => {
-//         if (err) {
-//             console.error("Error checking category content:", err);
-//             req.flash('error', 'Server error');
-//             return res.redirect('/manageCategories');
-//         }
-
-//         // If content exists → move to Uncategorized (ID = 0)
-//         if (contentRows.length > 0) {
-//             const moveSql = 'UPDATE content SET categoryID = 0 WHERE categoryID = ?';
-
-//             db.query(moveSql, [categoryID], (moveErr) => {
-//                 if (moveErr) {
-//                     console.error("Error moving content:", moveErr);
-//                     req.flash('error', 'Could not move content before deletion.');
-//                     return res.redirect('/manageCategories');
-//                 }
-
-//                 console.log(`Moved ${contentRows.length} item(s) to Uncategorized.`);
-//             });
-//         }
-
-//         // Get category image
-//         const imgSql = 'SELECT categoryImage FROM category WHERE categoryID = ?';
-//         db.query(imgSql, [categoryID], (err, imgRows) => {
-//             if (err) {
-//                 console.error("Image lookup error:", err);
-//                 req.flash('error', 'Server error');
-//                 return res.redirect('/manageCategories');
-//             }
-
-//             const imageFile = imgRows[0]?.categoryImage || null;
-//             const imagePath = path.join(__dirname, '../public/images', imageFile);
-
-//             // Delete category itself
-//             const deleteSql = 'DELETE FROM category WHERE categoryID = ?';
-//             db.query(deleteSql, [categoryID], (delErr) => {
-//                 if (delErr) {
-//                     console.error("Delete error:", delErr);
-//                     req.flash('error', 'Could not delete category.');
-//                     return res.redirect('/manageCategories');
-//                 }
-
-//                 // Remove image file only if it's not default
-//                 if (imageFile && imageFile !== 'default.png') {
-//                     fs.unlink(imagePath, (unlinkErr) => {
-//                         if (unlinkErr) {
-//                             console.warn("Failed to delete image:", unlinkErr.message);
-//                         }
-//                     });
-//                 }
-
-//                 req.flash('success', 'Category deleted successfully!');
-//                 res.redirect('/manageCategories');
-//             });
-//         });
-//     });
-// };

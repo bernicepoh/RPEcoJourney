@@ -170,36 +170,36 @@
 
       <% categories.forEach(c => { %>
 
-        <% if (c.categoryName === "Uncategorized") { return; } %>
+        <% if (c.contentTypeName === "Uncategorized") { return; } %>
 
         <div class="category-card">
 
           <div class="category-left">
-            <a class="category-title" href="/category/<%= c.categoryID %>/content">
-              <%= c.categoryName %>
+            <a class="category-title" href="/category/<%= c.contentTypeID %>/content">
+              <%= c.contentTypeName %>
             </a>
 
             <p class="category-desc">
-              <% if (c.categoryDescription) { %>
-                <%= c.categoryDescription.split('.')[0] %>
+              <% if (c.contentTypeDescription) { %>
+                <%= c.contentTypeDescription.split('.')[0] %>
               <% } %>
             </p>
           </div>
 
           <%
             let imgSrc;
-            if (!c.categoryImage) {
+            if (!c.contentTypeImage) {
               imgSrc = "/uploads/default.png";
-            } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.categoryImage)) {
-              imgSrc = "/uploads/" + c.categoryImage;
+            } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.contentTypeImage)) {
+              imgSrc = "/uploads/" + c.contentTypeImage;
             } else {
-              imgSrc = "/uploads/" + c.categoryImage;
+              imgSrc = "/uploads/" + c.contentTypeImage;
             }
           %>
 
           <img
             src="<%= imgSrc %>"
-            alt="<%= c.categoryName %>"
+            alt="<%= c.contentTypeName %>"
             class="category-img"
             loading="lazy"
             onerror="this.src='/uploads/default.png'"
