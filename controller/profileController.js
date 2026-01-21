@@ -159,17 +159,39 @@ exports.updateUserRole = (req, res) => {
   const userId = req.params.id;
   const { userType } = req.body;
 
-  const sql = "UPDATE user SET userType = ? WHERE userID = ?";
-
-  db.query(sql, [userType, userId], (error, results) => {
+  // First get the user's name
+  const getUserSql = "SELECT userName FROM user WHERE userID = ?";
+  
+  db.query(getUserSql, [userId], (error, userResults) => {
     if (error) {
-      console.error("Error updating user role:", error);
-      return res.status(500).send('Error updating user role');
-    } else {
-      console.log("User role updated successfully");
-      res.redirect('/adminUsers');
+      console.error("Error fetching user:", error);
+      req.flash("error", "Error updating user role");
+      return res.redirect('/adminUsers');
     }
-  }) ;
+
+    const userName = userResults[0]?.userName || 'User';
+    const sql = "UPDATE user SET userType = ? WHERE userID = ?";
+
+    db.query(sql, [userType, userId], (error, results) => {
+      if (error) {
+        console.error("Error updating user role:", error);
+        req.flash("error", "Error updating user role");
+        return res.redirect('/adminUsers');
+      } else {
+        console.log("User role updated successfully");
+        const timestamp = new Date().toLocaleString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric', 
+          hour: '2-digit', 
+          minute: '2-digit',
+          second: '2-digit'
+        });
+        req.flash("success", `Role updated successfully for ${userName} at ${timestamp}`);
+        res.redirect('/adminUsers');
+      }
+    });
+  });
 
 };
 
