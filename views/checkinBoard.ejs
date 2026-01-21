@@ -42,6 +42,17 @@
             padding: 25px;
             border-radius: 18px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: 0.25s ease;
+        }
+
+        /* 🌟 CLICKABLE XP CARD */
+        .xp-card {
+            cursor: pointer;
+        }
+
+        .xp-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(107, 191, 89, 0.35);
         }
 
         .card h2 {
@@ -56,14 +67,13 @@
             background: #dcdcdc;
             border-radius: 10px;
             margin: 15px 0;
-            cursor: pointer; /* Added this so users know they can hover */
         }
 
         .xp-fill {
             height: 100%;
             background: #6bbf59;
             border-radius: 10px;
-            transition: 0.4s ease;
+            transition: width 0.4s ease;
         }
 
         .check-btn {
@@ -180,14 +190,26 @@
         </div>
 
         <div class="top-grid">
-            <div class="card">
-                <h2>Level <%= progress.level %></h2>
-                <div class="xp-bar" title="<%= xpNeeded - progress.xp %> XP until Level <%= progress.level + 1 %>! Keep going! 🌿">
-                    <div class="xp-fill" style="width:<%= xpPercent %>%"></div>
-                </div>
-                <p><strong><%= progress.xp %> / <%= xpNeeded %> XP</strong></p>
-            </div>
 
+            <!-- 🌟 CLICKABLE XP CARD -->
+            <a href="/xphistory" style="text-decoration:none; color:inherit;">
+                <div class="card xp-card">
+                    <h2>Level <%= progress.level %></h2>
+
+                    <div class="xp-bar"
+                         title="<%= xpNeeded - progress.xp %> XP until Level <%= progress.level + 1 %>! Keep going! 🌿">
+                        <div class="xp-fill" style="width:<%= xpPercent %>%"></div>
+                    </div>
+
+                    <p><strong><%= progress.xp %> / <%= xpNeeded %> XP</strong></p>
+
+                    <p style="font-size:0.85rem; color:#6bbf59; margin-top:8px;">
+                        👉 View XP History
+                    </p>
+                </div>
+            </a>
+
+            <!-- STREAK CARD -->
             <div class="card">
                 <h2>🔥 Streak: <%= progress.streak %> days</h2>
                 <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
@@ -207,6 +229,7 @@
                     </form>
                 <% } %>
             </div>
+
         </div>
 
         <div class="action-grid">
@@ -221,7 +244,9 @@
 
         <div class="missions">
             <h2 style="margin-bottom: 5px;">📋 Your Random Missions</h2>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">These change every week! Complete them for bonus XP.</p>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
+                These change every week! Complete them for bonus XP.
+            </p>
 
             <% if (missions && missions.length > 0) { %>
                 <% missions.forEach(m => { %>
@@ -230,16 +255,22 @@
                             <%= m.missionType.includes('Quiz') ? '📝' : '🌿' %> 
                             <%= m.missionType %>
                         </span>
-                        
+
                         <% if (m.xpEarned > 0) { %>
-                            <span class="status-badge" style="background:#e8f6e8; color:#28a745;">✅ Completed</span>
+                            <span class="status-badge" style="background:#e8f6e8; color:#28a745;">
+                                ✅ Completed
+                            </span>
                         <% } else { %>
-                            <span class="status-badge" style="background:#f0f0f0; color:#888;">⚪ In Progress</span>
+                            <span class="status-badge" style="background:#f0f0f0; color:#888;">
+                                ⚪ In Progress
+                            </span>
                         <% } %>
                     </div>
                 <% }) %>
             <% } else { %>
-                <p style="text-align: center; color: #888;">No missions assigned yet. Try refreshing!</p>
+                <p style="text-align: center; color: #888;">
+                    No missions assigned yet. Try refreshing!
+                </p>
             <% } %>
         </div>
 
@@ -250,7 +281,7 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
-            
+
             if (urlParams.get("already") === "true") {
                 Swal.fire({
                     icon: 'info',
@@ -279,13 +310,14 @@
                     backdrop: `rgba(0,123,0,0.2) url("/uploads/confetti.gif") center/cover`
                 });
             <% } %>
-            
+
             window.history.replaceState({}, document.title, window.location.pathname);
         });
     </script>
 
 </body>
 </html>
+
 
 
 
