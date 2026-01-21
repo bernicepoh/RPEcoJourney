@@ -133,13 +133,13 @@
             <textarea id="contentDescription" name="contentDescription" required class="custom-textarea" oninput="autoExpand(this)"><%=content.contentDescription%></textarea>
 
             <label for="categoryID">Category:</label>
-            <select name="categoryID" id="categoryID" required class="custom-input">
-                    <option value="-">Select Category</option>
-                    <% categories.forEach(category => { %>
-                        <option value="<%= category.categoryID %>" <%= category.categoryID == content.categoryID ? 'selected' : '' %>><%= category.categoryName %></option>
-                    <% }) %>    
+            <select name="contentTypeID" id="contentTypeID" required class="custom-input">
+              <option value="">Select category</option> <!-- Empty value ensures it's invalid -->
+              <option value="1">Environmental</option>
+              <option value="2">Social</option>
+              <option value="3">Governance</option>
             </select>
-
+            
                 <label for="file">Current File:</label>
                 <input type="hidden" name="currentFile" value = "<%= content.contentFile %>" >
                 <div class="file-box">

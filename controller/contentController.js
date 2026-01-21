@@ -44,7 +44,7 @@ exports.getContentByContentType = (req, res) => {
 
                 FROM content c
                 JOIN content_type cat
-                ON c.contentTypeID = cat.contentTypeID
+                    ON c.contentTypeID = cat.contentTypeID
                 WHERE cat.contentTypeID = ?
             `;
 
@@ -54,13 +54,13 @@ exports.getContentByContentType = (req, res) => {
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
-            // Use data from first item for category info
+            // Use data from first item for content type info
             const contentTypeInfo = {
                 contentTypeName: results[0].contentTypeName,
                 contentTypeDescription: results[0].contentTypeDescription,
                 contentTypeImage: results[0].contentTypeImage
             };
-            res.render('viewContentBycontentType', {
+            res.render('viewContentByContentType', {
                 contentType: contentTypeInfo,
                 contentList: results,
                 user: req.session.user || null
@@ -75,46 +75,17 @@ exports.getContentByContentType = (req, res) => {
                 const contentTypeInfo = {
                     contentTypeName: catRows[0].contentTypeName,
                     contentTypeDescription: catRows[0].contentTypeDescription,
-                    contentTypeImage: catRows[0].contentTypeImage
+                    contentTypeImage: catRows[0].contentTypeImage,
                 };
-                res.render('viewContentBycontentType', {
+                res.render('viewContentByContentType', {
                     contentType: contentTypeInfo,
                     contentList: [],
                     user: req.session.user || null
                 });
-                // // After we get content list, fetch likers for ALL content
-                // const likerSql = `
-                //     SELECT e.contentID, u.userID, u.userName, u.profilePic
-                //     FROM engagement e
-                //     JOIN user u ON u.userID = e.userID
-                //     WHERE e.likes = 1
-                // `;
-
-                // db.query(likerSql, (err2, likerRows) => {
-                //     if (err2) {
-                //         console.error("Error loading liker list:", err2);
-                //         return res.status(500).send("Error retrieving likes");
-                //     }
-
-                //     // Attach likers to each content item
-                //     const updatedContentList = results.map(content => {
-                //         return {
-                //             ...content,
-                //             likers: likerRows.filter(l => l.contentID == content.contentID)
-                //         };
-                //     });
-
-                //     res.render('viewContentBycontent_type', {
-                //         content_type: content_typeInfo,
-                //         contentList: updatedContentList,
-                //         user: req.session.user || null
-                //     });
-                //});
             });
         }
     });
 };
-
 // ============================
 // TOGGLE LIKE (Correct Version)
 // ============================
@@ -731,62 +702,3 @@ exports.manageContent = (req, res) => {
         }
     });
 };
-
-
-// exports.postForgotPassword = (req, res) => {
-//     const { email } = req.body;
-
-//     if (!email) {
-//         req.flash('error', 'Please enter your email.');
-//         return res.redirect('/forgot-password');
-//     }
-
-//     db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
-//         if (err) throw err;
-
-//         if (results.length === 0) {
-//             req.flash('error', 'Email not found.');
-//             return res.redirect('/forgot-password');
-//         }
-
-//         const tempPassword = generateTempPassword(8);
-
-        
-//         db.query('UPDATE users SET password = SHA(?) WHERE email = ?', [tempPassword, email], (err) => {
-//             if (err) throw err;
-
-//             // Configure mail
-//             const transporter = nodemailer.createTransport({
-//                 service: 'gmail',
-//                 auth: {
-//                     user: 'fyptesting13@gmail.com',
-//                     pass: 'fjbjltcfxfofwiho' 
-//                 }
-//             });
-
-//             const mailOptions = {
-//                 from: 'fyptesting13@gmail.com',
-//                 to: email,
-//                 subject: 'Temporary Password',
-//                 text: Your temporary password is: ${tempPassword}\nPlease use this to log in and reset your password.
-//             };
-
-//             // Send email
-//             transporter.sendMail(mailOptions, (error) => {
-//                 if (error) {
-//                     console.log(error);
-//                     req.flash('error', 'Error sending email.');
-//                     return res.redirect('/forgot-password');
-//                 }
-
-//                 // Render page showing step 2
-//                 res.render('forgot_password', { 
-//                     step: 2,
-//                     email: email,
-//                     errors: [],
-//                     success: ['Temporary password sent to your email.']
-//                 });
-//             });
-//         });
-//     });
-// };
