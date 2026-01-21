@@ -8,6 +8,7 @@ const checkinController = require('./controller/checkinController');
 const profileController = require('./controller/profileController');
 const leaderboardController = require('./controller/leaderboardController');
 const aiQuizController = require('./controller/aiQuizController');
+const xpController = require('./controller/xpcontroller');
 const db = require('./db'); 
 
 const multer = require('multer');
@@ -196,6 +197,10 @@ app.post('/do-checkin', checkinController.doCheckIn);
 
 //leaderboard 
 app.get('/leaderboard', leaderboardController.getLeaderboard);
+
+// XP History Route
+app.get('/xphistory', checkAuthenticated, xpController.getXPHistory);
+
 
 // Error route
 app.get('/401', (req, res) => {
