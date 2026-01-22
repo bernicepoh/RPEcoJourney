@@ -89,8 +89,7 @@ app.use((req, res, next) => {
     next();
 });
 
-// Note: don't automatically consume flash here (controllers should read flash()),
-// res.locals.flash is already available via binding above.
+
 
 app.use('/uploads', express.static('uploads'));
 
@@ -114,6 +113,7 @@ app.post('/reset-password', userController.postResetPassword);
 //Admin Routes 
 app.get('/adminDashboard',allowAdminManagerWriter, userController.getAdminDashboard);
 app.get('/adminUsers', checkAdmin, userController.getAllUsers);
+app.post('/deleteUser/:id', checkAdmin, userController.deleteUser);
 
 //testing forget password route
 function simpleHash(str) {
@@ -178,7 +178,7 @@ app.get('/homepage', homepageController.getHomePage);
 app.get('/aboutus', homepageController.getAboutPage);
 
 
-app.get('/ai/select', (req, res) => {
+app.get('/ai/select',checkUser, (req, res) => {
     res.render('aiQuizSelect');
 });
 

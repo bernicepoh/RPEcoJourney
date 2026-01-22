@@ -4,8 +4,8 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
-    database: 'rpecojourney'
+    password: 'Republic_c207',
+    database: 'C300_RPecoJourneyfinal'
   });
 
 //Connecting to database

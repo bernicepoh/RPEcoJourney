@@ -9,7 +9,7 @@
       <!-- NORMAL USER NAV LINKS -->
       <li><a href="/homepage">Home</a></li>
       <li><a href="/aboutus">About Us</a></li>
-      <li><a href="/categories">Categories</a></li>
+      <li><a href="/categories">Browse Content</a></li>
     <% } %>
 
     <!-- BOTH user + guest can see Quiz -->
@@ -20,11 +20,39 @@
   <% if (user && user.userType !== "Guest") { %>
     <ul>
       <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
-      <li><a href="/">Logout</a></li>
+      <li><a href="#" id="logoutBtn">Logout</a></li>
     </ul>
   <% } %>
 
 </nav>
+
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Logout confirmation
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to log out?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#4CAF50',
+        confirmButtonText: 'Yes, logout',
+        cancelButtonText: 'No, stay'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/';
+        }
+      });
+    });
+  }
+</script>
 
 <style>
   nav {

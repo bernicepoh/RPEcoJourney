@@ -3,18 +3,22 @@
 <head>
     <title>Select Quiz Difficulty</title>
     <style>
+        
         body {
             background: url("/uploads/background.png") no-repeat center center fixed;
             background-size: cover;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            padding: 30px;
-            text-align: center;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .page-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: calc(100vh - 100px);
+            padding: 30px;
         }
 
         .container {
@@ -26,8 +30,8 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
 
-        h2 { margin-bottom: 10px; color: #4CAF50; }
-        p { margin-bottom: 25px; font-size: 14px; color: #ddd; }
+        h2 { margin-bottom: 10px; color: #4CAF50; text-align: center; }
+        p { margin-bottom: 25px; font-size: 14px; color: #ddd; text-align: center; }
 
         label { display: block; text-align: left; margin-top: 15px; font-weight: bold; }
 
@@ -83,28 +87,31 @@
     </style>
 </head>
 <body>
+    <%- include ('partials/navbar.ejs') %>
 
 <div id="loadingOverlay">
     <div class="spinner"></div>
     <p><b>Generating your Sustainability Quiz...</b></p>
 </div>
 
-<div class="container">
-    <h2>Ready for a Challenge?</h2>
-    <p>Select your level and let the AI test your knowledge!</p>
+<div class="page-wrapper">
+    <div class="container">
+        <h2>Ready for a Challenge?</h2>
+        <p>Select your level and let the AI test your knowledge!</p>
 
-    <form id="aiForm" action="/ai/start" method="POST">
+        <form id="aiForm" action="/ai/start" method="POST">
 
-        <label>Select Difficulty:</label>
-        <select name="difficulty" required>
-            <option value="">-- Choose Difficulty --</option>
-            <option value="1">Easy</option>
-            <option value="2">Medium</option>
-            <option value="3">Hard</option>
-        </select>
+            <label>Select Difficulty:</label>
+            <select name="difficulty" required>
+                <option value="">-- Choose Difficulty --</option>
+                <option value="1">Easy</option>
+                <option value="2">Medium</option>
+                <option value="3">Hard</option>
+            </select>
 
-        <button id="startBtn" type="submit">Start Quiz</button>
-    </form>
+            <button id="startBtn" type="submit">Start Quiz</button>
+        </form>
+    </div>
 </div>
 
 <script>
