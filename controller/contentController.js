@@ -209,8 +209,7 @@ exports.toggleLike = (req, res) => {
 // ============================
 // POSTING OF COMMENT 
 // ============================
-const OpenAI = require("openai");
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 
 exports.postComment = async (req, res) => {
     const contentID = req.params.id;
@@ -225,6 +224,8 @@ exports.postComment = async (req, res) => {
     }
 
     try {
+        const OpenAI = require("openai");   
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         // ============================
         // GPT-4o-mini Moderation
         // ============================
