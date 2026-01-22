@@ -110,17 +110,46 @@ exports.showQuizResult = (req, res) => {
 exports.generateInsights = async (req, res) => {
     const { questions, userAnswers } = req.body;
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const overallPrompt = `Analyze performance: ${JSON.stringify({ questions, userAnswers })}. Provide feedback.`;
+
+    // Overall feedback (optional summary)
+    const overallPrompt = `
+You are an eco-education assistant.
+Give short, encouraging feedback based on the quiz performance.
+Data: ${JSON.stringify({ questions, userAnswers })}
+Keep it student-friendly.
+`;
     const overallResult = await model.generateContent(overallPrompt);
     const feedback = overallResult.response.text();
 
+    // Per-question explanations
     const explanations = [];
+
     for (let i = 0; i < questions.length; i++) {
-        explanations.push("AI insight generated.");
+        const q = questions[i];
+        const userAnswer = userAnswers[i];
+        const correctAnswer = q.options[q.answerIndex];
+
+        const explainPrompt = `
+Explain this sustainability quiz question simply.
+
+Question: ${q.question}
+Correct Answer: ${correctAnswer}
+User Selected: ${q.options[userAnswer]}
+
+Explain WHY the correct answer is correct in 1–2 short sentences.
+Avoid emojis. Keep it clear and educational.
+`;
+
+        const explainResult = await model.generateContent(explainPrompt);
+        explanations.push(explainResult.response.text().trim());
     }
 
-    res.json({ feedback, explanations });
+    res.json({
+        feedback,
+        explanations
+    });
 };
+
 
 exports.getWordMeaning = async (req, res) => {
     const { word } = req.body;
