@@ -321,7 +321,7 @@
 <script>
 Swal.fire({
   icon: 'success',
-  title: 'Welcome!',
+  title: '<%= __("homepage.loginWelcome") %>',
   text: '<%= loginSuccess %>',
   timer: 1800,
   showConfirmButton: false
@@ -333,33 +333,33 @@ Swal.fire({
   <%- include('partials/navbar') %>
 
   <section class="hero">
-    <h1>Welcome to RPEcoJourney 🌿</h1>
-    <p>Empowering green living through awareness and fun quizzes.</p>
-    <a href="/categories" class="btn">Get Started</a>
+    <h1><%= __('homepage.heroTitle') %></h1>
+    <p><%= __('homepage.heroSubtitle') %></p>
+    <a href="/categories" class="btn"><%= __('homepage.getStarted') %></a>
   </section>
 
   <section class="features">
     <div class="feature-card">
       <img src="/uploads/leaderboard.png" alt="leaderboard">
-      <h3><a href="/leaderboard" style="color:inherit; text-decoration:none;">🌍 Join the Journey</a></h3>
-      <p>Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
+      <h3><a href="/leaderboard" style="color:inherit; text-decoration:none;"><%= __('homepage.feature1Title') %></a></h3>
+      <p><%= __('homepage.feature1Description') %></p>
     </div>
 
     <div class="feature-card">
       <img src="/uploads/quiz.png" alt="Take Quizzes">
-      <h3><a href="/ai/select" style="color:inherit; text-decoration:none;">🎯 Challenge Yourself</a></h3>
-      <p>Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
+      <h3><a href="/ai/select" style="color:inherit; text-decoration:none;"><%= __('homepage.feature2Title') %></a></h3>
+      <p><%= __('homepage.feature2Description') %></p>
     </div>
 
     <div class="feature-card">
       <img src="/uploads/dashboard.png" alt="Dashboard">
-      <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;">🧭 Your Sustainability Dashboard</a></h3>
-      <p>Track your personal growth in sustainability</p>
+      <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;"><%= __('homepage.feature3Title') %></a></h3>
+      <p><%= __('homepage.feature3Description') %></p>
     </div>
   </section>
 
   <footer>
-    &copy; 2025 RPEcoJourney. All Rights Reserved.
+    <%= __('homepage.footer') %>
   </footer>
 
   <!-- Chatbot Widget -->
@@ -369,13 +369,13 @@ Swal.fire({
 
   <div class="chatbot-container" id="chatbotContainer">
     <div class="chatbot-header">
-      <h3>🌿 RPEco Assistant</h3>
+      <h3><%= __('homepage.chatbotTitle') %></h3>
       <button class="chatbot-close" id="chatbotClose">×</button>
     </div>
     <div class="chatbot-messages" id="chatbotMessages">
       <div class="chat-message bot">
         <div class="message-bubble">
-          Hi! I'm your RPEcoJourney assistant. How can I help you today? 🌱
+          <%= __('homepage.chatbotWelcome') %>
         </div>
       </div>
     </div>
@@ -384,10 +384,10 @@ Swal.fire({
         type="text" 
         class="chatbot-input" 
         id="chatbotInput" 
-        placeholder="Type your message..."
+        placeholder="<%= __('homepage.chatbotPlaceholder') %>"
         autocomplete="off"
       >
-      <button class="chatbot-send" id="chatbotSend">Send</button>
+      <button class="chatbot-send" id="chatbotSend"><%= __('homepage.chatbotSend') %></button>
     </div>
   </div>
 
@@ -397,7 +397,7 @@ Swal.fire({
   <script>
   Swal.fire({
     icon: 'success',
-    title: 'Welcome!',
+    title: '<%= __("homepage.loginWelcome") %>',
     text: '<%= loginSuccess %>',
     timer: 1800,
     showConfirmButton: false
@@ -554,7 +554,7 @@ Swal.fire({
       } catch (error) {
         removeTypingIndicator();
         console.error('Chatbot Error:', error);
-        addMessage('Sorry, I encountered an error. Please try again later.', false);
+        addMessage('<%= __("homepage.chatbotError") %>', false);
       } finally {
         chatbotSend.disabled = false;
         chatbotInput.focus();

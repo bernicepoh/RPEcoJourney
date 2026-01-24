@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Select Quiz Difficulty</title>
+    <title><%= __('aiQuizSelect.title') %></title>
     <style>
         
         body {
@@ -91,25 +91,25 @@
 
 <div id="loadingOverlay">
     <div class="spinner"></div>
-    <p><b>Generating your Sustainability Quiz...</b></p>
+    <p><b><%= __('aiQuizSelect.generating') %></b></p>
 </div>
 
 <div class="page-wrapper">
     <div class="container">
-        <h2>Ready for a Challenge?</h2>
-        <p>Select your level and let the AI test your knowledge!</p>
+        <h2><%= __('aiQuizSelect.heading') %></h2>
+        <p><%= __('aiQuizSelect.subtitle') %></p>
 
         <form id="aiForm" action="/ai/start" method="POST">
 
-            <label>Select Difficulty:</label>
+            <label><%= __('aiQuizSelect.selectDifficulty') %></label>
             <select name="difficulty" required>
-                <option value="">-- Choose Difficulty --</option>
-                <option value="1">Easy</option>
-                <option value="2">Medium</option>
-                <option value="3">Hard</option>
+                <option value=""><%= __('aiQuizSelect.chooseDifficulty') %></option>
+                <option value="1"><%= __('aiQuizSelect.easy') %></option>
+                <option value="2"><%= __('aiQuizSelect.medium') %></option>
+                <option value="3"><%= __('aiQuizSelect.hard') %></option>
             </select>
 
-            <button id="startBtn" type="submit">Start Quiz</button>
+            <button id="startBtn" type="submit"><%= __('aiQuizSelect.startQuiz') %></button>
         </form>
     </div>
 </div>

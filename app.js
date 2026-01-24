@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const i18n = require('i18n');
 const userController = require('./controller/userController');
 const contentController = require('./controller/contentController');
 const categoryController = require('./controller/categoryController');
@@ -14,6 +15,7 @@ const db = require('./db');
 const multer = require('multer');
 const session = require('express-session');
 const flash = require('connect-flash');  
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const app = express();
 
@@ -54,6 +56,19 @@ const validateRegistration = (req,res, next) => {
     next()
 }
 
+// Configure i18n
+i18n.configure({
+  locales: ['en', 'ms', 'ta', 'zh'],
+  defaultLocale: 'en',
+  directory: path.join(__dirname, 'locales'),
+  cookie: 'language',
+  queryParameter: 'lang',
+  autoReload: true,
+  updateFiles: false,
+  syncFiles: false,
+  objectNotation: true
+});
+
 // Set up view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -64,6 +79,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Enable form processing
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+
+// Cookie parser
+app.use(cookieParser());
 
 // Session
 app.use(session({
@@ -76,6 +94,25 @@ app.use(session({
 
 // Use connect-flash middleware
 app.use(flash());
+
+// Initialize i18n
+app.use(i18n.init);
+
+// Language middleware - handle language switching
+app.use((req, res, next) => {
+  // Check if language is being changed
+  if (req.query.lang && ['en', 'ms', 'ta', 'zh'].includes(req.query.lang)) {
+    req.session.language = req.query.lang;
+    res.cookie('language', req.query.lang, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+  }
+  
+  // Set locale from session, cookie, or default
+  const locale = req.session.language || req.cookies.language || 'en';
+  req.setLocale(locale);
+  res.locals.currentLanguage = locale;
+  
+  next();
+});
 
 // Make user session available in ALL EJS files
 app.use((req, res, next) => {

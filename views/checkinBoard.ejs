@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eco Progress Dashboard</title>
+    <title><%= __('checkinBoard.title') %></title>
     <link rel="stylesheet" href="/css/style.css">
 
     <style>
@@ -166,10 +166,10 @@
 
     <div class="container">
 
-        <h1><%= user.userName %>'s Sustainability Journey 🌿</h1>
+        <h1><%= user.userName %><%= __('checkinBoard.sustainabilityJourney') %></h1>
 
         <p style="text-align:center; color:#4fa34b; margin-top:10px;">
-            Keep growing your green habits! 🌱
+            <%= __('checkinBoard.keepGrowing') %>
         </p>
 
         <div style="background:white; padding:25px; border-radius:18px; margin:30px auto; width:85%; display:flex; align-items:center; gap:20px; box-shadow:0 4px 15px rgba(0,0,0,0.1);">
@@ -194,25 +194,25 @@
             <!-- 🌟 CLICKABLE XP CARD -->
             <a href="/xphistory" style="text-decoration:none; color:inherit;">
                 <div class="card xp-card">
-                    <h2>Level <%= progress.level %></h2>
+                    <h2><%= __('checkinBoard.level') %> <%= progress.level %></h2>
 
                     <div class="xp-bar"
-                         title="<%= xpNeeded - progress.xp %> XP until Level <%= progress.level + 1 %>! Keep going! 🌿">
+                         title="<%= xpNeeded - progress.xp %> <%= __('checkinBoard.xpUntilLevel') %> <%= progress.level + 1 %><%= __('checkinBoard.keepGoing') %>">
                         <div class="xp-fill" style="width:<%= xpPercent %>%"></div>
                     </div>
 
                     <p><strong><%= progress.xp %> / <%= xpNeeded %> XP</strong></p>
 
                     <p style="font-size:0.85rem; color:#6bbf59; margin-top:8px;">
-                        👉 View XP History
+                        <%= __('checkinBoard.viewXpHistory') %>
                     </p>
                 </div>
             </a>
 
             <!-- STREAK CARD -->
             <div class="card">
-                <h2>🔥 Streak: <%= progress.streak %> days</h2>
-                <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
+                <h2><%= __('checkinBoard.streakDays') %><%= progress.streak %><%= __('checkinBoard.days') %></h2>
+                <p><%= __('checkinBoard.lastCheckIn') %><%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
 
                 <%
                     let last = progress.lastCheckinDate
@@ -222,10 +222,10 @@
                 %>
 
                 <% if (last === today) { %>
-                    <button class="disabled-btn" disabled>✔ Already checked in today</button>
+                    <button class="disabled-btn" disabled><%= __('checkinBoard.alreadyCheckedIn') %></button>
                 <% } else { %>
                     <form action="/do-checkin" method="POST">
-                        <button class="check-btn">Check In Today</button>
+                        <button class="check-btn"><%= __('checkinBoard.checkInToday') %></button>
                     </form>
                 <% } %>
             </div>
@@ -234,18 +234,18 @@
 
         <div class="action-grid">
             <a href="/quiz" style="text-decoration:none;">
-                <div class="action-card">📘 Take a Quiz</div>
+                <div class="action-card"><%= __('checkinBoard.takeQuiz') %></div>
             </a>
 
             <a href="/categories" style="text-decoration:none;">
-                <div class="action-card">🌱 Explore Content</div>
+                <div class="action-card"><%= __('checkinBoard.exploreContent') %></div>
             </a>
         </div>
 
         <div class="missions">
-            <h2 style="margin-bottom: 5px;">📋 Your Random Missions</h2>
+            <h2 style="margin-bottom: 5px;"><%= __('checkinBoard.yourMissions') %></h2>
             <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
-                These change every week! Complete them for bonus XP.
+                <%= __('checkinBoard.missionsDescription') %>
             </p>
 
             <% if (missions && missions.length > 0) { %>
@@ -258,18 +258,18 @@
 
                         <% if (m.xpEarned > 0) { %>
                             <span class="status-badge" style="background:#e8f6e8; color:#28a745;">
-                                ✅ Completed
+                                <%= __('checkinBoard.completed') %>
                             </span>
                         <% } else { %>
                             <span class="status-badge" style="background:#f0f0f0; color:#888;">
-                                ⚪ In Progress
+                                <%= __('checkinBoard.inProgress') %>
                             </span>
                         <% } %>
                     </div>
                 <% }) %>
             <% } else { %>
                 <p style="text-align: center; color: #888;">
-                    No missions assigned yet. Try refreshing!
+                    <%= __('checkinBoard.noMissions') %>
                 </p>
             <% } %>
         </div>
@@ -285,16 +285,16 @@
             if (urlParams.get("already") === "true") {
                 Swal.fire({
                     icon: 'info',
-                    title: 'Already Checked In!',
-                    text: 'You can only check in once per day. Come back tomorrow! 🌿',
+                    title: '<%= __("checkinBoard.alreadyCheckedInTitle") %>',
+                    text: '<%= __("checkinBoard.alreadyCheckedInText") %>',
                     confirmButtonColor: '#6bbf59'
                 });
             }
 
             <% if (streakMissed) { %>
                 Swal.fire({
-                    title: "Awww… You lost your streak 😢",
-                    text: "Start fresh today and come back tomorrow to rebuild it! 🌱",
+                    title: "<%= __("checkinBoard.streakLostTitle") %>",
+                    text: "<%= __("checkinBoard.streakLostText") %>",
                     icon: "warning",
                     confirmButtonColor: "#28a745"
                 });
@@ -302,10 +302,10 @@
 
             <% if (leveledUp) { %>
                 Swal.fire({
-                    title: 'LEVEL UP! 🎉',
-                    html: 'Congratulations <b><%= user.userName %></b>!<br>You have reached <b>Level <%= progress.level %></b>: <br>✨ <i><%= progress.levelTitle %></i> ✨',
+                    title: '<%= __("checkinBoard.levelUpTitle") %>',
+                    html: '<%= __("checkinBoard.congratulations") %> <b><%= user.userName %></b>!<br><%= __("checkinBoard.reachedLevel") %> <b><%= __("checkinBoard.level") %> <%= progress.level %></b>: <br>✨ <i><%= progress.levelTitle %></i> ✨',
                     icon: 'success',
-                    confirmButtonText: 'Keep going!',
+                    confirmButtonText: '<%= __("checkinBoard.keepGoingBtn") %>',
                     confirmButtonColor: '#6bbf59',
                     backdrop: `rgba(0,123,0,0.2) url("/uploads/confetti.gif") center/cover`
                 });

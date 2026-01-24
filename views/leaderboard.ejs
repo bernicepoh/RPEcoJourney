@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Leaderboard | RPEcoJourney</title>
+    <title><%= __('leaderboard.title') %> | RPEcoJourney</title>
 
     <style>
         body {
@@ -106,24 +106,24 @@
 
 <div class="leaderboard-container">
 
-    <h1>LEADERBOARD</h1>
+    <h1><%= __('leaderboard.title') %></h1>
 
     <!-- Tabs -->
     <div class="tabs">
-        <div class="tab active">Overall</div>
-        <div class="tab">Monthly</div>
-        <div class="tab">Friends</div>
+        <div class="tab active"><%= __('leaderboard.tabOverall') %></div>
+        <div class="tab"><%= __('leaderboard.tabMonthly') %></div>
+        <div class="tab"><%= __('leaderboard.tabFriends') %></div>
     </div>
 
     <!-- Table -->
     <table>
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>User</th>
-                <th>Level</th>
+                <th><%= __('leaderboard.rank') %></th>
+                <th><%= __('leaderboard.user') %></th>
+                <th><%= __('leaderboard.level') %></th>
                 <th>XP</th>
-                <th>Streak</th>
+                <th><%= __('leaderboard.streak') %></th>
             </tr>
         </thead>
 

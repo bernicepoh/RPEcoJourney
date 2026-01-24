@@ -7,20 +7,28 @@
 
     <% if (user && user.userType !== "Guest") { %>  
       <!-- NORMAL USER NAV LINKS -->
-      <li><a href="/homepage">Home</a></li>
-      <li><a href="/aboutus">About Us</a></li>
-      <li><a href="/categories">Browse Content</a></li>
+      <li><a href="/homepage"><%= __('nav.home') %></a></li>
+      <li><a href="/aboutus"><%= __('nav.aboutUs') %></a></li>
+      <li><a href="/categories"><%= __('nav.browseContent') %></a></li>
     <% } %>
 
     <!-- BOTH user + guest can see Quiz -->
-    <li><a href="/ai/select">Quiz Me!</a></li>
+    <li><a href="/ai/select"><%= __('nav.quizMe') %></a></li>
 
   </ul>
 
   <% if (user && user.userType !== "Guest") { %>
     <ul>
-      <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
-      <li><a href="#" id="logoutBtn">Logout</a></li>
+      <li><a href="/viewProfile/<%= user.userID %>"><%= __('nav.profile') %></a></li>
+      <li><a href="#" id="logoutBtn"><%= __('nav.logout') %></a></li>
+      <li class="language-switcher">
+        <select id="languageSelect" onchange="changeLanguage(this.value)">
+          <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>English</option>
+          <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>Bahasa Melayu</option>
+          <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>தமிழ்</option>
+          <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>中文</option>
+        </select>
+      </li>
     </ul>
   <% } %>
 
@@ -30,6 +38,13 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+  // Language change function
+  function changeLanguage(lang) {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('lang', lang);
+    window.location.href = currentUrl.toString();
+  }
+
   // Logout confirmation
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
@@ -37,14 +52,14 @@
       e.preventDefault();
       
       Swal.fire({
-        title: 'Are you sure?',
-        text: 'Do you want to log out?',
+        title: '<%= __("logout.title") %>',
+        text: '<%= __("logout.text") %>',
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#4CAF50',
         cancelButtonColor: '#4CAF50',
-        confirmButtonText: 'Yes, logout',
-        cancelButtonText: 'No, stay'
+        confirmButtonText: '<%= __("logout.confirmButton") %>',
+        cancelButtonText: '<%= __("logout.cancelButton") %>'
       }).then((result) => {
         if (result.isConfirmed) {
           window.location.href = '/';
@@ -97,6 +112,41 @@
   nav ul li a:hover {
     text-decoration: underline;
     color: #1a1a1a;
+  }
+
+  /* Language Switcher Styles */
+  .language-switcher {
+    display: flex;
+    align-items: center;
+  }
+
+  #languageSelect {
+    background-color: #003b2b;
+    color: white;
+    border: 2px solid #003b2b;
+    padding: 8px 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.25s ease-in-out;
+    font-family: 'Georgia', serif;
+  }
+
+  #languageSelect:hover {
+    background-color: #0b2535;
+    border-color: #0b2535;
+  }
+
+  #languageSelect:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.3);
+  }
+
+  #languageSelect option {
+    background-color: white;
+    color: #003b2b;
+    padding: 8px;
   }
 
   .profile-pic {

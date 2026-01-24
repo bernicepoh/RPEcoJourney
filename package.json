@@ -12,10 +12,12 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "connect-flash": "^0.1.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
     "express": "^5.2.1",
     "express-session": "^1.18.2",
+    "i18n": "^0.15.3",
     "multer": "^2.0.2",
     "mysql2": "^3.15.3",
     "nodemailer": "^7.0.10",
