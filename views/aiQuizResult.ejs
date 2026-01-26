@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Quiz Results</title>
+    <title><%= __('aiQuizResult.title') %></title>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -11,7 +11,7 @@
             background: #e8f7e4 url("/uploads/background.png") no-repeat center center fixed;
             background-size: cover;
             margin: 0;
-            padding: 40px;
+            padding: 0;
         }
 
         /* ============================
@@ -22,7 +22,8 @@
             gap: 30px;
             width: 100%;
             max-width: 1400px;
-            margin: auto;
+            margin: 20px auto;
+            padding: 0 40px;
         }
 
         /* LEFT PANEL (40%) */
@@ -172,6 +173,14 @@
             color: #2e7d32;
             margin-bottom: 10px;
         }
+
+        /* Fix navbar styling for this page */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 
@@ -182,26 +191,26 @@
 
     <div class="left-panel">
 
-        <h1>🎉 Quiz Completed!</h1>
+        <h1><%= __('aiQuizResult.quizCompleted') %></h1>
 
         <div class="score-box">
             <%= score %> / 50
-            <div style="font-size:14px;">Total Points Scored</div>
+            <div style="font-size:14px;"><%= __('aiQuizResult.totalPointsScored') %></div>
         </div>
 
         <div class="xp-box">
-            🌟 Total XP: <%= xpEarned %><br>
+            <%= __('aiQuizResult.totalXP') %> <%= xpEarned %><br>
             <span style="font-size: 12px; font-weight: normal; color: #795548;">
-                (Base: <%= score * 2 %> + Streak: <%= streakBonus %> + Perfect: <%= perfectBonus %>)
+                (<%= __('aiQuizResult.base') %> <%= score * 2 %> + <%= __('aiQuizResult.streak') %> <%= streakBonus %> + <%= __('aiQuizResult.perfect') %> <%= perfectBonus %>)
             </span>
         </div>
 
-        <div class="stat-box"><span>📅 Completed On:</span> <b><%= completedAt %></b></div>
-        <div class="stat-box"><span>⏳ User:</span> <b><%= user.userName %></b></div>
-        <div class="stat-box"><span>🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
+        <div class="stat-box"><span><%= __('aiQuizResult.completedOn') %></span> <b><%= completedAt %></b></div>
+        <div class="stat-box"><span><%= __('aiQuizResult.user') %></span> <b><%= user.userName %></b></div>
+        <div class="stat-box"><span><%= __('aiQuizResult.difficultyLevel') %></span> <b><%= difficulty %></b></div>
 
         <div class="btn-area">
-            <button class="btn home-btn" onclick="window.location.href='/ai/select'">Back to Quiz Selection</button>
+            <button class="btn home-btn" onclick="window.location.href='/ai/select'"><%= __('aiQuizResult.backToQuizSelection') %></button>
         </div>
 
     </div>
@@ -209,30 +218,30 @@
     <div class="right-panel">
 
         <div id="reviewCard" class="review-card">
-            <h3 id="reviewQuestion">Question Review</h3>
+            <h3 id="reviewQuestion"><%= __('aiQuizResult.questionReview') %></h3>
             <p id="reviewStatus"></p>
             <p id="reviewYourAnswer"></p>
             <p id="reviewCorrectAnswer"></p>
 
             <div id="reviewExplanation"></div>
 
-            <button id="playPauseBtn">▶️ Play</button>
+            <button id="playPauseBtn"><%= __('aiQuizResult.play') %></button>
 
             <div class="speed-control">
-                <label>Speed:</label>
+                <label><%= __('aiQuizResult.speed') %></label>
                 <input type="range" id="speedSlider" min="0.7" max="1.5" step="0.1" value="1">
                 <span id="speedValue">1.0x</span>
             </div>
 
             <div class="nav-arrows">
-                <button class="arrow-btn" onclick="prevReview()">← Prev</button>
-                <button class="arrow-btn" onclick="nextReview()">Next →</button>
+                <button class="arrow-btn" onclick="prevReview()"><%= __('aiQuizResult.prev') %></button>
+                <button class="arrow-btn" onclick="nextReview()"><%= __('aiQuizResult.next') %></button>
             </div>
         </div>
 
         <div class="ai-box">
-            <div class="ai-title">🤖 AI Feedback & Eco Tips</div>
-            <div id="aiFeedback">Loading AI insights...</div>
+            <div class="ai-title"><%= __('aiQuizResult.aiFeedback') %></div>
+            <div id="aiFeedback"><%= __('aiQuizResult.loadingInsights') %></div>
         </div>
 
     </div>
@@ -249,6 +258,19 @@ let currentWordIndex = 0;
 let words = [];
 let isPaused = false;
 let speedRate = 1;
+
+// Translation strings
+const translations = {
+    correct: '<%= __("aiQuizResult.correct") %>',
+    incorrect: '<%= __("aiQuizResult.incorrect") %>',
+    yourAnswer: '<%= __("aiQuizResult.yourAnswer") %>',
+    correctAnswer: '<%= __("aiQuizResult.correctAnswer") %>',
+    notAnswered: '<%= __("aiQuizResult.notAnswered") %>',
+    explanation: '<%= __("aiQuizResult.explanation") %>',
+    play: '<%= __("aiQuizResult.play") %>',
+    pause: '<%= __("aiQuizResult.pause") %>',
+    resume: '<%= __("aiQuizResult.resume") %>'
+};
 
 document.getElementById("speedSlider").addEventListener("input", (e) => {
     speedRate = parseFloat(e.target.value);
@@ -268,19 +290,19 @@ function loadReviewCard() {
         "review-card " + (isCorrect ? "correct-card" : "wrong-card");
 
     document.getElementById("reviewStatus").innerHTML =
-        isCorrect ? "✔ Correct!" : "❌ Incorrect";
+        isCorrect ? translations.correct : translations.incorrect;
 
     document.getElementById("reviewQuestion").innerHTML =
         `<b>Q${index+1}:</b> ${q.question}`;
 
     document.getElementById("reviewYourAnswer").innerHTML =
-        `Your Answer: <b>${q.options[review.userAnswers[index]] ?? "Not answered"}</b>`;
+        `${translations.yourAnswer} <b>${q.options[review.userAnswers[index]] ?? translations.notAnswered}</b>`;
 
     document.getElementById("reviewCorrectAnswer").innerHTML =
-        `Correct Answer: <b>${q.options[q.answerIndex]}</b>`;
+        `${translations.correctAnswer} <b>${q.options[q.answerIndex]}</b>`;
 
     document.getElementById("reviewExplanation").innerHTML =
-        `<b>💡 Explanation:</b><br>${aiExplanations[index]}`;
+        `<b>${translations.explanation}</b><br>${aiExplanations[index]}`;
 
     resetSpeech();
 }
@@ -290,7 +312,7 @@ function resetSpeech() {
     currentUtterance = null;
     currentWordIndex = 0;
     isPaused = false;
-    document.getElementById("playPauseBtn").innerHTML = "▶️ Play";
+    document.getElementById("playPauseBtn").innerHTML = translations.play;
 }
 
 function nextReview() { if (index < review.questions.length - 1) { index++; loadReviewCard(); } }
@@ -328,7 +350,7 @@ function startSpeech(text, startIndex = 0) {
     ).join(" ");
 
     document.getElementById("reviewExplanation").innerHTML =
-        `<b>💡 Explanation:</b><br>` + wrapped;
+        `<b>${translations.explanation}</b><br>` + wrapped;
 
     attachWordListeners();
 
@@ -351,20 +373,20 @@ function startSpeech(text, startIndex = 0) {
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utter);
 
-    document.getElementById("playPauseBtn").innerHTML = "⏸ Pause";
+    document.getElementById("playPauseBtn").innerHTML = translations.pause;
     isPaused = false;
 }
 
 function pauseSpeech() {
     window.speechSynthesis.pause();
     isPaused = true;
-    document.getElementById("playPauseBtn").innerHTML = "▶️ Resume";
+    document.getElementById("playPauseBtn").innerHTML = translations.resume;
 }
 
 function resumeSpeech() {
     window.speechSynthesis.resume();
     isPaused = false;
-    document.getElementById("playPauseBtn").innerHTML = "⏸ Pause";
+    document.getElementById("playPauseBtn").innerHTML = translations.pause;
 }
 
 function highlightWord(i) {

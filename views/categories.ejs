@@ -154,11 +154,9 @@
 
     <section class="intro">
       <div class="intro-text">
-        <h2>RP Sustainability</h2>
+        <h2><%= __('categories.title') %></h2>
         <p>
-          At RP, we are committed to embracing sustainability, and our RP Green Plan lays out the roadmap for our sustainability journey.
-          The RP Green Plan is strategically designed to embed sustainability into everything we do
-          whether it's our daily operations, practices, initiatives, or even what we teach in our classes.
+          <%= __('categories.introText') %>
         </p>
       </div>
       <img src="/uploads/rp-green.png" alt="RP Green Plan">
@@ -210,13 +208,13 @@
       <% }) %>
 
     <% } else { %>
-      <p>No categories yet. Please add some data.</p>
+      <p><%= __('categories.noCategories') %></p>
     <% } %>
 
   </main>
 
   <footer>
-    &copy; 2025 RPEcoJourney. All Rights Reserved.
+    <%= __('categories.footer') %>
   </footer>
 
 </body>

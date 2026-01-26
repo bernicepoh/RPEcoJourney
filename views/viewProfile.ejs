@@ -140,7 +140,7 @@
 
 <div class="profile-wrapper">
 
-    <div class="profile-title">Profile</div>
+    <div class="profile-title"><%= __('profile.title') %></div>
 
     <div class="profile-card">
 
@@ -154,12 +154,12 @@
 
       
         <div class="profile-info">
-            <div><b>Username</b>: <%= user.userName %></div>
-            <div><b>Email</b>: <%= user.email %></div>
-            <div><b>Contact Number</b>: <%= user.contactNo %></div>
+            <div><b><%= __('profile.username') %></b>: <%= user.userName %></div>
+            <div><b><%= __('profile.email') %></b>: <%= user.email %></div>
+            <div><b><%= __('profile.contactNumber') %></b>: <%= user.contactNo %></div>
             <br>
             <a href="/editProfile/<%= user.userID %>">
-                <button class="edit-btn">Edit Profile</button>
+                <button class="edit-btn"><%= __('profile.editProfile') %></button>
             </a>
         </div>
 

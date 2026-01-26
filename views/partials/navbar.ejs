@@ -5,7 +5,7 @@
 
   <ul>
 
-    <% if (user && user.userType !== "Guest") { %>  
+    <% if (user) { %>  
       <!-- NORMAL USER NAV LINKS -->
       <li><a href="/homepage"><%= __('nav.home') %></a></li>
       <li><a href="/aboutus"><%= __('nav.aboutUs') %></a></li>
@@ -17,18 +17,20 @@
 
   </ul>
 
-  <% if (user && user.userType !== "Guest") { %>
+  <% if (user) { %>
     <ul>
       <li><a href="/viewProfile/<%= user.userID %>"><%= __('nav.profile') %></a></li>
       <li><a href="#" id="logoutBtn"><%= __('nav.logout') %></a></li>
-      <li class="language-switcher">
-        <select id="languageSelect" onchange="changeLanguage(this.value)">
-          <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>English</option>
-          <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>Bahasa Melayu</option>
-          <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>தமிழ்</option>
-          <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>中文</option>
-        </select>
-      </li>
+      <% if (user.userType !== "Admin" && user.userType !== "Writer" && user.userType !== "Manager") { %>
+        <li class="language-switcher">
+          <select id="languageSelect" onchange="changeLanguage(this.value)">
+            <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>English</option>
+            <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>Bahasa Melayu</option>
+            <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>தமிழ்</option>
+            <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>中文</option>
+          </select>
+        </li>
+      <% } %>
     </ul>
   <% } %>
 

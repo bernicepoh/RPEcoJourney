@@ -131,5 +131,60 @@
     "hard": "Sukar",
     "startQuiz": "Mulakan Kuiz",
     "generating": "Menjana Kuiz Kemampanan anda..."
+  },
+  "aiQuizResult": {
+    "title": "Keputusan Kuiz",
+    "quizCompleted": "🎉 Kuiz Selesai!",
+    "totalPointsScored": "Jumlah Mata Diperolehi",
+    "totalXP": "🌟 Jumlah XP:",
+    "base": "Asas:",
+    "streak": "Rentetan:",
+    "perfect": "Sempurna:",
+    "completedOn": "📅 Selesai Pada:",
+    "user": "⏳ Pengguna:",
+    "difficultyLevel": "🔥 Tahap Kesukaran:",
+    "backToQuizSelection": "Kembali ke Pemilihan Kuiz",
+    "questionReview": "Semakan Soalan",
+    "correct": "✔ Betul!",
+    "incorrect": "❌ Salah",
+    "yourAnswer": "Jawapan Anda:",
+    "correctAnswer": "Jawapan Yang Betul:",
+    "notAnswered": "Tidak dijawab",
+    "explanation": "💡 Penjelasan:",
+    "play": "▶️ Main",
+    "pause": "⏸ Jeda",
+    "resume": "▶️ Sambung",
+    "speed": "Kelajuan:",
+    "prev": "← Sebelum",
+    "next": "Seterusnya →",
+    "aiFeedback": "🤖 Maklum Balas AI & Petua Eko",
+    "loadingInsights": "Memuatkan pandangan AI..."
+  },
+  "profile": {
+    "title": "Profil",
+    "username": "Nama Pengguna",
+    "email": "E-mel",
+    "contactNumber": "Nombor Telefon",
+    "editProfile": "Edit Profil"
+  },
+  "editProfile": {
+    "title": "Edit Profil",
+    "username": "Nama Pengguna:",
+    "email": "E-mel:",
+    "contactNumber": "Nombor Telefon:",
+    "newPassword": "Kata Laluan Baru (pilihan)",
+    "passwordPlaceholder": "Biarkan kosong untuk mengekalkan kata laluan semasa",
+    "confirmPassword": "Sahkan Kata Laluan Baru",
+    "confirmPasswordPlaceholder": "Sahkan kata laluan baru",
+    "currentProfileImage": "Gambar Profil Semasa",
+    "uploadNewImage": "Muat Naik Gambar Profil Baru (pilihan)",
+    "updateProfile": "Kemas Kini Profil",
+    "resetPassword": "🔒 Tetapkan Semula Kata Laluan"
+  },
+  "categories": {
+    "title": "Kemampanan RP",
+    "introText": "Di RP, kami komited untuk menerima kemampanan, dan Pelan Hijau RP kami menetapkan peta jalan untuk perjalanan kemampanan kami. Pelan Hijau RP direka secara strategik untuk menanamkan kemampanan dalam segala yang kami lakukan sama ada operasi harian, amalan, inisiatif, atau apa yang kami ajar dalam kelas kami.",
+    "noCategories": "Tiada kategori lagi. Sila tambah beberapa data.",
+    "footer": "© 2025 RPEcoJourney. Hak Cipta Terpelihara."
   }
 }

@@ -106,8 +106,8 @@ app.use((req, res, next) => {
     res.cookie('language', req.query.lang, { maxAge: 365 * 24 * 60 * 60 * 1000 });
   }
   
-  // Set locale from session, cookie, or default
-  const locale = req.session.language || req.cookies.language || 'en';
+  // Always default to English - only use session language if explicitly set in current session
+  const locale = req.session.language || 'en';
   req.setLocale(locale);
   res.locals.currentLanguage = locale;
   

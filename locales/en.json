@@ -131,5 +131,60 @@
     "hard": "Hard",
     "startQuiz": "Start Quiz",
     "generating": "Generating your Sustainability Quiz..."
+  },
+  "aiQuizResult": {
+    "title": "Quiz Results",
+    "quizCompleted": "🎉 Quiz Completed!",
+    "totalPointsScored": "Total Points Scored",
+    "totalXP": "🌟 Total XP:",
+    "base": "Base:",
+    "streak": "Streak:",
+    "perfect": "Perfect:",
+    "completedOn": "📅 Completed On:",
+    "user": "⏳ User:",
+    "difficultyLevel": "🔥 Difficulty Level:",
+    "backToQuizSelection": "Back to Quiz Selection",
+    "questionReview": "Question Review",
+    "correct": "✔ Correct!",
+    "incorrect": "❌ Incorrect",
+    "yourAnswer": "Your Answer:",
+    "correctAnswer": "Correct Answer:",
+    "notAnswered": "Not answered",
+    "explanation": "💡 Explanation:",
+    "play": "▶️ Play",
+    "pause": "⏸ Pause",
+    "resume": "▶️ Resume",
+    "speed": "Speed:",
+    "prev": "← Prev",
+    "next": "Next →",
+    "aiFeedback": "🤖 AI Feedback & Eco Tips",
+    "loadingInsights": "Loading AI insights..."
+  },
+  "profile": {
+    "title": "Profile",
+    "username": "Username",
+    "email": "Email",
+    "contactNumber": "Contact Number",
+    "editProfile": "Edit Profile"
+  },
+  "editProfile": {
+    "title": "Edit Profile",
+    "username": "Username:",
+    "email": "Email:",
+    "contactNumber": "Contact Number:",
+    "newPassword": "New Password (optional)",
+    "passwordPlaceholder": "Leave blank to keep current password",
+    "confirmPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "currentProfileImage": "Current Profile Image",
+    "uploadNewImage": "Upload New Profile Image (optional)",
+    "updateProfile": "Update Profile",
+    "resetPassword": "🔒 Reset Password"
+  },
+  "categories": {
+    "title": "RP Sustainability",
+    "introText": "At RP, we are committed to embracing sustainability, and our RP Green Plan lays out the roadmap for our sustainability journey. The RP Green Plan is strategically designed to embed sustainability into everything we do whether it's our daily operations, practices, initiatives, or even what we teach in our classes.",
+    "noCategories": "No categories yet. Please add some data.",
+    "footer": "© 2025 RPEcoJourney. All Rights Reserved."
   }
 }
