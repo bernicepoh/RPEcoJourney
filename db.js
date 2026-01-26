@@ -21,17 +21,9 @@
 
 const { Pool } = require('pg');
 
-const poolConfig = {
-    max: 5,
-    min: 2,
-    idleTimeoutMillis: 600000,
-};
-const DataBase = process.env.PG_DATABASE;
-const UserName = process.env.PG_USER;
-const Password = process.env.PG_PASSWORD;
-const Host = process.env.PG_HOST;
-const Port = process.env.PG_PORT;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }  // Required for Render
+});
 
-poolConfig.connectionString = `postgresql://${UserName}:${Password}@${Host}:${Port}/${DataBase}`;
-
-const client = new Pool(poolConfig);
+module.exports = pool;
