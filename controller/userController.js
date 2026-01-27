@@ -37,11 +37,11 @@ exports.login = (req, res) => {
       req.flash('loginSuccess', 'Login successful');
  
       const initProgress = `
-        INSERT INTO "user" (userID, totalXP, level, streak, CheckInDate)
+        INSERT INTO "user" (userid, totalXP, level, streak, CheckInDate)
         VALUES ($1, 0, 1, 0, NULL)
-        ON CONFLICT ("userID") DO NOTHING
+        ON CONFLICT (userid) DO NOTHING
       `;
-      db.query(initProgress, [user.userID]);
+      db.query(initProgress, [user.userid]);
  
       if (user.userType === 'User') {
         res.redirect('/homepage');
