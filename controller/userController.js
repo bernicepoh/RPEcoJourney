@@ -20,7 +20,7 @@ exports.login = (req, res) => {
   const sql = `
     SELECT *
     FROM "user"
-    WHERE "userName" = $1
+    WHERE username = $1
     AND password = encode(digest($2, 'sha256'), 'hex')
   `;
  
@@ -205,7 +205,7 @@ exports.register = (req, res) => {
     }
  
     db.query(
-      `INSERT INTO "user" (userName, email, password, contactNo)
+      `INSERT INTO "user" (username, email, password, contactNo)
        VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), $4)`,
       [userName, email, password, contactNo],
       (err) => {
