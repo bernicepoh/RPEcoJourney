@@ -2,105 +2,76 @@
 const checkAuthenticated = (req, res, next) => {
     if (req.session.user) {
         return next();
-    } else {
-        req.flash('error', 'Please log in to view this resource');
-        res.redirect('/');
     }
+    req.flash('error', 'Please log in to view this resource');
+    return res.redirect('/');
 };
 
 // Middleware to check if user is admin
 const checkAdmin = (req, res, next) => {
-    if (req.session.user && req.session.user.userType === 'Admin') {
-        console.log("User has admin rights");
+    if (req.session.user?.userType === 'Admin') {
         return next();
-    } else {
-        console.log("User DO NOT have admin rights");
-        res.redirect('/homepage');
     }
+    req.flash('error', 'Admin access only');
+    return res.redirect('/401');
 };
 
 // Middleware to check if user is manager
 const checkManager = (req, res, next) => {
-    if (req.session.user && req.session.user.userType === 'Manager') {
-        console.log("User has manager rights");
+    if (req.session.user?.userType === 'Manager') {
         return next();
-    } else {
-        console.log("User DO NOT have manager rights");
-        req.flash('error', 'Manager access only');
-        
     }
+    req.flash('error', 'Manager access only');
+    return res.redirect('/401');
 };
 
-// Middleware to check Admin or Manager
+// Admin OR Manager
 const allowAdminOrManager = (req, res, next) => {
     const role = req.session.user?.userType;
-
     if (role === 'Admin' || role === 'Manager') {
-        console.log("Access granted: Admin/Manager");
         return next();
-    } else {
-        console.log("Access denied: Not Admin/Manager");
-        req.flash('error', 'Only Admin or Manager can perform this action');
-        
     }
+    req.flash('error', 'Only Admin or Manager can perform this action');
+    return res.redirect('/401');
 };
 
-// Middleware to check if user is normal user
+// Normal user only
 const checkUser = (req, res, next) => {
-    if (req.session.user && req.session.user.userType === 'User') {
-        console.log("User is logged in");
+    if (req.session.user?.userType === 'User') {
         return next();
-    } else {
-        console.log("This function is for users only.");
-        req.flash('error', 'This function is for users only.');
-       
     }
+    req.flash('error', 'User access only');
+    return res.redirect('/401');
 };
 
-
+// Writer only
 const checkWriter = (req, res, next) => {
-    if (req.session.user && req.session.user.userType === 'Writer') {
-        console.log("Access denied: Not Writer");
+    if (req.session.user?.userType === 'Writer') {
         return next();
-    } else {
-        console.log("Access denied: Not Admin/Manager");
-        req.flash('error', 'Only Admin or Manager can perform this action');
-        return res.redirect('/401');
-
     }
+    req.flash('error', 'Writer access only');
+    return res.redirect('/401');
 };
 
+// Admin OR Manager OR Writer
 const allowAdminManagerWriter = (req, res, next) => {
     const role = req.session.user?.userType;
-
-    if (role === 'Admin' || role === 'Manager' || role === 'Writer') {
-        console.log("Access granted: Admin/Manager");
+    if (['Admin', 'Manager', 'Writer'].includes(role)) {
         return next();
-    } else {
-        console.log("Access denied: Not Admin/Manager/writer");
-        req.flash('error', 'Only Admin or Manager can perform this action');
-        
     }
+    req.flash('error', 'Access denied');
+    return res.redirect('/401');
 };
 
+// Admin OR Writer
 const allowAdminOrWriter = (req, res, next) => {
     const role = req.session.user?.userType;
-
     if (role === 'Admin' || role === 'Writer') {
-        console.log("Access granted: Admin/Manager");
         return next();
-    } else {
-        console.log("Access denied: Not Admin/Manager");
-        req.flash('error', 'Only Admin or Manager can perform this action');
-        
     }
+    req.flash('error', 'Access denied');
+    return res.redirect('/401');
 };
-
-
-
-
-        
-       
 
 module.exports = {
     checkAuthenticated,

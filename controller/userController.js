@@ -1,138 +1,291 @@
-const db = require("../db");
-const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const db = require('../db');
+const nodemailer = require('nodemailer');
 
-/* ======================================================
-   LOGIN
-====================================================== */
-exports.login = async (req, res) => {
+exports.getLogin = (req, res) => {
+  res.render('index', {
+    messages: req.flash('success'),
+    errors: req.flash('error'),
+    user: req.session.user
+  });
+};
+
+exports.login = (req, res) => {
   const { userName, password } = req.body;
 
-  try {
-    const sql = `
-      SELECT * FROM "user"
-      WHERE userName = $1
+  if (!userName || !password) {
+    req.flash('error', 'All fields are required.');
+    return res.redirect('/');
+  }
+
+  const sql = `
+    SELECT *
+    FROM "user"
+    WHERE "userName" = $1
       AND password = encode(digest($2, 'sha256'), 'hex')
-    `;
+  `;
 
-    const result = await db.query(sql, [userName, password]);
-
-    if (result.rows.length === 0) {
-      return res.render("login", { error: "Invalid username or password" });
+  db.query(sql, [userName, password], (err, results) => {
+    if (err) {
+      console.error('Error during login:', err);
+      req.flash('error', 'An error occurred. Please try again.');
+      return res.redirect('/');
     }
 
-    req.session.user = result.rows[0];
-    res.redirect("/dashboard");
+    if (results.rows.length > 0) {
+      const user = results.rows[0];
+      req.session.user = user;
+      req.flash('loginSuccess', 'Login successful');
 
-  } catch (err) {
-    console.error("Error during login:", err);
-    res.status(500).send("Server error");
-  }
+      // Auto create progress row if missing
+      const initProgress = `
+        INSERT INTO user_progress (userID, totalXP, level, streak, "CheckInDate")
+        VALUES ($1, 0, 1, 0, NULL)
+        ON CONFLICT (userID) DO NOTHING
+      `;
+      db.query(initProgress, [user.userID]);
+
+      if (user.userType === 'User') {
+        res.redirect('/homepage');
+      } else {
+        res.redirect('/adminDashboard');
+      }
+    } else {
+      req.flash('error', 'Invalid username or password');
+      res.redirect('/');
+    }
+  });
 };
 
-/* ======================================================
-   REGISTER
-====================================================== */
-exports.register = async (req, res) => {
-  const { userName, email, password, contactNo } = req.body;
+exports.getRegister = (req, res) => {
+  const errors = req.flash('error');
+  const messages = req.flash('success');
+  const formData = req.flash('formData')[0] || {};
 
-  try {
-    const sql = `
-      INSERT INTO "user" (userName, email, password, contactNo)
-      VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), $4)
-    `;
-
-    await db.query(sql, [userName, email, password, contactNo]);
-    res.redirect("/login");
-
-  } catch (err) {
-    console.error("Register error:", err);
-    res.status(500).send("Registration failed");
-  }
+  res.render('register', {
+    errors,
+    messages,
+    formData,
+    user: req.session.user
+  });
 };
 
-/* ======================================================
-   FORGOT PASSWORD (SEND TEMP PASSWORD)
-====================================================== */
-exports.forgotPassword = async (req, res) => {
+exports.getForgotPassword = (req, res) => {
+  res.render('forgot_password', {
+    step: 1,
+    email: '',
+    errors: req.flash('error'),
+    success: req.flash('success')
+  });
+};
+
+function generateTempPassword(length = 8) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let password = '';
+  for (let i = 0; i < length; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
+exports.postForgotPassword = (req, res) => {
   const { email } = req.body;
 
-  const tempPassword = crypto.randomBytes(4).toString("hex");
+  if (!email) {
+    req.flash('error', 'Please enter your email.');
+    return res.redirect('/forgot-password');
+  }
 
-  try {
-    const updateSql = `
-      UPDATE "user"
-      SET password = encode(digest($1, 'sha256'), 'hex')
-      WHERE email = $2
-    `;
-
-    const result = await db.query(updateSql, [tempPassword, email]);
-
-    if (result.rowCount === 0) {
-      return res.render("forgotPassword", { error: "Email not found" });
-    }
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
+  db.query(
+    'SELECT * FROM "user" WHERE email = $1',
+    [email],
+    (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.redirect('/forgot-password');
       }
-    });
 
-    await transporter.sendMail({
-      to: email,
-      subject: "Password Reset",
-      text: `Your temporary password is: ${tempPassword}`
-    });
+      if (results.rows.length === 0) {
+        req.flash('error', 'Email not found.');
+        return res.redirect('/forgot-password');
+      }
 
-    res.render("forgotPassword", { success: "Temporary password sent!" });
+      const tempPassword = generateTempPassword(8);
 
-  } catch (err) {
-    console.error("Forgot password error:", err);
-    res.status(500).send("Server error");
-  }
+      db.query(
+        `UPDATE "user"
+         SET password = encode(digest($1, 'sha256'), 'hex')
+         WHERE email = $2`,
+        [tempPassword, email],
+        (err) => {
+          if (err) {
+            console.error(err);
+            return res.redirect('/forgot-password');
+          }
+
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'fyptesting13@gmail.com',
+              pass: 'fjbjltcfxfofwiho'
+            }
+          });
+
+          const mailOptions = {
+            from: 'fyptesting13@gmail.com',
+            to: email,
+            subject: 'OTP',
+            text: `Your One-time password is: ${tempPassword}`
+          };
+
+          transporter.sendMail(mailOptions, (error) => {
+            if (error) {
+              console.log(error);
+              req.flash('error', 'Error sending email.');
+              return res.redirect('/forgot-password');
+            }
+
+            res.render('forgot_password', {
+              step: 2,
+              email,
+              errors: [],
+              success: ['Temporary password sent to your email.']
+            });
+          });
+        }
+      );
+    }
+  );
 };
 
-/* ======================================================
-   RESET PASSWORD (VERIFY TEMP PASSWORD)
-====================================================== */
-exports.resetPassword = async (req, res) => {
-  const { email, tempPassword, newPassword } = req.body;
+exports.postResetPassword = (req, res) => {
+  const { email, tempPassword, newPassword, confirmPassword } = req.body;
+  const errors = [];
 
-  try {
-    const checkSql = `
-      SELECT * FROM "user"
-      WHERE email = $1
+  if (!email || !tempPassword || !newPassword || !confirmPassword) {
+    errors.push('All fields are required.');
+  }
+
+  if (newPassword !== confirmPassword) {
+    errors.push('Passwords do not match.');
+  }
+
+  if (errors.length > 0) {
+    return res.render('forgot_password', {
+      step: 2,
+      email,
+      errors,
+      success: []
+    });
+  }
+
+  const sql = `
+    SELECT *
+    FROM "user"
+    WHERE email = $1
       AND password = encode(digest($2, 'sha256'), 'hex')
-    `;
+  `;
 
-    const userResult = await db.query(checkSql, [email, tempPassword]);
-
-    if (userResult.rows.length === 0) {
-      return res.render("resetPassword", { error: "Invalid temporary password" });
+  db.query(sql, [email, tempPassword], (err, results) => {
+    if (err || results.rows.length === 0) {
+      return res.render('forgot_password', {
+        step: 2,
+        email,
+        errors: ['Temporary password is incorrect.'],
+        success: []
+      });
     }
 
-    const updateSql = `
-      UPDATE "user"
-      SET password = encode(digest($1, 'sha256'), 'hex')
-      WHERE email = $2
-    `;
-
-    await db.query(updateSql, [newPassword, email]);
-    res.redirect("/login");
-
-  } catch (err) {
-    console.error("Reset password error:", err);
-    res.status(500).send("Server error");
-  }
+    db.query(
+      `UPDATE "user"
+       SET password = encode(digest($1, 'sha256'), 'hex')
+       WHERE email = $2`,
+      [newPassword, email],
+      () => {
+        req.flash('success', 'Password successfully reset.');
+        res.redirect('/');
+      }
+    );
+  });
 };
 
-/* ======================================================
-   LOGOUT
-====================================================== */
-exports.logout = (req, res) => {
-  req.session.destroy(() => {
-    res.redirect("/");
+exports.register = (req, res) => {
+  const { userName, email, password, confirmPassword, contactNo } = req.body;
+  const errors = [];
+
+  if (!userName || !email || !password || !confirmPassword || !contactNo) {
+    errors.push('All fields are required.');
+  }
+
+  if (password !== confirmPassword) {
+    errors.push('Passwords do not match.');
+  }
+
+  if (errors.length > 0) {
+    req.flash('error', errors);
+    req.flash('formData', req.body);
+    return res.redirect('/register');
+  }
+
+  db.query(
+    'SELECT * FROM "user" WHERE email = $1',
+    [email],
+    (err, results) => {
+      if (results.rows.length > 0) {
+        req.flash('error', 'Email already exists.');
+        return res.redirect('/register');
+      }
+
+      const insertSql = `
+        INSERT INTO "user" (userName, email, password, contactNo)
+        VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), $4)
+      `;
+
+      db.query(insertSql, [userName, email, password, contactNo], () => {
+        req.flash('success', 'Registration successful.');
+        res.redirect('/');
+      });
+    }
+  );
+};
+
+exports.getAdminDashboard = (req, res) => {
+  res.render('adminDashboard', {
+    user: req.session.user,
+    userName: req.session.user?.userName,
+    userType: req.session.user?.userType,
+    loginSuccess: req.flash('loginSuccess')
   });
+};
+
+exports.getAllUsers = (req, res) => {
+  const user = req.session.user;
+  const { email, contactNo } = req.query;
+
+  if (email && contactNo) {
+    db.query(
+      'SELECT * FROM "user" WHERE email = $1 AND contactNo = $2',
+      [email.trim(), contactNo.trim()],
+      (err, results) => {
+        res.render('adminUsers', {
+          users: results.rows,
+          user,
+          error: results.rows.length ? null : 'No user found.',
+          success: [],
+          searchEmail: email,
+          searchContactNo: contactNo
+        });
+      }
+    );
+  } else {
+    db.query('SELECT * FROM "user"', (err, results) => {
+      res.render('adminUsers', {
+        users: results.rows,
+        user,
+        error: null,
+        success: req.flash('success'),
+        searchEmail: '',
+        searchContactNo: ''
+      });
+    });
+  }
 };

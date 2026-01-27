@@ -1,15 +1,14 @@
 require('dotenv').config();
 const express = require('express');
-const userController = require('./controller/userController');
-const contentController = require('./controller/contentController');
-const categoryController = require('./controller/categoryController');
-const homepageController = require('./controller/homepageController');
-const checkinController = require('./controller/checkinController');
-const profileController = require('./controller/profileController');
-const leaderboardController = require('./controller/leaderboardController');
 const aiQuizController = require('./controller/aiQuizController');
+const categoryController = require('./controller/categoryController');
+const checkinController = require('./controller/checkinController');
+const contentController = require('./controller/contentController');
+const homepageController = require('./controller/homepageController');
+const leaderboardController = require('./controller/leaderboardController');
+const profileController = require('./controller/profileController');
+const userController = require('./controller/userController');
 const xpController = require('./controller/xpcontroller');
-const db = require('./db'); 
 
 const multer = require('multer');
 const session = require('express-session');
