@@ -11,51 +11,50 @@ exports.getContentByContentType = (req, res) => {
 
     const sql = `
         SELECT 
-            c."contentID", 
-            c."contentTitle", 
-            c."contentDescription", 
-            c."contentFile",
-            cat."contentTypeName",
-            cat."contentTypeDescription",
-            cat."contentTypeImage",
+            c.contentID, 
+            c.contentTitle, 
+            c.contentDescription, 
+            c.contentFile,
+            cat.contentTypeName,
+            cat.contentTypeDescription,
+            cat.contentTypeImage,
 
             /* Total like count */
             (
                 SELECT COUNT(*) 
                 FROM engagement e 
-                WHERE e."contentID" = c."contentID" 
+                WHERE e.contentID = c.contentID 
                 AND e.likes = 1
-            ) AS "likeCount",
-
+            ) AS likeCount,
             /* Whether THIS user liked */
             (
                 SELECT COUNT(*) 
                 FROM engagement e 
-                WHERE e."contentID" = c."contentID" 
-                AND e."userID" = $1
+                WHERE e.contentID = c.contentID 
+                AND e.userID = $1
                 AND e.likes = 1
-            ) AS "userLiked",
+            ) AS userLiked,
 
             /* Total comment count */
             (
                 SELECT COUNT(*) 
                 FROM engagement e
-                WHERE e."contentID" = c."contentID" 
+                WHERE e.contentID = c.contentID 
                 AND e.comments IS NOT NULL 
                 AND e.comments != ''
-            ) AS "commentCount",
+            ) AS commentCount,
 
             /* Total share count */
             (
                 SELECT COALESCE(SUM(share), 0)
                 FROM engagement e
-                WHERE e."contentID" = c."contentID"
-            ) AS "totalShares"
+                WHERE e.contentID = c.contentID
+            ) AS totalShares
 
         FROM content c
         JOIN content_type cat
-            ON c."contentTypeID" = cat."contentTypeID"
-        WHERE cat."contentTypeID" = $2
+            ON c.contentTypeID = cat.contentTypeID
+        WHERE cat.contentTypeID = $2
     `;
 
     db.query(sql, [userID, contentTypeID], (error, results) => {
@@ -77,7 +76,7 @@ exports.getContentByContentType = (req, res) => {
             });
         } else {
             // No content, but still try to get content_type info for banner, etc.
-            const catSql = 'SELECT * FROM content_type WHERE "contentTypeID" = $1';
+            const catSql = 'SELECT * FROM content_type WHERE contentTypeID = $1';
             db.query(catSql, [contentTypeID], (catError, catRows) => {
                 if (catError || catRows.rows.length === 0) {
                     return res.status(404).send('content type not found');
@@ -113,7 +112,7 @@ exports.toggleLike = (req, res) => {
 
     const checkSql = `
         SELECT likes FROM engagement 
-        WHERE "userID" = $1 AND "contentID" = $2
+        WHERE userID = $1 AND contentID = $2
     `;
 
     db.query(checkSql, [userID, contentID], (err, rows) => {
@@ -134,7 +133,7 @@ exports.toggleLike = (req, res) => {
             const updateSql = `
                 UPDATE engagement 
                 SET likes = $1
-                WHERE "userID" = $2 AND "contentID" = $3
+                WHERE userID = $2 AND contentID = $3
             `;
 
             db.query(updateSql, [newLikeValue, userID, contentID], (updateErr) => {
@@ -143,9 +142,9 @@ exports.toggleLike = (req, res) => {
                 if (updateErr) return res.status(500).json({ success: false });
 
                 const countSql = `
-                    SELECT COUNT(*) AS "likeCount"
+                    SELECT COUNT(*) AS likeCount
                     FROM engagement 
-                    WHERE "contentID" = $1 AND likes = 1
+                    WHERE contentID = $1 AND likes = 1
                 `;
 
                 db.query(countSql, [contentID], (countErr, countRows) => {
@@ -167,7 +166,7 @@ exports.toggleLike = (req, res) => {
             console.log("🆕 No existing row found → creating new one");
 
             const insertSql = `
-                INSERT INTO engagement ("userID", "contentID", likes)
+                INSERT INTO engagement (userID, contentID, likes)
                 VALUES ($1, $2, 1)
             `;
 
@@ -177,9 +176,9 @@ exports.toggleLike = (req, res) => {
                 if (insErr) return res.status(500).json({ success: false });
 
                 const countSql = `
-                    SELECT COUNT(*) AS "likeCount"
+                    SELECT COUNT(*) AS likeCount
                     FROM engagement 
-                    WHERE "contentID" = $1 AND likes = 1
+                    WHERE contentID = $1 AND likes = 1
                 `;
 
                 db.query(countSql, [contentID], (countErr, countRows) => {
@@ -261,7 +260,7 @@ exports.postComment = async (req, res) => {
         // Inserting of Clean Comment to DB
         // =================================
         const sql = `
-            INSERT INTO engagement ("userID", "contentID", comments, share) 
+            INSERT INTO engagement (userID, contentID, comments, share) 
             VALUES ($1, $2, $3, $4)
         `;
 
@@ -287,11 +286,11 @@ exports.trackShare = (req, res) => {
     const sql = `
         UPDATE engagement
         SET share = share + 1
-        WHERE "userID" = $1 AND "contentID" = $2
+        WHERE userID = $1 AND contentID = $2
     `;
 
     const insertSql = `
-        INSERT INTO engagement ("userID", "contentID", share)
+        INSERT INTO engagement (userID, contentID, share)
         VALUES ($1, $2, 1)
     `;
 
@@ -321,48 +320,48 @@ exports.getContent = (req, res) => {
     // ✅ SORT LOGIC MUST LIVE HERE
     const sort = req.query.sort || "newest";
 
-    let orderBy = 'e."createdAt" DESC'; // default
+    let orderBy = 'e.createdAt DESC'; // default
 
     if (sort === "oldest") {
-        orderBy = 'e."createdAt" ASC';
+        orderBy = 'e.createdAt ASC';
     } else if (sort === "az") {
-        orderBy = 'u."userName" ASC';
+        orderBy = 'u.userName ASC';
     } else if (sort === "za") {
-        orderBy = 'u."userName" DESC';
+        orderBy = 'u.userName DESC';
     }
 
     const contentSql = `
-        SELECT c.*, cat."contentTypeName", cat."contentTypeDescription", cat."contentTypeImage"
+        SELECT c.*, cat.contentTypeName, cat.contentTypeDescription, cat.contentTypeImage
         FROM content c
-        JOIN content_type cat ON c."contentTypeID" = cat."contentTypeID"
-        WHERE c."contentID" = $1
+        JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
+        WHERE c.contentID = $1
     `;
 
     const commentSql = `
         SELECT 
-            e."engagementID" AS "commentID",
-            e.comments AS "commentText",
-            e."isBlocked",
-            TO_CHAR(e."createdAt", 'DD Mon YYYY, HH12:MI AM') AS "createdAt",
-            u."userID",
-            u."userName",
-            u."userType",
-            u.image AS "userImage"
+            e.engagementID AS commentID,
+            e.comments AS commentText,
+            e.isBlocked,
+            TO_CHAR(e.createdAt, 'DD Mon YYYY, HH12:MI AM') AS createdAt,
+            u.userID,
+            u.userName,
+            u.userType,
+            u.image AS userImage
         FROM engagement e
-        JOIN "user" u ON e."userID" = u."userID"
-        WHERE e."contentID" = $1
+        JOIN "user" u ON e.userID = u.userID
+        WHERE e.contentID = $1
             AND (
-                e."isBlocked" = 0
-                OR e."userID" = $2
+                e.isBlocked = 0
+                OR e.userID = $2
                 OR $3 IN ('Admin', 'Manager')
             )
         ORDER BY ${orderBy}
     `;
 
     const likeSql = `
-        SELECT COUNT(*) AS "likeCount"
+        SELECT COUNT(*) AS likeCount
         FROM engagement
-        WHERE "contentID" = $1 AND likes = 1
+        WHERE contentID = $1 AND likes = 1
     `;
 
     db.query(contentSql, [contentID], (err, contentRows) => {
@@ -424,8 +423,8 @@ exports.blockComment = (req, res) => {
 
   const sql = `
     UPDATE engagement
-    SET "isBlocked" = 1
-    WHERE "engagementID" = $1
+    SET isBlocked = 1
+    WHERE engagementID = $1
   `;
 
   db.query(sql, [commentID], () => {
@@ -448,8 +447,8 @@ exports.unblockComment = (req, res) => {
 
   const sql = `
     UPDATE engagement
-    SET "isBlocked" = 0
-    WHERE "engagementID" = $1
+    SET isBlocked = 0
+    WHERE engagementID = $1
   `;
 
   db.query(sql, [commentID], (err) => {
@@ -475,9 +474,9 @@ exports.editComment = (req, res) => {
 
     // First get the contentID of this comment
     const getSQL = `
-        SELECT "contentID"
+        SELECT contentID
         FROM engagement 
-        WHERE "engagementID" = $1 AND "userID" = $2
+        WHERE engagementID = $1 AND userID = $2
     `;
 
     db.query(getSQL, [commentID, userID], (err, rows) => {
@@ -492,7 +491,7 @@ exports.editComment = (req, res) => {
         const updateSQL = `
             UPDATE engagement 
             SET comments = $1
-            WHERE "engagementID" = $2 AND "userID" = $3
+            WHERE engagementID = $2 AND userID = $3
         `;
 
         db.query(updateSQL, [updatedText.trim(), commentID, userID], (err2) => {
@@ -511,9 +510,9 @@ exports.deleteComment = (req, res) => {
 
     // 1) Get contentID first
     const sqlGet = `
-        SELECT "contentID"
+        SELECT contentID
         FROM engagement 
-        WHERE "engagementID" = $1 AND "userID" = $2
+        WHERE engagementID = $1 AND userID = $2
     `;
 
     db.query(sqlGet, [commentID, userID], (err, rows) => {
@@ -527,7 +526,7 @@ exports.deleteComment = (req, res) => {
         // 2) Delete the comment
         const sqlDelete = `
             DELETE FROM engagement 
-            WHERE "engagementID" = $1 AND "userID" = $2
+            WHERE engagementID = $1 AND userID = $2
         `;
 
         db.query(sqlDelete, [commentID, userID], (delErr) => {
@@ -567,7 +566,7 @@ exports.addContent = (req, res) => {
     }
 
     const sql = `
-        INSERT INTO content ("contentTypeID", "contentTitle", "contentDescription", "contentFile")
+        INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile)
         VALUES ($1, $2, $3, $4)
     `;
    
@@ -613,7 +612,7 @@ exports.editContentForm = async (req, res) => {
         }
 
         // Once categories are fetched, fetch the product by ID
-        const sql = 'SELECT * FROM content WHERE "contentID" = $1';
+        const sql = 'SELECT * FROM content WHERE contentID = $1';
         db.query(sql, [contentID], (contentError, results) => {
             if (contentError) {
                 console.error('Database query error:', contentError.message);
@@ -645,8 +644,8 @@ exports.editContent = (req, res) => {
     console.log("new file: " + contentFile);
     const sql = `
         UPDATE content
-        SET "contentTypeID" = $1, "contentTitle" = $2, "contentDescription" = $3, "contentFile" = $4
-        WHERE "contentID" = $5
+        SET contentTypeID = $1, contentTitle = $2, contentDescription = $3, contentFile = $4
+        WHERE contentID = $5
     `;
 
     // Updated the content into the database
@@ -668,7 +667,7 @@ exports.editContent = (req, res) => {
 exports.deleteContent = (req, res) => {
     const contentID = req.params.id;
     // First, get the categoryID of the content
-    const getCategorySql = 'SELECT "contentTypeID" FROM content WHERE "contentID" = $1';
+    const getCategorySql = 'SELECT contentTypeID FROM content WHERE contentID = $1';
     db.query(getCategorySql, [contentID], (getError, getResults) => {
         if (getError) {
             console.error("Error fetching contentTypeID:", getError);
@@ -699,7 +698,7 @@ exports.manageContent = (req, res) => {
     const sql = `
         SELECT *
         FROM content c
-        JOIN content_type cat ON c."contentTypeID" = cat."contentTypeID"
+        JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
     `;
 
     db.query(sql, (error, results) => {

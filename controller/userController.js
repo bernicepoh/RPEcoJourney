@@ -20,7 +20,7 @@ exports.login = (req, res) => {
   const sql = `
     SELECT *
     FROM "user"
-    WHERE "userName" = $1
+    WHERE userName = $1
       AND password = encode(digest($2, 'sha256'), 'hex')
   `;
 
@@ -38,7 +38,7 @@ exports.login = (req, res) => {
 
       // Auto create progress row if missing
       const initProgress = `
-        INSERT INTO user_progress (userID, totalXP, level, streak, "CheckInDate")
+        INSERT INTO user_progress (userID, totalXP, level, streak, CheckInDate)
         VALUES ($1, 0, 1, 0, NULL)
         ON CONFLICT (userID) DO NOTHING
       `;
