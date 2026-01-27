@@ -20,7 +20,7 @@ exports.login = (req, res) => {
   const sql = `
     SELECT *
     FROM "user"
-    WHERE userName = $1
+    WHERE username = $1
       AND password = encode(digest($2, 'sha256'), 'hex')
   `;
 
@@ -212,40 +212,42 @@ exports.register = (req, res) => {
   const { userName, email, password, confirmPassword, contactNo } = req.body;
   const errors = [];
 
-  if (!userName || !email || !password || !confirmPassword || !contactNo) {
-    errors.push('All fields are required.');
-  }
-
-  if (password !== confirmPassword) {
-    errors.push('Passwords do not match.');
-  }
-
+  // Validation...
   if (errors.length > 0) {
     req.flash('error', errors);
     req.flash('formData', req.body);
     return res.redirect('/register');
   }
 
-  db.query(
-    'SELECT * FROM "user" WHERE email = $1',
-    [email],
-    (err, results) => {
-      if (results.rows.length > 0) {
-        req.flash('error', 'Email already exists.');
+  // Check email duplicate
+  db.query('SELECT * FROM "user" WHERE email = $1 OR username = $2', [email, userName.toLowerCase()], (err, results) => {
+    if (err) {
+      console.error('Duplicate check error:', err);
+      req.flash('error', 'Database error.');
+      return res.redirect('/register');
+    }
+    if (results.rows.length > 0) {
+      req.flash('error', 'Email or username already exists.');
+      return res.redirect('/register');
+    }
+
+    const insertSql = `
+      INSERT INTO "user" (username, email, password, contactNo)
+      VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), $4)
+      RETURNING userID
+    `;
+
+    db.query(insertSql, [userName.toLowerCase(), email, password, contactNo], (err, result) => {
+      if (err) {
+        console.error('INSERT error:', err);  // Log here!
+        req.flash('error', 'Registration failed: ' + err.message);
         return res.redirect('/register');
       }
-
-      const insertSql = `
-        INSERT INTO "user" (userName, email, password, contactNo)
-        VALUES ($1, $2, encode(digest($3, 'sha256'), 'hex'), $4)
-      `;
-
-      db.query(insertSql, [userName, email, password, contactNo], () => {
-        req.flash('success', 'Registration successful.');
-        res.redirect('/');
-      });
-    }
-  );
+      console.log('User registered, ID:', result.rows[0]?.userID, 'Rows affected:', result.rowCount);
+      req.flash('success', 'Registration successful.');
+      res.redirect('/');
+    });
+  });
 };
 
 exports.getAdminDashboard = (req, res) => {
