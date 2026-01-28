@@ -1,5 +1,6 @@
 const db = require('../db');
 
+
 /**
  * GET /xp-history
  * Logic:
@@ -23,25 +24,25 @@ const getXPHistory = async (req, res) => {
     // Uses subqueries to get permanent totals from non-expiring tables
     const statsQuery = `
         SELECT 
-            (SELECT COUNT(*) FROM quiz WHERE userID = $1) as quizCount,
-            (SELECT COUNT(*) FROM mission WHERE userID = $2 AND xpEarned > 0) as missionCount,
-            (SELECT totalXP FROM "user" WHERE userID = $3) as currentXP,
-            (SELECT streak FROM "user" WHERE userID = $4) as currentStreak
+            (SELECT COUNT(*) FROM quiz WHERE userID = ?) as quizCount,
+            (SELECT COUNT(*) FROM mission WHERE userID = ? AND xpEarned > 0) as missionCount,
+            (SELECT totalXP FROM user WHERE userID = ?) as currentXP,
+            (SELECT streak FROM user WHERE userID = ?) as currentStreak
     `;
 
     // 3. QUERY: Heatmap & Filter Data (Covers the last 3 months)
     const heatmapQuery = `
         SELECT DATE(timestamp) as logDate, SUM(xpEarned) as totalDayXP 
         FROM xp_log 
-        WHERE userID = $1 AND timestamp >= CURRENT_DATE - INTERVAL '90 days'
+        WHERE userID = ? AND timestamp >= DATE_SUB(NOW(), INTERVAL 90 DAY)
         GROUP BY DATE(timestamp)
     `;
 
     // 4. QUERY: Detailed History Logs
     const logQuery = `
-        SELECT earnedFrom, xpEarned, TO_CHAR(timestamp, 'DD Mon YYYY') as formattedDate 
+        SELECT earnedFrom, xpEarned, DATE_FORMAT(timestamp, '%d %b %Y') as formattedDate 
         FROM xp_log 
-        WHERE userID = $1 
+        WHERE userID = ? 
         ORDER BY timestamp DESC
     `;
 
@@ -66,7 +67,7 @@ const getXPHistory = async (req, res) => {
 
                 // Process heatmap results into a JSON object: { "YYYY-MM-DD": XP_SUM }
                 const heatmapData = {};
-                heatmapResults.rows.forEach(row => {  // Changed: results.rows
+                heatmapResults.forEach(row => {
                     // Normalize date to YYYY-MM-DD format for frontend JS matching
                     const dateStr = row.logDate.toISOString().split('T')[0];
                     heatmapData[dateStr] = row.totalDayXP;
@@ -74,8 +75,8 @@ const getXPHistory = async (req, res) => {
 
                 // 5. Final Render: Pass data to EJS
                 res.render('xphistory', { 
-                    logs: logs.rows,  // Changed: logs.rows
-                    stats: statsResults.rows[0],  // Changed: statsResults.rows[0]
+                    logs: logs, 
+                    stats: statsResults[0],
                     heatmapData: JSON.stringify(heatmapData),
                     user: user 
                 });

@@ -1,448 +1,339 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Quiz Results</title>
+    <title>Sustainability Quiz</title>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: #e8f7e4 url("/uploads/background.png") no-repeat center center fixed;
+            background: #e8f7e4 url("/uploads/background.png");
             background-size: cover;
-            margin: 0;
-            padding: 40px;
+            padding: 40px 0;
+            color: #333;
         }
 
-        /* ============================
-           2-COLUMN MAIN LAYOUT
-        =============================*/
-        .results-container {
-            display: flex;
-            gap: 30px;
-            width: 100%;
-            max-width: 1400px;
+        .quiz-container {
+            max-width: 850px;
             margin: auto;
-        }
-
-        /* LEFT PANEL (40%) */
-        .left-panel {
-            flex: 0 0 40%;
             background: white;
-            padding: 30px;
+            padding: 40px;
             border-radius: 25px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            box-shadow: 0px 5px 25px rgba(0,0,0,0.1);
+        }
+
+        h1 {
             text-align: center;
+            font-size: 34px;
+            color: #0b3d2e;
+            margin-bottom: 5px;
         }
 
-        /* RIGHT PANEL (60%) */
-        .right-panel {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 35px;
         }
 
-        /* ============================
-           SCORE BOXES
-        =============================*/
-        h1 { color: #1b5e20; font-size: 30px; margin-bottom: 25px; }
-
-        .score-box {
+        .question-card {
             background: #d9e8f5;
-            padding: 30px 20px;
-            border-radius: 18px;
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .xp-box {
-            background: #fff7c2;
-            padding: 15px 25px;
+            padding: 30px;
             border-radius: 20px;
-            display: inline-block;
-            font-size: 18px;
-            font-weight: 600;
+            position: relative;
             margin-bottom: 30px;
-            border: 2px dashed #fbc02d;
+            transition: 0.2s;
         }
 
-        .stat-box {
-            background: #f1f8e9;
-            padding: 15px 20px;
-            border-radius: 15px;
-            margin-bottom: 12px;
-            font-size: 16px;
-            text-align: left;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .btn-area { margin-top: 30px; }
-        .btn {
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 16px;
-            border: none;
-            cursor: pointer;
-            margin: 0 10px;
+        .timer {
+            position: absolute;
+            right: 30px;
+            top: 20px;
+            font-size: 18px;
+            color: #b71c1c;
             font-weight: bold;
         }
-        .home-btn { background: #1b5e20; color: white; transition: 0.3s; }
-        .home-btn:hover { background: #2e7d32; }
 
-        /* ============================
-           QUESTION REVIEW CARD
-        =============================*/
-        .review-card {
-            padding: 25px;
-            border-radius: 20px;
+        .option {
             background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            text-align: left;
-        }
-
-        .correct-card {
-            background: #eaffea;
-            border-left: 10px solid #2e7d32;
-        }
-
-        .wrong-card {
-            background: #ffecec;
-            border-left: 10px solid #d9534f;
-        }
-
-        .karaoke { padding: 2px 3px; border-radius: 4px; cursor: pointer; }
-        .highlight-word {
-            background: linear-gradient(90deg, #4caf50, #a8ff78);
-        }
-
-        #reviewExplanation {
-            margin-top: 15px;
-            padding: 15px;
-            border-radius: 12px;
-            background: #f7f7f7;
-            border-left: 6px solid #777;
-            line-height: 1.5;
-        }
-
-        #playPauseBtn {
-            background: #ffd65a;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        .speed-control {
-            margin-top: 12px;
+            padding: 14px 20px;
+            border-radius: 30px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .speed-control input { width: 150px; }
 
-        .nav-arrows { display: flex; justify-content: space-between; margin-top: 15px; }
-        .arrow-btn {
-            background: #66bb6a;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 15px;
+        .option:hover {
+            border-color: #4caf50;
+        }
+
+        .submit-btn {
+            background: #4caf50;
             color: white;
+            border: none;
+            padding: 12px 25px;
+            float: right;
+            margin-top: 10px;
+            border-radius: 30px;
+            font-size: 16px;
             cursor: pointer;
         }
 
-        /* ============================
-           AI FEEDBACK BOX
-        =============================*/
-        .ai-box {
-            padding: 20px;
-            border-radius: 20px;
-            background: #eef7ea;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            text-align: left;
+        .submit-btn:disabled {
+            background: #9ccc9c;
+            cursor: not-allowed;
         }
 
-        .ai-title {
-            font-size: 22px;
+        #feedback {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        #errorMsg {
+            display: none;
+            background: #ffdddd;
+            color: #b71c1c;
+            border-left: 5px solid #b71c1c;
+            padding: 10px 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             font-weight: bold;
-            color: #2e7d32;
-            margin-bottom: 10px;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.4s ease;
+        }
+
+        .user-card {
+            background: #8bc34a;
+            padding: 20px;
+            border-radius: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .pfp {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
         }
     </style>
 </head>
 
 <body>
-   <%- include('partials/navbar') %>
 
-<div class="results-container">
+<div class="quiz-container">
 
-    <div class="left-panel">
+    <h1>Sustainability Quiz</h1>
+    <p class="subtitle">Test your knowledge about sustainability!</p>
 
-        <h1>🎉 Quiz Completed!</h1>
+    <div class="question-card" id="questionCard">
 
-        <div class="score-box">
-            <%= score %> / 50
-            <div style="font-size:14px;">Total Points Scored</div>
-        </div>
+        <span class="timer">Time Left: <span id="timer">10</span> seconds</span>
 
-        <div class="xp-box">
-            🌟 Total XP: <%= xpEarned %><br>
-            <span style="font-size: 12px; font-weight: normal; color: #795548;">
-                (Base: <%= score * 2 %> + Streak: <%= streakBonus %> + Perfect: <%= perfectBonus %>)
-            </span>
-        </div>
+        <h3>Question <span id="qNum"></span> of <%= quiz.questions.length %></h3>
+        <h2 id="questionText" style="margin-top:10px;"></h2>
 
-        <div class="stat-box"><span>📅 Completed On:</span> <b><%= completedAt %></b></div>
-        <div class="stat-box"><span>⏳ User:</span> <b><%= user.userName %></b></div>
-        <div class="stat-box"><span>🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
+        <div id="errorMsg">⚠ Cannot be empty! Please select an answer.</div>
 
-        <div class="btn-area">
-            <button class="btn home-btn" onclick="window.location.href='/ai/select'">Back to Quiz Selection</button>
-        </div>
+        <div id="optionsBox"></div>
 
+        <div id="feedback"></div>
+
+        <button class="submit-btn" id="submitBtn" disabled>Submit →</button>
     </div>
 
-    <div class="right-panel">
-
-        <div id="reviewCard" class="review-card">
-            <h3 id="reviewQuestion">Question Review</h3>
-            <p id="reviewStatus"></p>
-            <p id="reviewYourAnswer"></p>
-            <p id="reviewCorrectAnswer"></p>
-
-            <div id="reviewExplanation"></div>
-
-            <button id="playPauseBtn">▶️ Play</button>
-
-            <div class="speed-control">
-                <label>Speed:</label>
-                <input type="range" id="speedSlider" min="0.7" max="1.5" step="0.1" value="1">
-                <span id="speedValue">1.0x</span>
-            </div>
-
-            <div class="nav-arrows">
-                <button class="arrow-btn" onclick="prevReview()">← Prev</button>
-                <button class="arrow-btn" onclick="nextReview()">Next →</button>
-            </div>
+    <div class="user-card">
+        <div class="pfp"></div>
+        <div>
+            <strong><%= user.userName %></strong><br>
+            Score: <span id="score">0</span>
         </div>
-
-        <div class="ai-box">
-            <div class="ai-title">🤖 AI Feedback & Eco Tips</div>
-            <div id="aiFeedback">Loading AI insights...</div>
-        </div>
-
     </div>
 
 </div>
 
+
 <script>
-const review = JSON.parse(localStorage.getItem("aiQuizReview"));
-let index = 0;
-let aiExplanations = [];
+    let qList = <%- JSON.stringify(quiz.questions) %>;
+    
+    // ⭐ THE FIX: Capture the difficulty from EJS so JavaScript knows what it is
+    let difficulty = "<%= difficulty %>"; 
+    
+    let current = 0;
+    let score = 0;
+    let timer = 10;
+    let interval;
 
-let currentUtterance = null;
-let currentWordIndex = 0;
-let words = [];
-let isPaused = false;
-let speedRate = 1;
+    // ⭐ STREAK SYSTEM
+    let streak = 0;
+    let streakBonus = 0;
+    let perfectBonus = 0;
 
-document.getElementById("speedSlider").addEventListener("input", (e) => {
-    speedRate = parseFloat(e.target.value);
-    document.getElementById("speedValue").innerText = speedRate.toFixed(1) + "x";
+    // ⭐ USER ANSWER STORAGE
+    let userAnswers = [];
 
-    if (currentUtterance && !isPaused) {
-        window.speechSynthesis.cancel();
-        startSpeech(aiExplanations[index], currentWordIndex);
+    const feedbackBox = document.getElementById("feedback");
+    const errorMsg = document.getElementById("errorMsg");
+    const questionCard = document.getElementById("questionCard");
+
+    function loadQuestion() {
+        let q = qList[current];
+
+        feedbackBox.style.display = "none";
+        errorMsg.style.display = "none";
+        feedbackBox.innerHTML = "";
+        document.getElementById("submitBtn").disabled = true;
+
+        document.getElementById("qNum").innerText = current + 1;
+        document.getElementById("questionText").innerText = q.question;
+
+        let html = "";
+        q.options.forEach((opt, i) => {
+            html += `
+            <label class="option">
+                <input type="radio" name="answer" value="${i}">
+                ${opt}
+            </label>`;
+        });
+        document.getElementById("optionsBox").innerHTML = html;
+
+        document.querySelectorAll("input[name='answer']").forEach(radio => {
+            radio.addEventListener("change", () => {
+                document.getElementById("submitBtn").disabled = false;
+                errorMsg.style.display = "none";
+            });
+        });
+
+        timer = 10;
+        document.getElementById("timer").innerText = timer;
+
+        clearInterval(interval);
+        interval = setInterval(() => {
+            timer--;
+            document.getElementById("timer").innerText = timer;
+            if (timer <= 0) handleSubmit();
+        }, 1000);
     }
-});
 
-function loadReviewCard() {
-    let q = review.questions[index];
-    const isCorrect = review.userAnswers[index] === q.answerIndex;
+    function handleSubmit() {
+        clearInterval(interval);
 
-    document.getElementById("reviewCard").className =
-        "review-card " + (isCorrect ? "correct-card" : "wrong-card");
+        let selected = document.querySelector("input[name='answer']:checked");
 
-    document.getElementById("reviewStatus").innerHTML =
-        isCorrect ? "✔ Correct!" : "❌ Incorrect";
+        if (!selected) {
+            errorMsg.style.display = "block";
+            questionCard.classList.add("shake");
 
-    document.getElementById("reviewQuestion").innerHTML =
-        `<b>Q${index+1}:</b> ${q.question}`;
+            setTimeout(() => {
+                questionCard.classList.remove("shake");
+            }, 400);
 
-    document.getElementById("reviewYourAnswer").innerHTML =
-        `Your Answer: <b>${q.options[review.userAnswers[index]] ?? "Not answered"}</b>`;
+            return;
+        }
 
-    document.getElementById("reviewCorrectAnswer").innerHTML =
-        `Correct Answer: <b>${q.options[q.answerIndex]}</b>`;
+        let selectedValue = parseInt(selected.value);
+        userAnswers.push(selectedValue); // ⭐ SAVE ANSWER
 
-    document.getElementById("reviewExplanation").innerHTML =
-        `<b>💡 Explanation:</b><br>${aiExplanations[index]}`;
+        let correctIndex = qList[current].answerIndex;
+        let correctAnswer = qList[current].options[correctIndex];
+        let isCorrect = selectedValue === correctIndex;
 
-    resetSpeech();
-}
+        if (isCorrect) {
+            score += 10;
+            streak++;
 
-function resetSpeech() {
-    window.speechSynthesis.cancel();
-    currentUtterance = null;
-    currentWordIndex = 0;
-    isPaused = false;
-    document.getElementById("playPauseBtn").innerHTML = "▶️ Play";
-}
+            if (streak === 3) {
+                streakBonus += 5;
 
-function nextReview() { if (index < review.questions.length - 1) { index++; loadReviewCard(); } }
-function prevReview() { if (index > 0) { index--; loadReviewCard(); } }
+                Swal.fire({
+                    icon: "success",
+                    title: "🔥 Streak Bonus!",
+                    text: "You answered 3 correct in a row! +5 XP!",
+                    timer: 1800,
+                    showConfirmButton: false
+                });
 
-async function loadAIInsights() {
-    const res = await fetch("/ai/insights", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(review)
-    });
-
-    const data = await res.json();
-    aiExplanations = data.explanations;
-
-    document.getElementById("aiFeedback").innerHTML = data.feedback;
-
-    loadReviewCard();
-}
-loadAIInsights();
-
-document.getElementById("playPauseBtn").addEventListener("click", () => {
-    const text = aiExplanations[index];
-
-    if (!currentUtterance) startSpeech(text, 0);
-    else if (isPaused) resumeSpeech();
-    else pauseSpeech();
-});
-
-function startSpeech(text, startIndex = 0) {
-    words = text.split(/\s+/);
-
-    const wrapped = words.map((w, i) =>
-        `<span class="karaoke" data-index="${i}" id="word${i}">${w}</span>`
-    ).join(" ");
-
-    document.getElementById("reviewExplanation").innerHTML =
-        `<b>💡 Explanation:</b><br>` + wrapped;
-
-    attachWordListeners();
-
-    const remainingText = words.slice(startIndex).join(" ");
-    const utter = new SpeechSynthesisUtterance(remainingText);
-
-    utter.lang = "en-US";
-    utter.rate = speedRate;
-
-    currentUtterance = utter;
-    currentWordIndex = startIndex;
-
-    utter.onboundary = () => {
-        highlightWord(currentWordIndex);
-        currentWordIndex++;
-    };
-
-    utter.onend = () => resetSpeech();
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utter);
-
-    document.getElementById("playPauseBtn").innerHTML = "⏸ Pause";
-    isPaused = false;
-}
-
-function pauseSpeech() {
-    window.speechSynthesis.pause();
-    isPaused = true;
-    document.getElementById("playPauseBtn").innerHTML = "▶️ Resume";
-}
-
-function resumeSpeech() {
-    window.speechSynthesis.resume();
-    isPaused = false;
-    document.getElementById("playPauseBtn").innerHTML = "⏸ Pause";
-}
-
-function highlightWord(i) {
-    document.querySelectorAll(".karaoke")
-        .forEach(el => el.classList.remove("highlight-word"));
-
-    const el = document.getElementById("word" + i);
-    if (el) el.classList.add("highlight-word");
-}
-
-function attachWordListeners() {
-    document.querySelectorAll(".karaoke").forEach(span => {
-
-        let pressTimer = null;
-        let longPress = false;
-
-        const start = (e) => {
-            longPress = false;
-            e.preventDefault();
-
-            pressTimer = setTimeout(() => {
-                longPress = true;
-                showWordMeaning(span.innerText);
-            }, 600);
-        };
-
-        const end = () => {
-            clearTimeout(pressTimer);
-
-            if (!longPress) {
-                const idx = parseInt(span.dataset.index);
-                startSpeech(aiExplanations[index], idx);
+                streak = 0;
             }
-        };
 
-        span.addEventListener("mousedown", start);
-        span.addEventListener("mouseup", end);
-        span.addEventListener("mouseleave", end);
+            feedbackBox.style.background = "#c8f7c5";
+            feedbackBox.style.color = "#2e7d32";
+            feedbackBox.innerHTML = `✅ Correct!`;
 
-        span.addEventListener("touchstart", start, { passive: false });
-        span.addEventListener("touchend", end);
-        span.addEventListener("touchcancel", end);
-    });
-}
+        } else {
+            streak = 0;
 
-async function showWordMeaning(word) {
-    const res = await fetch("/ai/word-meaning", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ word })
-    });
+            feedbackBox.style.background = "#ffcccc";
+            feedbackBox.style.color = "#b71c1c";
+            feedbackBox.innerHTML = `❌ Wrong!<br><br>Correct Answer: <b>${correctAnswer}</b>`;
+        }
 
-    const data = await res.json();
+        feedbackBox.style.display = "block";
+        document.getElementById("score").innerText = score;
 
-    Swal.fire({
-        title: `📘 ${word}`,
-        html: `<p style="font-size:16px;">${data.meaning}</p>`,
-        confirmButtonText: "OK"
-    });
-}
+        document.getElementById("submitBtn").disabled = true;
+        document.querySelectorAll("input[name='answer']").forEach(r => r.disabled = true);
+
+        // NEXT QUESTION AFTER 4s
+        setTimeout(() => {
+            current++;
+            if (current < qList.length) {
+                loadQuestion();
+            } else {
+
+                if (score === qList.length * 10) {
+                    perfectBonus = 20;
+
+                    Swal.fire({
+                        icon: "success",
+                        title: "🌟 PERFECT SCORE!",
+                        text: "+20 XP Bonus for getting all questions correct!",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+
+                // ⭐ SAVE FULL REVIEW BEFORE REDIRECT
+                const reviewData = {
+                    questions: qList,
+                    userAnswers: userAnswers
+                };
+                localStorage.setItem("aiQuizReview", JSON.stringify(reviewData));
+
+                // 🚀 REDIRECT TO RESULTS PAGE
+                setTimeout(() => {
+                    window.location.href =
+                        `/aiQuizResult?score=${score}&streakBonus=${streakBonus}&perfectBonus=${perfectBonus}&difficulty=${difficulty}`;
+                }, 2000);
+            }
+        }, 4000);
+    }
+
+    document.getElementById("submitBtn").onclick = handleSubmit;
+
+    loadQuestion();
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

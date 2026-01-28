@@ -3,7 +3,7 @@ const db = require('../db');
 exports.getLeaderboard = (req, res) => {
     const sql = `
         SELECT userName, totalXP, level, streak, image
-        FROM "user"  -- Quoted reserved word
+        FROM user
         ORDER BY totalXP DESC
         LIMIT 20
     `;
@@ -14,6 +14,6 @@ exports.getLeaderboard = (req, res) => {
             return res.send("DB error");
         }
 
-        res.render("leaderboard", { users: rows.rows });  // Changed: rows.rows
+        res.render("leaderboard", { users: rows });
     });
 };

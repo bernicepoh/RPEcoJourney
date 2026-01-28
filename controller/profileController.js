@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 
 exports.getProfile = (req, res) => {
     const userID = req.session.user.userID;
-    const sql = 'SELECT * FROM "user" WHERE userID = $1';
+    const sql = 'SELECT * FROM user WHERE userID = ?';
 
     db.query(sql, [userID], (err, results) => {
         if (err) {
@@ -11,9 +11,9 @@ exports.getProfile = (req, res) => {
             return res.status(500).send('Database error');
         }
 
-        if (results.rows.length > 0) {  // Changed: results.rows
+        if (results.length > 0) {
             res.render('editProfile', { 
-                user: results.rows[0],  // Changed: results.rows[0]
+                user: results[0],
                 error: req.flash("error") || [],
                 success: req.flash("success") || []
             });
@@ -53,7 +53,7 @@ exports.updateProfile = (req, res) => {
   }
 
   // Check email duplicate
-  const checkEmailSql = 'SELECT * FROM "user" WHERE email = $1 AND userID != $2';
+  const checkEmailSql = "SELECT * FROM user WHERE email = ? AND userID != ?";
   db.query(checkEmailSql, [email, userId], (err, emailResults) => {
     if (err) {
       console.error("Error checking email:", err);
@@ -61,13 +61,13 @@ exports.updateProfile = (req, res) => {
       return res.redirect("/editProfile/" + userId);
     }
 
-    if (emailResults.rows.length > 0) {  // Changed: results.rows
+    if (emailResults.length > 0) {
       req.flash("error", "Email is already in use.");
       return res.redirect("/editProfile/" + userId);
     }
 
     // Check contact duplicate
-    const checkContactSql = 'SELECT * FROM "user" WHERE contactNo = $1 AND userID != $2';
+    const checkContactSql = "SELECT * FROM user WHERE contactNo = ? AND userID != ?";
     db.query(checkContactSql, [contactNo, userId], (err, contactResults) => {
       if (err) {
         console.error("Error checking contact:", err);
@@ -75,21 +75,21 @@ exports.updateProfile = (req, res) => {
         return res.redirect("/editProfile/" + userId);
       }
 
-      if (contactResults.rows.length > 0) {  // Changed: results.rows
+      if (contactResults.length > 0) {
         req.flash("error", "Contact number is already in use.");
         return res.redirect("/editProfile/" + userId);
       }
 
       // Get existing image
-      const getImageSql = 'SELECT Image FROM "user" WHERE userID = $1';
+      const getImageSql = "SELECT Image FROM user WHERE userID = ?";
       db.query(getImageSql, [userId], (err, imageResults) => {
         if (err) {
-         console.error("Error fetching image:", err);
-         req.flash("error", "An error occurred. Please try again.");
-         return res.redirect("/editProfile/" + userId);
+          console.error("Error fetching image:", err);
+          req.flash("error", "An error occurred. Please try again.");
+          return res.redirect("/editProfile/" + userId);
         }
 
-        let Image = imageResults.rows[0]?.Image || null;  // Changed: results.rows; safer null handling
+        let Image = imageResults[0].Image; // keep old image by default
 
         // If a new image is uploaded, replace it
         if (req.file) {
@@ -104,61 +104,63 @@ exports.updateProfile = (req, res) => {
 
         // Update profile
         const updateSql = `
-          UPDATE "user" 
-          SET userName = $1, email = $2, contactNo = $3, Image = $4
-          WHERE userID = $5
+          UPDATE user 
+          SET userName = ?, email = ?, contactNo = ?, Image = ?
+          WHERE userID = ?
         `;
         const params = [userName, email, contactNo, Image, userId];
 
         db.query(updateSql, params, (err) => {
-         if (err) {
-           console.error("Error updating profile:", err);
-           req.flash("error", "An error occurred. Please try again.");
-           return res.redirect("/editProfile/" + userId);
-         }
+          if (err) {
+            console.error("Error updating profile:", err);
+            req.flash("error", "An error occurred. Please try again.");
+            return res.redirect("/editProfile/" + userId);
+          }
 
-         
-         req.session.user.userName = userName;
-         req.session.user.email = email;
-         req.session.user.contactNo = contactNo;
-         req.session.user.Image = Image;
+          
+          req.session.user.userName = userName;
+          req.session.user.email = email;
+          req.session.user.contactNo = contactNo;
+          req.session.user.Image = Image;
 
-         req.flash("success", "Profile updated successfully!");
-         res.redirect("/viewProfile/" + userId);
+          req.flash("success", "Profile updated successfully!");
+          res.redirect("/viewProfile/" + userId);
         });
       });
     });
   });
 };
 
+
 exports.getProfileAdmin = (req, res) => {
      const userID = req.params.id;
-     const sql = 'SELECT * FROM "user" WHERE userID = $1';
+    const sql = 'SELECT * FROM user WHERE userID = ?';
 
-     db.query(sql, [userID], (err, results) => {
-         if (err) {
-             console.error('Error fetching user profile:', err);
-             return res.status(500).send('Database error');
-         }
+    db.query(sql, [userID], (err, results) => {
+        if (err) {
+            console.error('Error fetching user profile:', err);
+            return res.status(500).send('Database error');
+        }
 
-         if (results.rows.length > 0) {  // Changed: results.rows
-             res.render('editUserRole', { 
-                 user: results.rows[0],  // Changed: results.rows[0]
-                 error: req.flash("error") || [],
-                 success: req.flash("success") || []
-             });
-         } else {
-             res.status(404).send('User not found');
-         }
-     });
+        if (results.length > 0) {
+            res.render('editUserRole', { 
+                user: results[0],
+                error: req.flash("error") || [],
+                success: req.flash("success") || []
+            });
+        } else {
+            res.status(404).send('User not found');
+        }
+    });
 };
 
 exports.updateUserRole = (req, res) => {
+
   const userId = req.params.id;
   const { userType } = req.body;
 
   // First get the user's name
-  const getUserSql = 'SELECT userName FROM "user" WHERE userID = $1';
+  const getUserSql = "SELECT userName FROM user WHERE userID = ?";
   
   db.query(getUserSql, [userId], (error, userResults) => {
     if (error) {
@@ -167,10 +169,10 @@ exports.updateUserRole = (req, res) => {
       return res.redirect('/adminUsers');
     }
 
-    const userName = userResults.rows[0]?.userName || 'User';  // Changed: results.rows
-    const sql = 'UPDATE "user" SET userType = $1 WHERE userID = $2';
+    const userName = userResults[0]?.userName || 'User';
+    const sql = "UPDATE user SET userType = ? WHERE userID = ?";
 
-    db.query(sql, [userType, userId], (error) => {  // Removed unused 'results'
+    db.query(sql, [userType, userId], (error, results) => {
       if (error) {
         console.error("Error updating user role:", error);
         req.flash("error", "Error updating user role");
@@ -190,21 +192,23 @@ exports.updateUserRole = (req, res) => {
       }
     });
   });
+
 };
 
 exports.getViewProfile = (req, res) => {
     const userID = req.session.user.userID;
-    const sql = 'SELECT * FROM "user" WHERE userID = $1';  // Fixed: only 1 param needed
+    const image = req.session.user.Image;
+    const sql = 'SELECT * FROM user WHERE userID = ?';
 
-    db.query(sql, [userID], (err, results) => {  // Fixed: params array
+    db.query(sql, [userID, image], (err, results) => {
         if (err) {
             console.error('Error fetching user profile:', err);
             return res.status(500).send('Database error');
         }
 
-        if (results.rows.length > 0) {  // Changed: results.rows
+        if (results.length > 0) {
             res.render('viewProfile', { 
-                user: results.rows[0],  // Changed: results.rows[0]
+                user: results[0],
                 error: req.flash("error") || [],
                 success: req.flash("success") || []
             });

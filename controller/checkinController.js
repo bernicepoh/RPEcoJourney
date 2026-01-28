@@ -11,22 +11,13 @@ exports.getCheckInBoard = (req, res) => {
     missionController.getWeeklyMissions(userID, (err, userMissions) => {
         if (err) return res.send("DB error");
 
-        const sql = `
-            SELECT 
-                totalXP AS xp, 
-                level, 
-                streak, 
-                checkInDate AS lastCheckinDate, 
-                image AS profilePhoto, 
-                userName 
-            FROM "user" 
-            WHERE userID = $1
-        `;
+        const sql = `SELECT totalXP AS xp, level, streak, checkInDate AS lastCheckinDate, image AS profilePhoto, userName FROM user WHERE userID = ?`;
 
         db.query(sql, [userID], (err, rows) => {
             if (err) return res.send("DB error");
-            let progress = rows.rows ? rows.rows[0] : rows[0];
+            let progress = rows[0];
 
+            // --- DYNAMIC SAFETY CHECK ---
             let xpNeeded = getXPRequirement(progress.level);
 
             if (progress.xp >= xpNeeded && progress.level < 10) {
@@ -38,13 +29,12 @@ exports.getCheckInBoard = (req, res) => {
                     newLevel++;
                 }
 
-                db.query(
-                    `UPDATE "user" SET totalXP = $1, level = $2 WHERE userID = $3`,
-                    [newXP, newLevel, userID],
-                    () => res.redirect("/checkin-board?levelup=true")
-                );
+                db.query("UPDATE user SET totalXP = ?, level = ? WHERE userID = ?", [newXP, newLevel, userID], () => {
+                    return res.redirect("/checkin-board?levelup=true");
+                });
                 return;
             }
+            // -----------------------------
 
             const titles = ["Eco Novice", "Eco Learner", "Eco Seeker", "Eco Explorer", "Eco Ranger", "Eco Guardian", "Eco Warrior", "Eco Champion", "Eco Hero", "Eco Master", "Eco Legend"];
             const badges = ["eco-novice.png", "eco-learner.png", "eco-seeker.png", "eco-explorer.png", "eco-ranger.png", "eco-guardian.png", "eco-warrior.png", "eco-champion.png", "eco-hero.png", "eco-master.png", "eco-legend.png"];
@@ -52,15 +42,16 @@ exports.getCheckInBoard = (req, res) => {
             progress.levelTitle = titles[Math.min(progress.level, 10)];
             progress.levelBadge = badges[Math.min(progress.level, 10)];
 
+            // Pass the dynamic xpNeeded to the frontend
             const currentXPNeeded = getXPRequirement(progress.level);
             const xpPercent = Math.min((progress.xp / currentXPNeeded) * 100, 100);
 
             return res.render("checkinBoard", {
                 progress,
                 xpPercent,
-                xpNeeded: currentXPNeeded,
+                xpNeeded: currentXPNeeded, // Send the dynamic value!
                 missions: userMissions,
-                user: { ...req.session.user, profilePhoto: progress.profilePhoto },
+                user: { ...req.session.user, profilePhoto: progress.profilePhoto }, 
                 streakMissed: req.query.miss === "true",
                 leveledUp: req.query.levelup === "true"
             });
@@ -75,67 +66,47 @@ exports.doCheckIn = (req, res) => {
     const userID = req.session.user.userID;
     const today = new Date().toLocaleDateString('en-CA');
 
-    db.query('BEGIN', (err) => {
+    db.beginTransaction((err) => {
         if (err) return res.send("DB error");
 
-        db.query(
-            `SELECT totalXP AS xp, level, streak, checkInDate 
-             FROM "user" 
-             WHERE userID = $1 
-             FOR UPDATE`,
-            [userID],
-            (err, result) => {
-                const rows = result.rows;
-                if (err || !rows.length) {
-                    return db.query('ROLLBACK', () => res.send("Error"));
-                }
+        db.query(`SELECT totalXP AS xp, level, streak, checkInDate FROM user WHERE userID = ? FOR UPDATE`, [userID], (err, rows) => {
+            if (err || !rows.length) return db.rollback(() => res.send("Error"));
 
-                const p = rows[0];
-                let last = p.checkInDate ? new Date(p.checkInDate).toLocaleDateString('en-CA') : null;
+            const p = rows[0];
+            let last = p.checkInDate ? new Date(p.checkInDate).toLocaleDateString('en-CA') : null;
 
-                if (last === today) {
-                    return db.query('ROLLBACK', () => res.redirect("/checkin-board?already=true"));
-                }
+            if (last === today) return db.rollback(() => res.redirect("/checkin-board?already=true"));
 
-                let finalXP, finalLevel, finalStreak;
-                let didLevelUp = false;
+            let finalXP, finalLevel, finalStreak;
+            let didLevelUp = false;
 
-                if (!p.checkInDate) {
-                    finalXP = p.xp + 3;
-                    finalLevel = p.level;
-                    finalStreak = 1;
-                } else {
-                    let yesterday = new Date();
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    yesterday = yesterday.toLocaleDateString('en-CA');
-
-                    finalStreak = (last === yesterday) ? p.streak + 1 : 1;
-                    finalXP = p.xp + (3 + Math.min(finalStreak, 7));
-                    finalLevel = p.level;
-                }
-
-                while (finalXP >= getXPRequirement(finalLevel) && finalLevel < 10) {
-                    finalXP -= getXPRequirement(finalLevel);
-                    finalLevel++;
-                    didLevelUp = true;
-                }
-
-                db.query(
-                    `UPDATE "user" 
-                     SET totalXP = $1, level = $2, streak = $3, checkInDate = $4 
-                     WHERE userID = $5`,
-                    [finalXP, finalLevel, finalStreak, today, userID],
-                    (err) => {
-                        if (err) {
-                            return db.query('ROLLBACK', () => res.send("DB error"));
-                        }
-                        db.query('COMMIT', () => {
-                            res.redirect(`/checkin-board?miss=${finalStreak === 1 && p.streak > 1}${didLevelUp ? '&levelup=true' : ''}`);
-                        });
-                    }
-                );
+            if (!p.checkInDate) {
+                finalXP = p.xp + 3;
+                finalLevel = p.level;
+                finalStreak = 1;
+            } else {
+                let yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                yesterday = yesterday.toLocaleDateString('en-CA');
+                finalStreak = (last === yesterday) ? p.streak + 1 : 1;
+                finalXP = p.xp + (3 + Math.min(finalStreak, 7));
+                finalLevel = p.level;
             }
-        );
+
+            // DYNAMIC LEVEL UP CHECK
+            while (finalXP >= getXPRequirement(finalLevel) && finalLevel < 10) {
+                finalXP -= getXPRequirement(finalLevel);
+                finalLevel++;
+                didLevelUp = true; 
+            }
+
+            db.query(`UPDATE user SET totalXP=?, level=?, streak=?, checkInDate=? WHERE userID=?`, [finalXP, finalLevel, finalStreak, today, userID], (err) => {
+                if (err) return db.rollback(() => res.send("DB error"));
+                db.commit(() => {
+                    res.redirect(`/checkin-board?miss=${finalStreak === 1 && p.streak > 1}${didLevelUp ? '&levelup=true' : ''}`);
+                });
+            });
+        });
     });
 };
 
@@ -147,14 +118,9 @@ exports.updatePhoto = (req, res) => {
     if (!req.file) return res.redirect("/profile?error=no-file");
 
     const newPhotoPath = "/uploads/" + req.file.filename;
-
-    db.query(
-        `UPDATE "user" SET image = $1 WHERE userID = $2`,
-        [newPhotoPath, userID],
-        (err) => {
-            if (err) return res.redirect("/profile?error=db");
-            req.session.user.image = newPhotoPath;
-            return res.redirect("/profile?success=updated");
-        }
-    );
+    db.query("UPDATE user SET image = ? WHERE userID = ?", [newPhotoPath, userID], (err) => {
+        if (err) return res.redirect("/profile?error=db");
+        req.session.user.image = newPhotoPath;
+        return res.redirect("/profile?success=updated");
+    });
 };
