@@ -1,14 +1,16 @@
 const db = require('../db');
 const fs = require('fs');
 const path = require('path');
+const { translateText } = require('../middleware/translator');
 
 // Public — List all categories
-exports.getCategories = (req, res) => {
+exports.getCategories = async (req, res) => {
     const sql = 'SELECT * FROM content_type';
-    const user = req.session.user 
+    const user = req.session.user;
+    const currentLang = req.session.language || req.cookies.language || 'en';
 
     // Fetch data from MySQL
-    db.query(sql, (error, results) => {
+    db.query(sql, async (error, results) => {
         if (error) {
             console.error('Database query error:', error.message);
 
@@ -19,6 +21,26 @@ exports.getCategories = (req, res) => {
                 flashSuccess: req.flash("success"),
                 flashError: req.flash("error")
             });
+        }
+        // Filter out Uncategorized before translation
+        results = results.filter(cat => cat.contentTypeName !== 'Uncategorized');
+        
+        console.log('🔍 Categories before translation:', results.map(c => c.contentTypeName));
+        console.log('🌐 Current language:', currentLang);
+        
+        // Translate category names and descriptions if not English
+        if (currentLang !== 'en' && results.length > 0) {
+            console.log('🔄 Starting translation to:', currentLang);
+            for (let category of results) {
+                const origName = category.contentTypeName;
+                
+                category.contentTypeName = await translateText(category.contentTypeName, currentLang);
+                if (category.contentTypeDescription) {
+                    category.contentTypeDescription = await translateText(category.contentTypeDescription, currentLang);
+                }
+                
+                console.log(`✅ Translated: ${origName} → ${category.contentTypeName}`);
+            }
         }
 
         // ALWAYS PASS FLASH HERE!!

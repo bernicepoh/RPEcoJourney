@@ -4,6 +4,7 @@
     <title>Quiz Results</title>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/translations.js"></script>
 
     <style>
         body {
@@ -219,19 +220,19 @@
             <button id="playPauseBtn">▶️ Play</button>
 
             <div class="speed-control">
-                <label>Speed:</label>
+                <label id="speedLabel">Speed:</label>
                 <input type="range" id="speedSlider" min="0.7" max="1.5" step="0.1" value="1">
                 <span id="speedValue">1.0x</span>
             </div>
 
             <div class="nav-arrows">
-                <button class="arrow-btn" onclick="prevReview()">← Prev</button>
-                <button class="arrow-btn" onclick="nextReview()">Next →</button>
+                <button class="arrow-btn" id="prevBtn" onclick="prevReview()">← Prev</button>
+                <button class="arrow-btn" id="nextBtn" onclick="nextReview()">Next →</button>
             </div>
         </div>
 
         <div class="ai-box">
-            <div class="ai-title">🤖 AI Feedback & Eco Tips</div>
+            <div class="ai-title" id="aiTitle">🤖 AI Feedback & Eco Tips</div>
             <div id="aiFeedback">Loading AI insights...</div>
         </div>
 
@@ -268,19 +269,19 @@ function loadReviewCard() {
         "review-card " + (isCorrect ? "correct-card" : "wrong-card");
 
     document.getElementById("reviewStatus").innerHTML =
-        isCorrect ? "✔ Correct!" : "❌ Incorrect";
+        isCorrect ? t('correct') : t('incorrect');
 
     document.getElementById("reviewQuestion").innerHTML =
         `<b>Q${index+1}:</b> ${q.question}`;
 
     document.getElementById("reviewYourAnswer").innerHTML =
-        `Your Answer: <b>${q.options[review.userAnswers[index]] ?? "Not answered"}</b>`;
+        t('yourAnswer') + ` <b>${q.options[review.userAnswers[index]] ?? t('notAnswered')}</b>`;
 
     document.getElementById("reviewCorrectAnswer").innerHTML =
-        `Correct Answer: <b>${q.options[q.answerIndex]}</b>`;
+        t('correctAnswer') + ` <b>${q.options[q.answerIndex]}</b>`;
 
     document.getElementById("reviewExplanation").innerHTML =
-        `<b>💡 Explanation:</b><br>${aiExplanations[index]}`;
+        `<b>${t('explanation')}</b><br>${aiExplanations[index]}`;
 
     resetSpeech();
 }
@@ -425,6 +426,43 @@ async function showWordMeaning(word) {
         confirmButtonText: "OK"
     });
 }
+
+// Translate page content on load
+document.addEventListener('DOMContentLoaded', () => {
+    const quizCompletedTitle = document.getElementById('quizCompletedTitle');
+    const totalPointsText = document.getElementById('totalPointsText');
+    const totalXpLabel = document.getElementById('totalXpLabel');
+    const baseLabel = document.getElementById('baseLabel');
+    const streakLabel = document.getElementById('streakLabel');
+    const perfectLabel = document.getElementById('perfectLabel');
+    const completedOnLabel = document.getElementById('completedOnLabel');
+    const userLabel = document.getElementById('userLabel');
+    const difficultyLabel = document.getElementById('difficultyLabel');
+    const backToQuizBtn = document.getElementById('backToQuizBtn');
+    const speedLabel = document.getElementById('speedLabel');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const aiTitle = document.getElementById('aiTitle');
+    const aiFeedback = document.getElementById('aiFeedback');
+
+    if (quizCompletedTitle) quizCompletedTitle.textContent = t('quizCompleted');
+    if (totalPointsText) totalPointsText.textContent = t('totalPointsScored');
+    if (totalXpLabel) totalXpLabel.textContent = t('totalXP');
+    if (baseLabel) baseLabel.textContent = t('base');
+    if (streakLabel) streakLabel.textContent = t('streakBonus');
+    if (perfectLabel) perfectLabel.textContent = t('perfectBonus');
+    if (completedOnLabel) completedOnLabel.innerHTML = t('completedOn');
+    if (userLabel) userLabel.innerHTML = t('userLabel');
+    if (difficultyLabel) difficultyLabel.innerHTML = t('difficultyLevel');
+    if (backToQuizBtn) backToQuizBtn.textContent = t('backToQuizSelection');
+    if (speedLabel) speedLabel.textContent = t('speed');
+    if (prevBtn) prevBtn.innerHTML = t('prev');
+    if (nextBtn) nextBtn.innerHTML = t('next');
+    if (aiTitle) aiTitle.textContent = t('aiFeedback');
+    if (aiFeedback && aiFeedback.textContent === 'Loading AI insights...') {
+        aiFeedback.textContent = t('loadingInsights');
+    }
+});
 </script>
 
 </body>

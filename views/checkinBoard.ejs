@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eco Progress Dashboard</title>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/translations.js"></script>
 
     <style>
         body {
@@ -166,9 +167,9 @@
 
     <div class="container">
 
-        <h1><%= user.userName %>'s Sustainability Journey 🌿</h1>
+        <h1><%= user.userName %>'s <span id="sustainabilityJourney">Sustainability Journey</span> 🌿</h1>
 
-        <p style="text-align:center; color:#4fa34b; margin-top:10px;">
+        <p id="keepGrowingMsg" style="text-align:center; color:#4fa34b; margin-top:10px;">
             Keep growing your green habits! 🌱
         </p>
 
@@ -203,7 +204,7 @@
 
                     <p><strong><%= progress.xp %> / <%= xpNeeded %> XP</strong></p>
 
-                    <p style="font-size:0.85rem; color:#6bbf59; margin-top:8px;">
+                    <p id="viewXPHistory" style="font-size:0.85rem; color:#6bbf59; margin-top:8px;">
                         👉 View XP History
                     </p>
                 </div>
@@ -211,8 +212,8 @@
 
             <!-- STREAK CARD -->
             <div class="card">
-                <h2>🔥 Streak: <%= progress.streak %> days</h2>
-                <p>Last Check-In: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
+                <h2>🔥 <span id="streakLabel">Streak</span>: <%= progress.streak %> <span id="daysLabel">days</span></h2>
+                <p><span id="lastCheckinLabel">Last Check-In</span>: <%= progress.lastCheckinDate ? progress.lastCheckinDate : "—" %></p>
 
                 <%
                     let last = progress.lastCheckinDate
@@ -222,10 +223,10 @@
                 %>
 
                 <% if (last === today) { %>
-                    <button class="disabled-btn" disabled>✔ Already checked in today</button>
+                    <button class="disabled-btn" id="alreadyCheckedBtn" disabled>✔ Already checked in today</button>
                 <% } else { %>
                     <form action="/do-checkin" method="POST">
-                        <button class="check-btn">Check In Today</button>
+                        <button class="check-btn" id="checkInTodayBtn">Check In Today</button>
                     </form>
                 <% } %>
             </div>
@@ -234,17 +235,17 @@
 
         <div class="action-grid">
             <a href="/quiz" style="text-decoration:none;">
-                <div class="action-card">📘 Take a Quiz</div>
+                <div class="action-card" id="takeQuizBtn">📘 Take a Quiz</div>
             </a>
 
             <a href="/categories" style="text-decoration:none;">
-                <div class="action-card">🌱 Explore Content</div>
+                <div class="action-card" id="exploreContentBtn">🌱 Explore Content</div>
             </a>
         </div>
 
         <div class="missions">
-            <h2 style="margin-bottom: 5px;">📋 Your Random Missions</h2>
-            <p style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
+            <h2 id="yourMissionsTitle" style="margin-bottom: 5px;">📋 Your Random Missions</h2>
+            <p id="missionsSubtitle" style="font-size: 0.85rem; color: #666; margin-bottom: 20px;">
                 These change every week! Complete them for bonus XP.
             </p>
 
@@ -257,18 +258,18 @@
                         </span>
 
                         <% if (m.xpEarned > 0) { %>
-                            <span class="status-badge" style="background:#e8f6e8; color:#28a745;">
+                            <span class="status-badge mission-completed" style="background:#e8f6e8; color:#28a745;">
                                 ✅ Completed
                             </span>
                         <% } else { %>
-                            <span class="status-badge" style="background:#f0f0f0; color:#888;">
+                            <span class="status-badge mission-inprogress" style="background:#f0f0f0; color:#888;">
                                 ⚪ In Progress
                             </span>
                         <% } %>
                     </div>
                 <% }) %>
             <% } else { %>
-                <p style="text-align: center; color: #888;">
+                <p id="noMissionsMsg" style="text-align: center; color: #888;">
                     No missions assigned yet. Try refreshing!
                 </p>
             <% } %>
@@ -280,21 +281,59 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
+            // Translate page elements
+            const sustainabilityJourney = document.getElementById('sustainabilityJourney');
+            const keepGrowingMsg = document.getElementById('keepGrowingMsg');
+            const viewXPHistory = document.getElementById('viewXPHistory');
+            const streakLabel = document.getElementById('streakLabel');
+            const daysLabel = document.getElementById('daysLabel');
+            const lastCheckinLabel = document.getElementById('lastCheckinLabel');
+            const alreadyCheckedBtn = document.getElementById('alreadyCheckedBtn');
+            const checkInTodayBtn = document.getElementById('checkInTodayBtn');
+            const takeQuizBtn = document.getElementById('takeQuizBtn');
+            const exploreContentBtn = document.getElementById('exploreContentBtn');
+            const yourMissionsTitle = document.getElementById('yourMissionsTitle');
+            const missionsSubtitle = document.getElementById('missionsSubtitle');
+            const noMissionsMsg = document.getElementById('noMissionsMsg');
+            
+            if (sustainabilityJourney) sustainabilityJourney.textContent = t('sustainabilityJourney');
+            if (keepGrowingMsg) keepGrowingMsg.textContent = t('keepGrowing');
+            if (viewXPHistory) viewXPHistory.textContent = t('viewXPHistory');
+            if (streakLabel) streakLabel.textContent = t('streakLabel');
+            if (daysLabel) daysLabel.textContent = t('daysLabel');
+            if (lastCheckinLabel) lastCheckinLabel.textContent = t('lastCheckin');
+            if (alreadyCheckedBtn) alreadyCheckedBtn.textContent = t('alreadyCheckedIn');
+            if (checkInTodayBtn) checkInTodayBtn.textContent = t('checkInToday');
+            if (takeQuizBtn) takeQuizBtn.textContent = t('takeQuiz');
+            if (exploreContentBtn) exploreContentBtn.textContent = t('exploreContent');
+            if (yourMissionsTitle) yourMissionsTitle.textContent = t('yourMissions');
+            if (missionsSubtitle) missionsSubtitle.textContent = t('missionsSubtitle');
+            if (noMissionsMsg) noMissionsMsg.textContent = t('noMissions');
+            
+            // Translate mission status badges
+            document.querySelectorAll('.mission-completed').forEach(el => {
+                el.textContent = t('missionCompleted');
+            });
+            document.querySelectorAll('.mission-inprogress').forEach(el => {
+                el.textContent = t('missionInProgress');
+            });
+            
+
             const urlParams = new URLSearchParams(window.location.search);
 
             if (urlParams.get("already") === "true") {
                 Swal.fire({
                     icon: 'info',
-                    title: 'Already Checked In!',
-                    text: 'You can only check in once per day. Come back tomorrow! 🌿',
+                    title: t('alreadyCheckedInTitle'),
+                    text: t('alreadyCheckedInText'),
                     confirmButtonColor: '#6bbf59'
                 });
             }
 
             <% if (streakMissed) { %>
                 Swal.fire({
-                    title: "Awww… You lost your streak 😢",
-                    text: "Start fresh today and come back tomorrow to rebuild it! 🌱",
+                    title: t('streakLostTitle'),
+                    text: t('streakLostText'),
                     icon: "warning",
                     confirmButtonColor: "#28a745"
                 });
@@ -302,10 +341,10 @@
 
             <% if (leveledUp) { %>
                 Swal.fire({
-                    title: 'LEVEL UP! 🎉',
-                    html: 'Congratulations <b><%= user.userName %></b>!<br>You have reached <b>Level <%= progress.level %></b>: <br>✨ <i><%= progress.levelTitle %></i> ✨',
+                    title: t('levelUpTitle'),
+                    html: t('levelUpText').replace('{userName}', '<b><%= user.userName %></b>').replace('{level}', '<b><%= progress.level %></b>').replace('{levelTitle}', '<i><%= progress.levelTitle %></i>'),
                     icon: 'success',
-                    confirmButtonText: 'Keep going!',
+                    confirmButtonText: t('keepGoing'),
                     confirmButtonColor: '#6bbf59',
                     backdrop: `rgba(0,123,0,0.2) url("/uploads/confetti.gif") center/cover`
                 });

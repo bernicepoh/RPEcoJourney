@@ -1,12 +1,18 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
+const { translateText, translateMultiple } = require('../middleware/translator');
 
 // ============================
 // GET CONTENT BY content_type
 // ============================
-exports.getContentByContentType = (req, res) => {
+exports.getContentByContentType = async (req, res) => {
     const contentTypeID = req.params.id;
     const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
+    const currentLang = req.session.language || req.cookies.language || 'en';
+    
+    console.log('🌐 Current Language:', currentLang);
+    console.log('📝 Session Language:', req.session.language);
+    console.log('🍪 Cookie Language:', req.cookies.language);
 
     const sql = `SELECT 
                     c.contentID, 
@@ -48,12 +54,25 @@ exports.getContentByContentType = (req, res) => {
                 WHERE cat.contentTypeID = ?
             `;
 
-    db.query(sql, [userID, contentTypeID], (error, results) => {
+    db.query(sql, [userID, contentTypeID], async (error, results) => {
         if (error) {
             console.log("🔥 SQL ERROR:", error);
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
+            // Translate content if not English
+            if (currentLang !== 'en') {
+                console.log('🔄 Translating content to:', currentLang);
+                for (let item of results) {
+                    console.log('📖 Original contentTypeDescription:', item.contentTypeDescription);
+                    item.contentTitle = await translateText(item.contentTitle, currentLang);
+                    item.contentDescription = await translateText(item.contentDescription, currentLang);
+                    item.contentTypeName = await translateText(item.contentTypeName, currentLang);
+                    item.contentTypeDescription = await translateText(item.contentTypeDescription, currentLang);
+                    console.log('✅ Translated contentTypeDescription:', item.contentTypeDescription);
+                }
+            }
+
             // Use data from first item for content type info
             const contentTypeInfo = {
                 contentTypeName: results[0].contentTypeName,
@@ -68,13 +87,23 @@ exports.getContentByContentType = (req, res) => {
         } else {
             // No content, but still try to get content_type info for banner, etc.
             const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
-            db.query(catSql, [contentTypeID], (catError, catRows) => {
+            db.query(catSql, [contentTypeID], async (catError, catRows) => {
                 if (catError || catRows.length === 0) {
                     return res.status(404).send('content type not found');
                 }
+
+                let contentTypeName = catRows[0].contentTypeName;
+                let contentTypeDescription = catRows[0].contentTypeDescription;
+
+                // Translate if not English
+                if (currentLang !== 'en') {
+                    contentTypeName = await translateText(contentTypeName, currentLang);
+                    contentTypeDescription = await translateText(contentTypeDescription, currentLang);
+                }
+
                 const contentTypeInfo = {
-                    contentTypeName: catRows[0].contentTypeName,
-                    contentTypeDescription: catRows[0].contentTypeDescription,
+                    contentTypeName,
+                    contentTypeDescription,
                     contentTypeImage: catRows[0].contentTypeImage,
                 };
                 res.render('viewContentByContentType', {

@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Select Quiz Difficulty</title>
+    <script src="/translations.js"></script>
     <style>
         
         body {
@@ -91,22 +92,22 @@
 
 <div id="loadingOverlay">
     <div class="spinner"></div>
-    <p><b>Generating your Sustainability Quiz...</b></p>
+    <p id="loadingText"><b>Generating your Sustainability Quiz...</b></p>
 </div>
 
 <div class="page-wrapper">
     <div class="container">
-        <h2>Ready for a Challenge?</h2>
-        <p>Select your level and let the AI test your knowledge!</p>
+        <h2 id="quizHeading">Ready for a Challenge?</h2>
+        <p id="quizSubtitle">Select your level and let the AI test your knowledge!</p>
 
         <form id="aiForm" action="/ai/start" method="POST">
 
-            <label>Select Difficulty:</label>
-            <select name="difficulty" required>
-                <option value="">-- Choose Difficulty --</option>
-                <option value="1">Easy</option>
-                <option value="2">Medium</option>
-                <option value="3">Hard</option>
+            <label id="difficultyLabel">Select Difficulty:</label>
+            <select name="difficulty" id="difficultySelect" required>
+                <option value="" id="chooseDifficulty">-- Choose Difficulty --</option>
+                <option value="1" id="easyOption">Easy</option>
+                <option value="2" id="mediumOption">Medium</option>
+                <option value="3" id="hardOption">Hard</option>
             </select>
 
             <button id="startBtn" type="submit">Start Quiz</button>
@@ -120,6 +121,29 @@
 
     form.addEventListener("submit", function () {
         overlay.style.display = "flex";
+    });
+
+    // Translate page content on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const loadingText = document.getElementById('loadingText');
+        const quizHeading = document.getElementById('quizHeading');
+        const quizSubtitle = document.getElementById('quizSubtitle');
+        const difficultyLabel = document.getElementById('difficultyLabel');
+        const chooseDifficulty = document.getElementById('chooseDifficulty');
+        const easyOption = document.getElementById('easyOption');
+        const mediumOption = document.getElementById('mediumOption');
+        const hardOption = document.getElementById('hardOption');
+        const startBtn = document.getElementById('startBtn');
+
+        if (loadingText) loadingText.innerHTML = '<b>' + t('generating') + '</b>';
+        if (quizHeading) quizHeading.textContent = t('quizHeading');
+        if (quizSubtitle) quizSubtitle.textContent = t('quizSubtitle');
+        if (difficultyLabel) difficultyLabel.textContent = t('selectDifficulty');
+        if (chooseDifficulty) chooseDifficulty.textContent = t('chooseDifficulty');
+        if (easyOption) easyOption.textContent = t('easy');
+        if (mediumOption) mediumOption.textContent = t('medium');
+        if (hardOption) hardOption.textContent = t('hard');
+        if (startBtn) startBtn.textContent = t('startQuiz');
     });
 </script>
 

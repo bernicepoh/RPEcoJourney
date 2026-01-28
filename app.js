@@ -15,6 +15,8 @@ const multer = require('multer');
 const session = require('express-session');
 const flash = require('connect-flash');  
 const path = require('path');
+const cookieParser = require('cookie-parser');
+const { translationMiddleware, translateText } = require('./middleware/translator');
 const app = express();
 
 // multer
@@ -65,6 +67,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// Cookie parser for language persistence
+app.use(cookieParser());
+
 // Session
 app.use(session({
   secret: 'secret-key', 
@@ -89,9 +94,31 @@ app.use((req, res, next) => {
     next();
 });
 
+// Make current language available in all views
+app.use((req, res, next) => {
+    res.locals.currentLanguage = req.session.language || req.cookies.language || 'en';
+    next();
+});
+
+// Translation middleware
+app.use(translationMiddleware);
+
 
 
 app.use('/uploads', express.static('uploads'));
+
+// Language switching route
+app.post('/change-language', (req, res) => {
+    const { language } = req.body;
+    const validLanguages = ['en', 'ms', 'ta', 'zh'];
+    
+    if (validLanguages.includes(language)) {
+        req.session.language = language;
+        res.cookie('language', language, { maxAge: 365 * 24 * 60 * 60 * 1000 }); // 1 year
+    }
+    
+    res.redirect(req.get('referer') || '/');
+});
 
 //Profile Routes 
 app.get('/editProfile/:id', profileController.getProfile);
