@@ -722,7 +722,7 @@ exports.manageContent = (req, res) => {
 // Get all content requests
 exports.getContentRequests = (req, res) => {
     const sql = `
-        SELECT * FROM content_request
+        SELECT * FROM content
         WHERE status = 'pending'
         ORDER BY createdAt DESC
     `;
@@ -747,7 +747,7 @@ exports.approveContentRequest = (req, res) => {
 
     // Get the request details
     const getRequestSql = `
-        SELECT * FROM content_request WHERE contentRequestID = $1
+        SELECT * FROM contentt WHERE contentID = $1
     `;
 
     db.query(getRequestSql, [contentRequestID], (error, results) => {
@@ -766,7 +766,7 @@ exports.approveContentRequest = (req, res) => {
 
         // Update the request status to approved
         const updateSql = `
-            UPDATE content_request 
+            UPDATE content
             SET status = 'approved', approvedAt = NOW() 
             WHERE contentRequestID = $1
         `;
@@ -810,7 +810,7 @@ exports.rejectContentRequest = (req, res) => {
 
     // Get the request details
     const getRequestSql = `
-        SELECT * FROM content_request WHERE contentRequestID = $1
+        SELECT * FROM content WHERE contentRequestID = $1
     `;
 
     db.query(getRequestSql, [contentRequestID], (error, results) => {
@@ -829,7 +829,7 @@ exports.rejectContentRequest = (req, res) => {
 
         // Update the request status to rejected
         const updateSql = `
-            UPDATE content_request 
+            UPDATE content 
             SET status = 'rejected', rejectedAt = NOW() 
             WHERE contentRequestID = $1
         `;
