@@ -331,10 +331,10 @@
               </button>
             <% } %>
 
-            <!-- 🚫 BLOCK (ADMIN / MANAGER ON OTHER USERS ONLY) -->
+            <!-- 🚫 BLOCK (ADMIN ON OTHER USERS ONLY) -->
             <% if (
               sessionUser.userID !== c.userID &&
-              ['Admin','Manager'].includes(sessionUser.userType)
+              ['Admin'].includes(sessionUser.userType)
             ) { %>
               <form
                 action="/comment/block/<%= c.commentID %>"
