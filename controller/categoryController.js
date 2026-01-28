@@ -131,8 +131,8 @@ exports.editCategoryForm = (req, res) => {
 
 // Admin/Manager — Update existing category
 exports.updateCategory = (req, res) => {
-    const contentID = req.params.id;
-    const { contentName, contentDescription } = req.body;
+    const contentTypeID = req.params.id;
+    const { contentTypeName, contentTypeDescription } = req.body;
     let contentTypeImage = req.body.currentImage;
 
     if (req.file) {
@@ -141,11 +141,11 @@ exports.updateCategory = (req, res) => {
 
     const sql = `
         UPDATE content_type 
-        SET contentName = $1, contentDescription = $2, contentTypeImage = $3 
-        WHERE contentID = $4
+        SET contentTypeName = $1, contentTypeDescription = $2, contentTypeImage = $3 
+        WHERE contentTypeID = $4
     `;
     
-    db.query(sql, [contentName, contentDescription, contentTypeImage, contentID], (error) => {
+    db.query(sql, [contentTypeName, contentTypeDescription, contentTypeImage, contentTypeID], (error) => {
         if (error) {
             console.error('Error updating category:', error.message);
             return res.status(500).send('Error updating category');
