@@ -413,14 +413,14 @@ exports.getContent = (req, res) => {
 };
 
 // ======================================
-// BLOCKED COMMENT - ADMIN/MANAGER ONLY
+// BLOCKED COMMENT - ADMIN ONLY
 // ======================================
 exports.blockComment = (req, res) => {
   const commentID = req.params.id;
   const contentID = req.body.contentID;
   const userType = req.session.user.userType;
 
-  if (!['Admin', 'Manager'].includes(userType)) {
+  if (!['Admin'].includes(userType)) {
     return res.status(403).send('Forbidden');
   }
 
@@ -436,14 +436,14 @@ exports.blockComment = (req, res) => {
 };
 
 // ======================================
-// UNBLOCK COMMENT - ADMIN / MANAGER ONLY
+// UNBLOCK COMMENT - ADMIN ONLY
 // ======================================
 exports.unblockComment = (req, res) => {
   const commentID = req.params.commentID;
   const userType = req.session.user.userType;
   const contentID = req.body.contentID; // 👈 IMPORTANT
 
-  if (!['Admin', 'Manager'].includes(userType)) {
+  if (!['Admin'].includes(userType)) {
     return res.status(403).send('Forbidden');
   }
 
