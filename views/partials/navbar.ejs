@@ -1,5 +1,5 @@
 <nav>
-  <a href="/adminDashboard">
+  <a href="/adminDashboard" style="flex-shrink: 0;">
     <h1>RPEcoJourney</h1>
   </a>
 
@@ -33,16 +33,21 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.2rem 2.5rem;
+    padding: 1rem 3rem;
     font-family: 'Georgia', serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
 
   nav h1 {
     margin: 0;
-    font-size: 2.3rem;
+    font-size: 1.8rem;
     font-weight: 900;
     letter-spacing: 1px;
     color: #003b2b;
+    white-space: nowrap;
   }
 
   nav a {
@@ -52,18 +57,20 @@
   nav ul {
     list-style: none;
     display: flex;
-    gap: 45px;
+    gap: 2rem;
     margin: 0;
     padding: 0;
+    align-items: center;
   }
 
   nav ul li a {
     color: #0b2535;
     text-decoration: none;
     font-style: italic;
-    font-size: 1.4rem;
+    font-size: 1rem;
     font-weight: 700;
     transition: all 0.25s ease-in-out;
+    white-space: nowrap;
   }
 
   nav ul li a:hover {
@@ -72,8 +79,8 @@
   }
 
   .profile-pic {
-    width: 75px;
-    height: 75px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #0b2535;

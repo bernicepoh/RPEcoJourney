@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Approval Requests</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .requests-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .requests-container h1 {
+            color: #003b2b;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .request-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .request-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .request-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+            color: #003b2b;
+        }
+
+        .request-description {
+            color: #666;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .request-meta {
+            font-size: 12px;
+            color: #999;
+            margin: 10px 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .btn-approve {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-reject {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .content-file {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .content-file:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .requests-container {
+                margin: 20px;
+                padding: 15px;
+            }
+
+            .request-header {
+                flex-direction: column;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar') %>
+    
+    <div class="requests-container">
+        <h1>📋 Content Approval Requests</h1>
+        
+        <% if (requests && requests.length > 0) { %>
+            <% requests.forEach(request => { %>
+                <div class="request-card">
+                    <div class="request-header">
+                        <div style="flex: 1;">
+                            <h3 class="request-title"><%= request.contentTitle %></h3>
+                        </div>
+                        <span style="background-color: #ffc107; color: #000; padding: 8px 16px; border-radius: 20px; font-weight: bold; font-size: 12px; white-space: nowrap;">
+                            ⏳ PENDING
+                        </span>
+                    </div>
+                    
+                    <p class="request-description"><%= request.contentDescription %></p>
+                    
+                    <% if (request.contentFile) { %>
+                        <div class="request-meta">
+                            📁 File: <a href="/uploads/<%= request.contentFile %>" class="content-file" target="_blank"><%= request.contentFile %></a>
+                        </div>
+                    <% } %>
+                    
+                    <div class="request-meta">
+                        📅 Submitted: <%= new Date(request.createdAt).toLocaleString() %>
+                    </div>
+                    
+                    <div class="actions">
+                        <form method="POST" action="/admin/content-requests/approve/<%= request.contentRequestID %>" style="display: inline; width: 100%;">
+                            <button type="submit" class="btn btn-approve" style="width: 100%;">✓ Approve</button>
+                        </form>
+                        <form method="POST" action="/admin/content-requests/reject/<%= request.contentRequestID %>" style="display: inline; width: 100%;">
+                            <button type="submit" class="btn btn-reject" style="width: 100%;" onclick="return confirm('Are you sure you want to reject this content?');">✕ Reject</button>
+                        </form>
+                    </div>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="empty-message">
+                <h2>✓ No Pending Requests</h2>
+                <p>All content requests have been reviewed.</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>
