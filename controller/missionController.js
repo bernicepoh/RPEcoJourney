@@ -116,3 +116,22 @@ exports.completeMission = (userId, missionTitle) => {
     });
 };
 
+
+// ==========================================
+// 3. SOCIAL MISSION TRIGGERS
+// ==========================================
+
+// Call this from your "Like Post" Route
+exports.triggerLikeMission = (userId) => {
+    this.completeMission(userId, 'Like a Sustainability Post');
+};
+
+// Call this from your "Comment" Route
+exports.triggerCommentMission = (userId) => {
+    this.completeMission(userId, 'Comment on any Content');
+};
+
+// Call this from your "Share" Route
+exports.triggerShareMission = (userId) => {
+    this.completeMission(userId, 'Share 1 Sustainability Post');
+};

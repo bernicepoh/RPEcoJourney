@@ -1,6 +1,6 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
-
+const missionController = require("./missionController");
 
 // ============================
 // GET CONTENT BY content_type
