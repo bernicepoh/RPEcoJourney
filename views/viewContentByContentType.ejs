@@ -215,26 +215,26 @@
       <div class="file-box">
         <% const ext = contentList[i].contentFile.split('.').pop().toLowerCase(); %>
         <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
-          <img src="/uploads/<%= contentList[i].contentFile %>">
+          <img src="<%= contentList[i].contentFile %>">
         <% } else if (ext === 'pdf') { %>
-          <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
+          <a href="<%= contentList[i].contentFile %>" target="_blank">
+            <img class="file-icon" src="<%= contentList[i].contentFile %>" style="width: 150px;">
           </a>
         <% } else if (['doc','docx'].includes(ext)) { %>
-          <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/word.png" style="width: 150px;">
+          <a href="<%= contentList[i].contentFile %>" target="_blank">
+            <img class="file-icon" src="<%= contentList[i].contentFile %>" style="width: 150px;">
           </a>
         <% } else if (['ppt','pptx'].includes(ext)) { %>
-          <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/ppt.png" style="width: 150px;">
+          <a href="<%= contentList[i].contentFile %>" target="_blank">
+            <img class="file-icon" src="<%= contentList[i].contentFile %>" style="width: 150px;">
           </a>
         <% } else if (['mp4','mov','avi'].includes(ext)) { %>
           <video autoplay loop muted playsinline>
-            <source src="/uploads/<%= contentList[i].contentFile %>">
+            <source src="<%= contentList[i].contentFile %>">
           </video>
         <% } else { %>
-          <a href="/uploads/<%= contentList[i].contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
+          <a href="<%= contentList[i].contentFile %>" target="_blank">
+            <img class="file-icon" src="<%= contentList[i].contentFile %>" style="width: 150px;">
           </a>
         <% } %>
       </div>

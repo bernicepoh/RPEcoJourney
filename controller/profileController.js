@@ -99,7 +99,7 @@ exports.updateProfile = (req, res) => {
             const oldPath = "./public/uploads/" + Image;
             if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
           }
-          Image = req.file.filename; // use new image
+          Image = req.file.path; // use new image
         }
 
         // Update profile

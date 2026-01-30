@@ -240,9 +240,9 @@
                 <div class="profile-image-section">
                     <label>Current Profile Image</label>
                     <% if (user.image) { %>
-                        <img src="/uploads/<%= user.image %>" alt="Profile image" class="img-preview">
+                        <img src="<%= user.image %>" alt="Profile image" class="img-preview">
                     <% } else { %>
-                        <img src="/uploads/defaultUser.png" alt="Default image" class="img-preview">
+                        <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769803913/defaultUser_jzwft8.png" alt="Default image" class="img-preview">
                     <% } %>
 
                     <label for="image">Upload New Profile Image (optional)</label>

@@ -209,8 +209,7 @@ exports.toggleLike = (req, res) => {
 // ============================
 // POSTING OF COMMENT 
 // ============================
-const OpenAI = require("openai");
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 
 exports.postComment = async (req, res) => {
     const contentID = req.params.id;
@@ -225,6 +224,8 @@ exports.postComment = async (req, res) => {
     }
 
     try {
+        const OpenAI = require("openai");   
+        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         // ============================
         // GPT-4o-mini Moderation
         // ============================
@@ -413,14 +414,14 @@ exports.getContent = (req, res) => {
 };
 
 // ======================================
-// BLOCKED COMMENT - ADMIN ONLY
+// BLOCKED COMMENT - ADMIN/MANAGER ONLY
 // ======================================
 exports.blockComment = (req, res) => {
   const commentID = req.params.id;
   const contentID = req.body.contentID;
   const userType = req.session.user.userType;
 
-  if (!['Admin'].includes(userType)) {
+  if (!['Admin', 'Manager'].includes(userType)) {
     return res.status(403).send('Forbidden');
   }
 
@@ -436,14 +437,14 @@ exports.blockComment = (req, res) => {
 };
 
 // ======================================
-// UNBLOCK COMMENT - ADMIN ONLY
+// UNBLOCK COMMENT - ADMIN / MANAGER ONLY
 // ======================================
 exports.unblockComment = (req, res) => {
   const commentID = req.params.commentID;
   const userType = req.session.user.userType;
   const contentID = req.body.contentID; // 👈 IMPORTANT
 
-  if (!['Admin'].includes(userType)) {
+  if (!['Admin', 'Manager'].includes(userType)) {
     return res.status(403).send('Forbidden');
   }
 
@@ -554,15 +555,9 @@ exports.addContentForm = (req, res) => {
 
 exports.addContent = (req, res) => {
     const { contentTypeID, contentTitle, contentDescription } = req.body;
-    let contentFile;
-    if (req.file) {
-        contentFile = req.file.filename; // Save only the filename
-    } else {
-        contentFile = null;
-    }
-
+    
+    const contentFile = req.file ? req.file.path : null;
     const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
-   
 
     // Insert the new content into the database
     db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
@@ -630,7 +625,7 @@ exports.editContent = (req, res) => {
     const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile = req.body.currentFile; //retrieve current image filename
     if (req.file) { //if new image is uploaded
-        contentFile = req.file.filename; // set image to be new image filename
+        contentFile = req.file.path ; // set image to be new image filename
     }
     console.log("new file: " + contentFile);
     const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
@@ -699,6 +694,6 @@ exports.manageContent = (req, res) => {
             flashError: req.flash("error") });
         } else {
             res.status(404).send('No content');
-        }
+        }   
     });
 };

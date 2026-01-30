@@ -146,10 +146,10 @@
 
         <!-- Profile Image -->
         <% if (user.image) { %>
-            <img src="/uploads/<%= user.image %>" alt="Profile Picture">
+            <img src="<%= user.image %>" alt="Profile Picture">
             
         <% } else { %>
-            <img src="/uploads/defaultUser.png" alt="Profile Picture">
+            <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769803913/defaultUser_jzwft8.png" alt="Profile Picture">
         <% } %>
 
       
