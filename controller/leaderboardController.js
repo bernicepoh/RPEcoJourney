@@ -4,6 +4,7 @@ exports.getLeaderboard = (req, res) => {
     const sql = `
         SELECT userName, totalXP, level, streak, image
         FROM user
+        WHERE userType = 'User'
         ORDER BY totalXP DESC
         LIMIT 20
     `;
