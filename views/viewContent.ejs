@@ -26,7 +26,7 @@
       font-style: italic;
       text-align: center;
       margin: 0 auto;
-      max-width: 600px;
+      max-width: 900px;
       margin-bottom: 40px;
     }
     .main-image {
@@ -59,8 +59,8 @@
     }
  
     .file-box {
-      width: 350px;              /* all previews share SAME width */
-      height: 260px;             /* adjust height if needed */
+      width: 800px;              /* all previews share SAME width */
+      height: 600px;             /* adjust height if needed */
       display: flex;
       align-items: center;       /* center vertically */
       justify-content: center;   /* center horizontally */
@@ -154,31 +154,46 @@
       </h3>
  
       <div class="file-box">
-        <% const ext = content.contentFile.split('.').pop().toLowerCase(); %>
-        <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
-          <img src="/uploads/<%= content.contentFile %>">
-        <% } else if (ext === 'pdf') { %>
-          <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
-          </a>
-        <% } else if (['doc','docx'].includes(ext)) { %>
-          <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/word.png" style="width: 150px;">
-          </a>
-        <% } else if (['ppt','pptx'].includes(ext)) { %>
-          <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/ppt.png" style="width: 150px;">
-          </a>
-        <% } else if (['mp4','mov','avi'].includes(ext)) { %>
-          <video autoplay loop muted playsinline>
-            <source src="/uploads/<%= content.contentFile %>">
-          </video>
-        <% } else { %>
-          <a href="/uploads/<%= content.contentFile %>" target="_blank">
-            <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
-          </a>
-        <% } %>
-      </div>  
+  <% const ext = content.contentFile.split('.').pop().toLowerCase(); %>
+
+  <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
+    <!-- Images -->
+    <img src="<%= content.contentFile %>">
+
+  <% } else if (ext === 'pdf') { %>
+    <!-- PDFs: embed with iframe -->
+    <iframe
+      src="<%= content.contentFile %>"
+      style="width:100%; height:100%; border:none;"
+    ></iframe>
+
+  <% } else if (['doc','docx'].includes(ext)) { %>
+    <!-- Word docs: use Office Web Viewer -->
+    <iframe src="<%= content.contentFile %>" 
+        style="width:100%; height:100%; border:none;"></iframe>
+
+
+  <% } else if (['ppt','pptx'].includes(ext)) { %>
+    <!-- PowerPoint: use Office Web Viewer -->
+    <iframe
+      src="<%= content.contentFile %>"
+      style="width:100%; height:100%; border:none;"
+    ></iframe>
+
+  <% } else if (['mp4','mov','avi'].includes(ext)) { %>
+    <!-- Videos (you already had this) -->
+    <video autoplay loop muted playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;">
+      <source src="<%= content.contentFile %>">
+    </video>
+
+  <% } else { %>
+    <!-- Fallback: still allow download -->
+    <a href="<%= content.contentFile %>" target="_blank">
+      <img class="file-icon" src="<%= content.contentFile %>" style="width: 150px;">
+    </a>
+  <% } %>
+</div>
+ 
  
       <hr class="desc-divider">
  
@@ -223,7 +238,7 @@
 
   <div class="comment-box blocked" style="display:flex; gap:12px;">
     <img
-      src="/uploads/<%= c.userImage || 'default-avatar.png' %>"
+      src="<%= c.userImage || 'default-avatar.png' %>"
       class="comment-avatar"
     >
 
@@ -268,7 +283,7 @@
 
       <!-- ✅ AVATAR IS BACK -->
       <img
-        src="/uploads/<%= c.userImage || 'default-avatar.png' %>"
+        src="<%= c.userImage || 'default-avatar.png' %>"
         class="comment-avatar"
       >
 
@@ -316,10 +331,10 @@
               </button>
             <% } %>
 
-            <!-- 🚫 BLOCK (ADMIN / MANAGER ON OTHER USERS ONLY) -->
+            <!-- 🚫 BLOCK (ADMIN ON OTHER USERS ONLY) -->
             <% if (
               sessionUser.userID !== c.userID &&
-              ['Admin','Manager'].includes(sessionUser.userType)
+              ['Admin'].includes(sessionUser.userType)
             ) { %>
               <form
                 action="/comment/block/<%= c.commentID %>"

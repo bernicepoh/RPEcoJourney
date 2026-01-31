@@ -51,19 +51,19 @@ exports.getContentByContentType = (req, res) => {
                 WHERE e.contentID = c.contentID
             ) AS totalShares
 
-        FROM content c
-        JOIN content_type cat
-            ON c.contentTypeID = cat.contentTypeID
-        WHERE cat.contentTypeID = $2
-    `;
+                FROM content c
+                JOIN content_type cat
+                ON c.contentTypeID = cat.contentTypeID
+                WHERE cat.contentTypeID = ?
+            `;
 
     db.query(sql, [userID, contentTypeID], (error, results) => {
         if (error) {
             console.log("🔥 SQL ERROR:", error);
             return res.status(500).send('Error retrieving content');
         }
-        if (results.rows.length > 0) {
-            // Use data from first item for content type info
+        if (results.length > 0) {
+            // Use data from first item for category info
             const contentTypeInfo = {
                 contentTypeName: results.rows[0].contentTypeName,
                 contentTypeDescription: results.rows[0].contentTypeDescription,
@@ -82,9 +82,9 @@ exports.getContentByContentType = (req, res) => {
                     return res.status(404).send('content type not found');
                 }
                 const contentTypeInfo = {
-                    contentTypeName: catRows.rows[0].contentTypeName,
-                    contentTypeDescription: catRows.rows[0].contentTypeDescription,
-                    contentTypeImage: catRows.rows[0].contentTypeImage,
+                    contentTypeName: catRows[0].contentTypeName,
+                    contentTypeDescription: catRows[0].contentTypeDescription,
+                    contentTypeImage: catRows[0].contentTypeImage
                 };
                 res.render('viewContentByContentType', {
                     contentType: contentTypeInfo,
@@ -95,7 +95,6 @@ exports.getContentByContentType = (req, res) => {
         }
     });
 };
-
 
 // ============================
 // TOGGLE LIKE (Correct Version)
@@ -203,6 +202,9 @@ exports.toggleLike = (req, res) => {
 // ============================
 // POSTING OF COMMENT 
 // ============================
+const OpenAI = require("openai");
+const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
 exports.postComment = async (req, res) => {
     const contentID = req.params.id;
     const userID = req.session.user.userID;
@@ -565,11 +567,9 @@ exports.addContent = (req, res) => {
         contentFile = null;
     }
 
-    const sql = `
-        INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile)
-        VALUES ($1, $2, $3, $4)
-    `;
+    const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
    
+
     // Insert the new content into the database
     db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
         if (error) {
@@ -639,7 +639,7 @@ exports.editContent = (req, res) => {
     const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile = req.body.currentFile; //retrieve current image filename
     if (req.file) { //if new image is uploaded
-        contentFile = req.file.filename; // set image to be new image filename
+        contentFile = req.file.path ; // set image to be new image filename
     }
     console.log("new file: " + contentFile);
     const sql = `
@@ -715,154 +715,65 @@ exports.manageContent = (req, res) => {
             });
         } else {
             res.status(404).send('No content');
-        }
+        }   
     });
 };
 
-// Get all content requests
-exports.getContentRequests = (req, res) => {
-    const sql = `
-        SELECT * FROM content
-        WHERE status = 'pending'
-        ORDER BY createdAt DESC
-    `;
 
-    db.query(sql, (error, results) => {
-        if (error) {
-            console.error('Error fetching content requests:', error);
-            return res.status(500).send('Error retrieving content requests');
-        }
+// exports.postForgotPassword = (req, res) => {
+//     const { email } = req.body;
 
-        res.render('contentRequests', { 
-            requests: results.rows || [],
-            flashSuccess: req.flash('success'),
-            flashError: req.flash('error')
-        });
-    });
-};
+//     if (!email) {
+//         req.flash('error', 'Please enter your email.');
+//         return res.redirect('/forgot-password');
+//     }
 
-// Approve a content request
-exports.approveContentRequest = (req, res) => {
-    const contentRequestID = req.params.id;
+//     db.query('SELECT * FROM users WHERE email = ?', [email], (err, results) => {
+//         if (err) throw err;
 
-    // Get the request details
-    const getRequestSql = `
-        SELECT * FROM contentt WHERE contentID = $1
-    `;
+//         if (results.length === 0) {
+//             req.flash('error', 'Email not found.');
+//             return res.redirect('/forgot-password');
+//         }
 
-    db.query(getRequestSql, [contentRequestID], (error, results) => {
-        if (error) {
-            console.error('Error fetching content request:', error);
-            req.flash('error', 'Error approving content request');
-            return res.redirect('/content-requests');
-        }
+//         const tempPassword = generateTempPassword(8);
 
-        if (results.rows.length === 0) {
-            req.flash('error', 'Content request not found');
-            return res.redirect('/content-requests');
-        }
+        
+//         db.query('UPDATE users SET password = SHA(?) WHERE email = ?', [tempPassword, email], (err) => {
+//             if (err) throw err;
 
-        const request = results.rows[0];
+//             // Configure mail
+//             const transporter = nodemailer.createTransport({
+//                 service: 'gmail',
+//                 auth: {
+//                     user: 'fyptesting13@gmail.com',
+//                     pass: 'fjbjltcfxfofwiho' 
+//                 }
+//             });
 
-        // Update the request status to approved
-        const updateSql = `
-            UPDATE content
-            SET status = 'approved', approvedAt = NOW() 
-            WHERE contentRequestID = $1
-        `;
+//             const mailOptions = {
+//                 from: 'fyptesting13@gmail.com',
+//                 to: email,
+//                 subject: 'Temporary Password',
+//                 text: Your temporary password is: ${tempPassword}\nPlease use this to log in and reset your password.
+//             };
 
-        db.query(updateSql, [contentRequestID], (updateError) => {
-            if (updateError) {
-                console.error('Error updating content request:', updateError);
-                req.flash('error', 'Error approving content request');
-                return res.redirect('/content-requests');
-            }
+//             // Send email
+//             transporter.sendMail(mailOptions, (error) => {
+//                 if (error) {
+//                     console.log(error);
+//                     req.flash('error', 'Error sending email.');
+//                     return res.redirect('/forgot-password');
+//                 }
 
-            // Send approval email to the user
-            const transporter = nodemailer.createTransport({
-                service: 'Gmail',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASSWORD
-                }
-            });
-
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: request.userEmail,
-                subject: 'Content Approved - RPEcoJourney',
-                html: `<p>Your content "${request.contentTitle}" has been approved!</p>`
-            };
-
-            transporter.sendMail(mailOptions, (err) => {
-                if (err) console.log('Email sending error:', err);
-            });
-
-            req.flash('success', 'Content request approved successfully!');
-            res.redirect('/content-requests');
-        });
-    });
-};
-
-// Reject a content request
-exports.rejectContentRequest = (req, res) => {
-    const contentRequestID = req.params.id;
-
-    // Get the request details
-    const getRequestSql = `
-        SELECT * FROM content WHERE contentRequestID = $1
-    `;
-
-    db.query(getRequestSql, [contentRequestID], (error, results) => {
-        if (error) {
-            console.error('Error fetching content request:', error);
-            req.flash('error', 'Error rejecting content request');
-            return res.redirect('/content-requests');
-        }
-
-        if (results.rows.length === 0) {
-            req.flash('error', 'Content request not found');
-            return res.redirect('/content-requests');
-        }
-
-        const request = results.rows[0];
-
-        // Update the request status to rejected
-        const updateSql = `
-            UPDATE content 
-            SET status = 'rejected', rejectedAt = NOW() 
-            WHERE contentRequestID = $1
-        `;
-
-        db.query(updateSql, [contentRequestID], (updateError) => {
-            if (updateError) {
-                console.error('Error updating content request:', updateError);
-                req.flash('error', 'Error rejecting content request');
-                return res.redirect('/content-requests');
-            }
-
-            // Send rejection email to the user
-            const transporter = nodemailer.createTransport({
-                service: 'Gmail',
-                auth: {
-                    user: process.env.EMAIL_USER,
-                    pass: process.env.EMAIL_PASSWORD
-                }
-            });
-
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: request.userEmail,
-                subject: 'Content Rejected - RPEcoJourney',
-                html: `<p>Your content "${request.contentTitle}" has been rejected.</p>`
-            };
-
-            transporter.sendMail(mailOptions, (err) => {
-                if (err) console.log('Email sending error:', err);
-            });
-
-            req.flash('success', 'Content request rejected successfully!');
-            res.redirect('/content-requests');
-        });
-    });
-};
+//                 // Render page showing step 2
+//                 res.render('forgot_password', { 
+//                     step: 2,
+//                     email: email,
+//                     errors: [],
+//                     success: ['Temporary password sent to your email.']
+//                 });
+//             });
+//         });
+//     });
+// };

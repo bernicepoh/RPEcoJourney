@@ -118,6 +118,202 @@
       .hero h1 { font-size: 2.5rem; }
       .hero p { font-size: 1rem; }
     }
+
+    /* Chatbot Styles */
+    .chatbot-button {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6bbf59, #4fa13d);
+      color: white;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .chatbot-container {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      width: 380px;
+      height: 550px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+      display: none;
+      flex-direction: column;
+      z-index: 999;
+      overflow: hidden;
+    }
+
+    .chatbot-container.active {
+      display: flex;
+    }
+
+    .chatbot-header {
+      background: linear-gradient(135deg, #6bbf59, #4fa13d);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chatbot-header h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .chatbot-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chatbot-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      background: #f5f5f5;
+    }
+
+    .chat-message {
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .chat-message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-bubble {
+      max-width: 75%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      word-wrap: break-word;
+    }
+
+    .chat-message.bot .message-bubble {
+      background: white;
+      color: #333;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-message.user .message-bubble {
+      background: #6bbf59;
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chatbot-input-area {
+      padding: 15px;
+      background: white;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      gap: 10px;
+    }
+
+    .chatbot-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      outline: none;
+      font-size: 14px;
+    }
+
+    .chatbot-input:focus {
+      border-color: #6bbf59;
+    }
+
+    .chatbot-send {
+      padding: 12px 20px;
+      background: #6bbf59;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .chatbot-send:hover {
+      background: #4fa13d;
+    }
+
+    .chatbot-send:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 10px;
+    }
+
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #999;
+      border-radius: 50%;
+      animation: typing 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes typing {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .chatbot-container {
+        width: calc(100vw - 20px);
+        right: 10px;
+        left: 10px;
+        height: 70vh;
+        bottom: 90px;
+      }
+
+      .chatbot-button {
+        bottom: 20px;
+        right: 20px;
+      }
+    }
   </style>
 </head>
 
@@ -144,19 +340,19 @@ Swal.fire({
 
   <section class="features">
     <div class="feature-card">
-      <img src="/uploads/leaderboard.png" alt="leaderboard">
+      <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769654454/leaderboard_ifa70m.png" alt="leaderboard">
       <h3><a href="/leaderboard" style="color:inherit; text-decoration:none;">🌍 Join the Journey</a></h3>
       <p>Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
     </div>
 
     <div class="feature-card">
       <img src="/uploads/quiz.png" alt="Take Quizzes">
-      <h3><a href="/ai/select" style="color:inherit; text-decoration:none;">🎯 Challenge Yourself</a></h3>
+      <h3><a href="/quiz" style="color:inherit; text-decoration:none;">🎯 Challenge Yourself</a></h3>
       <p>Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
     </div>
 
     <div class="feature-card">
-      <img src="/uploads/dashboard.png" alt="Dashboard">
+      <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769655538/dashboard_vz0x2m.png" alt="Dashboard">
       <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;">🧭 Your Sustainability Dashboard</a></h3>
       <p>Track your personal growth in sustainability</p>
     </div>
@@ -165,6 +361,35 @@ Swal.fire({
   <footer>
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+
+  <!-- Chatbot Widget -->
+  <button class="chatbot-button" id="chatbotButton">
+    💬
+  </button>
+
+  <div class="chatbot-container" id="chatbotContainer">
+    <div class="chatbot-header">
+      <h3>🌿 RPEco Assistant</h3>
+      <button class="chatbot-close" id="chatbotClose">×</button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="chat-message bot">
+        <div class="message-bubble">
+          Hi! I'm your RPEcoJourney assistant. How can I help you today? 🌱
+        </div>
+      </div>
+    </div>
+    <div class="chatbot-input-area">
+      <input 
+        type="text" 
+        class="chatbot-input" 
+        id="chatbotInput" 
+        placeholder="Type your message..."
+        autocomplete="off"
+      >
+      <button class="chatbot-send" id="chatbotSend">Send</button>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -180,6 +405,172 @@ Swal.fire({
   </script>
   <% } %>
 
+  <script>
+    // Chatbot functionality
+    const chatbotButton = document.getElementById('chatbotButton');
+    const chatbotContainer = document.getElementById('chatbotContainer');
+    const chatbotClose = document.getElementById('chatbotClose');
+    const chatbotInput = document.getElementById('chatbotInput');
+    const chatbotSend = document.getElementById('chatbotSend');
+    const chatbotMessages = document.getElementById('chatbotMessages');
+    const WEBHOOK_URL = 'https://n8ngc.codeblazar.org/webhook/99d64e35-fddc-4af9-9aef-ef519d6a0cc6/chat';
+
+    // Generate or retrieve session ID
+    function getSessionId() {
+      let sessionId = sessionStorage.getItem('chatbot_session_id');
+      if (!sessionId) {
+        sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem('chatbot_session_id', sessionId);
+      }
+      return sessionId;
+    }
+
+    // Store conversation history
+    let conversationHistory = [];
+
+    // Toggle chatbot
+    chatbotButton.addEventListener('click', () => {
+      chatbotContainer.classList.toggle('active');
+      if (chatbotContainer.classList.contains('active')) {
+        chatbotInput.focus();
+      }
+    });
+
+    chatbotClose.addEventListener('click', () => {
+      chatbotContainer.classList.remove('active');
+    });
+
+    // Add message to chat
+    function addMessage(text, isUser = false) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'message-bubble';
+      bubbleDiv.textContent = text;
+      
+      messageDiv.appendChild(bubbleDiv);
+      chatbotMessages.appendChild(messageDiv);
+      
+      // Scroll to bottom
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    // Show typing indicator
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'chat-message bot';
+      typingDiv.id = 'typing-indicator';
+      
+      const bubbleDiv = document.createElement('div');
+      bubbleDiv.className = 'message-bubble';
+      
+      const typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing-indicator';
+      typingIndicator.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+      
+      bubbleDiv.appendChild(typingIndicator);
+      typingDiv.appendChild(bubbleDiv);
+      chatbotMessages.appendChild(typingDiv);
+      
+      chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
+
+    // Remove typing indicator
+    function removeTypingIndicator() {
+      const typingIndicator = document.getElementById('typing-indicator');
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    // Send message to webhook
+    async function sendMessage() {
+      const message = chatbotInput.value.trim();
+      if (!message) return;
+
+      // Add user message
+      addMessage(message, true);
+      chatbotInput.value = '';
+      chatbotSend.disabled = true;
+
+      // Add to conversation history
+      conversationHistory.push({
+        role: 'user',
+        content: message,
+        timestamp: new Date().toISOString()
+      });
+
+      // Show typing indicator
+      showTypingIndicator();
+
+      try {
+        const payload = {
+          chatInput: message,
+          sessionId: getSessionId(),
+          action: 'sendMessage'
+        };
+
+        const response = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload)
+        });
+
+        removeTypingIndicator();
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        // Handle the response - adjust based on your webhook response structure
+        let botResponse = '';
+        if (data.output) {
+          botResponse = data.output;
+        } else if (data.response) {
+          botResponse = data.response;
+        } else if (data.message) {
+          botResponse = data.message;
+        } else if (data.text) {
+          botResponse = data.text;
+        } else if (typeof data === 'string') {
+          botResponse = data;
+        } else {
+          botResponse = 'I received your message! How else can I help you?';
+        }
+
+        // Add to conversation history
+        conversationHistory.push({
+          role: 'assistant',
+          content: botResponse,
+          timestamp: new Date().toISOString()
+        });
+
+        addMessage(botResponse, false);
+      } catch (error) {
+        removeTypingIndicator();
+        console.error('Chatbot Error:', error);
+        addMessage('Sorry, I encountered an error. Please try again later.', false);
+      } finally {
+        chatbotSend.disabled = false;
+        chatbotInput.focus();
+      }
+    }
+
+    // Send message on button click
+    chatbotSend.addEventListener('click', sendMessage);
+
+    // Send message on Enter key
+    chatbotInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+  </script>
+
 </body>
 </html>
-

@@ -12,6 +12,173 @@
             background-repeat: no-repeat;
             background-size: cover; 
             background-position: center;
+            font-family: 'Georgia', serif;
+        }
+
+        .search-card {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 35px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-card h4 {
+            color: #1b5e20;
+            font-weight: 800;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .search-card .form-label {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .search-card .form-control {
+            border: 2px solid #81c784;
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .search-card .form-control:focus {
+            border-color: #1b5e20;
+            box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.15);
+            outline: none;
+            background-color: white;
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(27, 94, 32, 0.4);
+            background: linear-gradient(135deg, #1b5e20 0%, #134818 100%);
+        }
+
+        .btn-clear {
+            background: #757575;
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 30px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .btn-clear:hover {
+            background: #616161;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 15px 20px;
+            font-size: 15px;
+        }
+
+        .alert-danger {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left: 5px solid #c62828;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 5px solid #2e7d32;
+            font-weight: 600;
+        }
+
+        .card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .card-title {
+            color: #1b5e20;
+            font-weight: 700;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .card-text {
+            color: #424242;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .card-text strong {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #66bb6a 0%, #43a047 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #43a047 0%, #388e3c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(67, 160, 71, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+        }
+
+        .page-title {
+            color: #1b5e20;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -19,8 +186,60 @@
     <div><%- include ('partials/navbar.ejs') %></div>
 
     <div class="container mt-4">
-        <h2 class="mb-4">All Users</h2>
+        <h2 class="mb-4 page-title">All Users</h2>
 
+        <!-- Search Section -->
+        <div class="search-card">
+            <h4>Search User</h4>
+            <form action="/adminUsers" method="GET">
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label for="email" class="form-label" style="color: #2e7d32; font-weight: 600;">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-control" 
+                            placeholder="Enter user email"
+                            value="<%= typeof searchEmail !== 'undefined' ? searchEmail : '' %>"
+                        >
+                    </div>
+                    <div class="col-md-5 mb-3">
+                        <label for="contactNo" class="form-label" style="color: #2e7d32; font-weight: 600;">Contact Number</label>
+                        <input 
+                            type="text" 
+                            id="contactNo" 
+                            name="contactNo" 
+                            class="form-control" 
+                            placeholder="Enter contact number"
+                            value="<%= typeof searchContactNo !== 'undefined' ? searchContactNo : '' %>"
+                        >
+                    </div>
+                    <div class="col-md-2 mb-3 d-flex flex-column justify-content-end gap-2">
+                        <button type="submit" class="btn-search">Search</button>
+                        <a href="/adminUsers" class="btn-clear text-center">Clear</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Error Message -->
+        <% if (typeof error !== 'undefined' && error) { %>
+            <div class="alert alert-danger">
+                <%= error %>
+            </div>
+        <% } %>
+
+        <!-- Success Message -->
+        <% if (typeof success !== 'undefined' && success && success.length > 0) { %>
+            <div class="alert alert-success">
+                <% success.forEach(function(msg) { %>
+                    <%= msg %>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <!-- User Cards -->
         <div class="row">
             <% if (users && users.length > 0) { %>
 
@@ -38,7 +257,6 @@
                                     <a href="/editUserRole/<%= u.userID %>" class="btn btn-primary btn-sm">Edit</a>
                                     <a href="/deleteUser/<%= u.userID %>" class="btn btn-danger btn-sm">Delete</a>
                                 </div>
-
                             </div>
                         </div>
                     </div>

@@ -23,49 +23,143 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 70px);
+            min-height: calc(100vh - 70px);
+            padding: 20px;
         }
 
         .card-profile {
-            width: 450px;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            background-color: #7d9cad;
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         h2 {
             text-align: center;
-            margin-bottom: 25px;
-            color: #333;
+            margin-bottom: 30px;
+            color: #1b5e20;
+            font-size: 32px;
+            font-weight: 800;
         }
 
         label {
-            font-weight: bold;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 15px;
         }
 
         .form-control {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            padding: 12px 18px;
+            border: 2px solid #81c784;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus {
+            border-color: #1b5e20;
+            box-shadow: 0 0 0 3px rgba(27, 94, 32, 0.1);
+            outline: none;
+            background-color: #fff;
         }
 
         .btn-update {
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(27, 94, 32, 0.4);
+            background: linear-gradient(135deg, #1b5e20 0%, #134818 100%);
         }
 
         .alert {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: none;
+        }
+
+        .alert-danger {
+            background-color: #ffebee;
+            color: #c62828;
+            border-left: 4px solid #c62828;
+        }
+
+        .alert-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border-left: 4px solid #2e7d32;
         }
 
         .img-preview {
             display: block;
-            margin: 0 auto 15px;
-            width: 120px;
-            height: 120px;
+            margin: 0 auto 20px;
+            width: 130px;
+            height: 130px;
             object-fit: cover;
             border-radius: 50%;
-            border: 2px solid #ccc;
+            border: 4px solid #2e7d32;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .img-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .confirm-status {
+            margin-left: 8px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .extra-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .extra-links a {
+            color: #1b5e20;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .extra-links a:hover {
+            color: #2e7d32;
+            text-decoration: underline;
+        }
+
+        .profile-image-section {
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            text-align: center;
         }
     </style>
 </head>
@@ -123,28 +217,75 @@
                     required
                 >
 
-                <label>Current Profile Image:</label>
-                <% if (user.image) { %>
-                    <img src="/uploads/<%= user.image %>" alt="Profile image" class="img-preview">
-                <% } else { %>
-                    <img src="/uploads/defaultUser.png" alt="Default image" class="img-preview">
-                <% } %>
-
-                <label for="image">Upload New Profile Image (optional):</label>
+                <label for="password">New Password (optional)</label>
                 <input 
-                    type="file" 
-                    id="image" 
-                    name="image" 
-                    class="form-control"
-                    accept="image/*"
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    class="form-control" 
+                    placeholder="Leave blank to keep current password"
                 >
 
-                <button type="submit" class="btn btn-primary btn-update">Update Profile</button>
+                <label for="confirmPassword">Confirm New Password
+                    <span id="confirmIcon" class="confirm-status"></span>
+                </label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    class="form-control" 
+                    placeholder="Confirm new password"
+                >
 
-                <p><a href="/forgot-password">Reset Password</a></p>
+                <div class="profile-image-section">
+                    <label>Current Profile Image</label>
+                    <% if (user.image) { %>
+                        <img src="<%= user.image %>" alt="Profile image" class="img-preview">
+                    <% } else { %>
+                        <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769803913/defaultUser_jzwft8.png" alt="Default image" class="img-preview">
+                    <% } %>
+
+                    <label for="image">Upload New Profile Image (optional)</label>
+                    <input 
+                        type="file" 
+                        id="image" 
+                        name="image" 
+                        class="form-control"
+                        accept="image/*"
+                    >
+                </div>
+
+                <button type="submit" class="btn-update">Update Profile</button>
+
+                <div class="extra-links">
+                    <a href="/forgot-password">🔒 Reset Password</a>
+                </div>
             </form>
         </div>
     </div>
+
+    <script>
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const confirmIcon = document.getElementById('confirmIcon');
+
+        function checkMatch() {
+            if (confirmPassword.value === '' && password.value === '') {
+                confirmIcon.innerHTML = '';
+            } else if (confirmPassword.value === '') {
+                confirmIcon.innerHTML = '';
+            } else if (confirmPassword.value === password.value) {
+                confirmIcon.innerHTML = '✓';
+                confirmIcon.style.color = 'green';
+            } else {
+                confirmIcon.innerHTML = '✗';
+                confirmIcon.style.color = 'red';
+            }
+        }
+
+        confirmPassword.addEventListener('input', checkMatch);
+        password.addEventListener('input', checkMatch);
+    </script>
+
 </body>
 </html>
-

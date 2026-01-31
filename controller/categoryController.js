@@ -88,13 +88,8 @@ exports.addCategoryForm = (req, res) => {
 // Admin/Manager — Add new category (IF NEED, but in this case no since only fixed to 3 categories)
 exports.addCategory = (req, res) => {
     const { contentTypeName, contentTypeDescription } = req.body;
-    let contentTypeImage;
-    if (req.file) {
-        contentTypeImage = req.file.filename; 
-    } else {
-        contentTypeImage = null;
-    }
 
+    const contentTypeImage = req.file ? req.file.path : null;
     const sql = 'INSERT INTO content_type (contentTypeName, contentTypeDescription, contentTypeImage) VALUES (?, ?, ?)';
     
     // Insert the new category into the database
@@ -145,7 +140,7 @@ exports.updateCategory = (req, res) => {
     const { contentName, contentDescription } = req.body;
     let contentTypeImage = req.body.currentImage; //retrieve current image filename
     if (req.file) { //if new image is uploaded
-        contentTypeImage = req.file.filename; // set image to be new image filename
+        contentTypeImage = req.file.path; // set image to be new image filename
     }
     console.log("new file: " + contentTypeImage);
     
