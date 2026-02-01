@@ -115,4 +115,3 @@ exports.completeMission = (userId, missionTitle) => {
         }
     });
 };
-

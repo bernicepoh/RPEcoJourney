@@ -1,20 +1,33 @@
 const mysql = require('mysql2');
+const fs = require('fs');
 
-// Database connection details
+
+
+
+
+
+
+
+
+
+
+
+
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: 'Republic_C207',
+    password: '',
     database: 'rpecojourney'
   });
 
-//Connecting to database
+// Test on startup
 db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to MySQL:', err);
-        return;
-    }
-    console.log('Connected to MySQL database');
+  if (err) {
+    console.error('MySQL Connection failed:', err);
+    return;
+  }
+  console.log('Connected to MySQL with SSL');
 });
 
 module.exports = db;

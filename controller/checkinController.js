@@ -117,25 +117,10 @@ exports.updatePhoto = (req, res) => {
     const userID = req.session.user.userID;
     if (!req.file) return res.redirect("/profile?error=no-file");
 
-    const newPhotoPath = "/uploads/" + req.file.filename;
+    const newPhotoPath = req.file.path;
     db.query("UPDATE user SET image = ? WHERE userID = ?", [newPhotoPath, userID], (err) => {
         if (err) return res.redirect("/profile?error=db");
         req.session.user.image = newPhotoPath;
         return res.redirect("/profile?success=updated");
     });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

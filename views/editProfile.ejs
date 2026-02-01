@@ -12,7 +12,7 @@
             font-family: 'Georgia', serif;
             margin: 0;
             padding: 0;
-            background-image: url("/uploads/background.png");
+            background-color: #e8dfcf;
             background-repeat: no-repeat;
             background-size: cover; 
             background-position: center;
@@ -33,7 +33,7 @@
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            background: white;
             backdrop-filter: blur(10px);
             animation: fadeIn 0.6s ease-in-out;
         }
@@ -240,9 +240,9 @@
                 <div class="profile-image-section">
                     <label>Current Profile Image</label>
                     <% if (user.image) { %>
-                        <img src="/uploads/<%= user.image %>" alt="Profile image" class="img-preview">
+                        <img src="<%= user.image %>" alt="Profile image" class="img-preview">
                     <% } else { %>
-                        <img src="/uploads/defaultUser.png" alt="Default image" class="img-preview">
+                        <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769803913/defaultUser_jzwft8.png" alt="Default image" class="img-preview">
                     <% } %>
 
                     <label for="image">Upload New Profile Image (optional)</label>
@@ -289,4 +289,3 @@
 
 </body>
 </html>
-
