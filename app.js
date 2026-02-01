@@ -17,17 +17,7 @@ const flash = require('connect-flash');
 const path = require('path');
 const app = express();
 
-// multer
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'public/uploads'); // Directory to save uploaded files
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
-    }
-});
-
-const upload = multer({ storage: storage });
+const { parser } = require('./cloudinary');
 
 // Import middleware
 const { checkAuthenticated, checkAdmin, allowAdminOrManager, checkUser, checkWriter, allowAdminManagerWriter, allowAdminOrWriter } = require('./middleware/auth');
@@ -96,7 +86,7 @@ app.use('/uploads', express.static('uploads'));
 
 //Profile Routes 
 app.get('/editProfile/:id', profileController.getProfile);
-app.post('/editProfile/:id',upload.single('image'), profileController.updateProfile);
+app.post('/editProfile/:id',parser.single('image'), profileController.updateProfile);
 app.get('/editUserRole/:id', checkAdmin, profileController.getProfileAdmin);
 app.post('/editUserRole/:id', checkAdmin, profileController.updateUserRole);
 app.get('/viewProfile/:id', profileController.getViewProfile);
@@ -106,7 +96,7 @@ app.get('/viewProfile/:id', profileController.getViewProfile);
 app.get('/', userController.getLogin);
 app.post('/', userController.login);
 app.get('/register',userController.getRegister);
-app.post('/register',upload.single('image'),validateRegistration,userController.register);
+app.post('/register',parser.single('image'),validateRegistration,userController.register);
 app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
@@ -129,9 +119,9 @@ function simpleHash(str) {
 app.get('/contentType/:id/content', contentController.getContentByContentType);
 app.get('/content/:id', contentController.getContent);
 app.get('/addContent', allowAdminOrWriter, contentController.addContentForm);
-app.post('/addContent', allowAdminOrWriter, upload.single('contentFile'), contentController.addContent);
+app.post('/addContent', allowAdminOrWriter, parser.single('contentFile'), contentController.addContent);
 app.get('/editContent/:id', checkAdmin, contentController.editContentForm);
-app.post('/editContent/:id', checkAdmin, upload.single('contentFile'), contentController.editContent);
+app.post('/editContent/:id', checkAdmin, parser.single('contentFile'), contentController.editContent);
 app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
 app.get('/manageContent', allowAdminOrWriter, contentController.manageContent);
 
@@ -165,10 +155,10 @@ app.get('/manageCategories', allowAdminOrManager, categoryController.getManageCa
 
 // ADD Category
 app.get('/addCategory', allowAdminOrManager, categoryController.addCategoryForm);
-app.post('/addCategory', allowAdminOrManager, upload.single('categoryImage'), categoryController.addCategory);
+app.post('/addCategory', allowAdminOrManager, parser.single('categoryImage'), categoryController.addCategory);
 // EDIT Category
 app.get('/editCategory/:id', allowAdminOrManager, categoryController.editCategoryForm);
-app.post('/editCategory/:id', allowAdminOrManager, upload.single('categoryImage'), categoryController.updateCategory);
+app.post('/editCategory/:id', allowAdminOrManager, parser.single('categoryImage'), categoryController.updateCategory);
 // DELETE Category
 app.post('/deleteCategory/:id', allowAdminOrManager, categoryController.deleteCategory);
 
@@ -210,4 +200,3 @@ app.get('/401', (req, res) => {
 // Start express server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
-

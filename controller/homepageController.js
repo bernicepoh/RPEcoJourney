@@ -7,11 +7,8 @@ exports.getHomePage = (req, res) => {
    });
 };
 
-
-
 exports.getAboutPage = (req, res) => {
 
   const user = req.session.user 
   res.render('aboutus', {user}); 
 };
-

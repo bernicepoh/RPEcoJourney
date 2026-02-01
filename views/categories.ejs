@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <style>
     body {
-      background-image: url("/uploads/background.png");
+      background-color: #e8dfcf;
       background-repeat: no-repeat;
       background-size: cover;
       background-position: center;
@@ -161,7 +161,7 @@
           whether it's our daily operations, practices, initiatives, or even what we teach in our classes.
         </p>
       </div>
-      <img src="/uploads/rp-green.png" alt="RP Green Plan">
+      <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769655007/rp-green_tt37zs.png" alt="RP Green Plan">
     </section>
 
     <hr>
@@ -186,23 +186,12 @@
             </p>
           </div>
 
-          <%
-            let imgSrc;
-            if (!c.contentTypeImage) {
-              imgSrc = "/uploads/default.png";
-            } else if (["Environmental.png", "Social.png", "Governance.png"].includes(c.contentTypeImage)) {
-              imgSrc = "/uploads/" + c.contentTypeImage;
-            } else {
-              imgSrc = "/uploads/" + c.contentTypeImage;
-            }
-          %>
-
           <img
-            src="<%= imgSrc %>"
+            src="<%= c.contentTypeImage %>"
             alt="<%= c.contentTypeName %>"
             class="category-img"
             loading="lazy"
-            onerror="this.src='/uploads/default.png'"
+            onerror="this.src='<%= c.contentFile %>'"
           >
 
         </div>
