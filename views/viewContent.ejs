@@ -11,7 +11,7 @@
       font-size: larger;
       margin: 0;
       padding: 0;
-      background-image: url("/uploads/background.png");
+      background-color: #e8dfcf;
       background-repeat: no-repeat;
       background-size: cover; 
       background-position: center;
@@ -80,15 +80,87 @@
       object-fit: contain;
     }
     
-    .comment-area {
-          width: 100%;
-          min-height: 55px;
-          border-radius: 7px;
-          padding: 8px 12px;
-          background: #a7c3bb42;
-          border: 1px solid #bddad1;
-          resize: vertical;
+    /* Comment form container */
+    .comment-form {
+      max-width: 750px;
+      margin: 30px auto 0;
+      padding: 20px;
+      background: #f9fff7; /* 👈 solid light eco white */
+      border-radius: 14px;
+      border: 1px solid #cfe6cf;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     }
+
+    /* Label */
+    .comment-form .form-label {
+      font-size: 0.95em;
+      font-weight: 600;
+      color: #2f5d3a;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* Textarea */
+    .comment-area {
+      width: 100%;
+      min-height: 150px;   /* 👈 bigger */
+      padding: 14px 16px;
+      font-size: 0.95em;
+      line-height: 1.6;
+      border-radius: 10px;
+      border: 1.5px solid #a7cfa9;
+      background-color: #ffffff;
+      color: #2c2c2c;
+      resize: vertical;
+    }
+
+   .comment-area::placeholder {
+      color: #7fa58c;
+      font-style: italic;
+    }
+
+    /* Focus state */
+    .comment-area:focus {
+      border-color: #5fa777;
+      box-shadow: 0 0 0 3px rgba(95, 167, 119, 0.2);
+    }
+
+    /* ==============================
+        Edit Comment Box Enhancements
+      ============================== */
+      .edit-textarea-container {
+        margin-bottom: 15px;
+      }
+
+      .form-control {
+        width: 100%;
+        min-height: 150px; /* 👈 bigger typing area */
+        padding: 14px 16px;
+        font-size: 1em;
+        line-height: 1.6;
+        border: 1.5px solid #b7d4b1;
+        border-radius: 10px;
+        background-color: #ffffff;  /* Solid background */
+        resize: vertical;
+        transition: border-color 0.3s, box-shadow 0.3s ease;
+      }
+
+      /* Focus effect */
+      .form-control:focus {
+        border-color: #5fa777;
+        box-shadow: 0 0 0 3px rgba(95, 167, 119, 0.2);
+      }
+
+      /* Button padding and spacing */
+      button {
+        padding: 8px 16px;
+        margin-top: 12px;
+        font-size: 1em;
+      }
+
+      button:focus {
+        outline: none;
+      }
 
     .comment-box {
       background: #edf3ef;
@@ -126,7 +198,13 @@
       border-radius: 50%;
       object-fit: cover;
     }
- 
+
+    .comment-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px;
+    }
+
     .publish-btn {
       background: #2a7e4e;
       color: white;
@@ -306,9 +384,14 @@
           style="display:none;"
         >
           <input type="hidden" name="contentID" value="<%= content.contentID %>">
-          <textarea name="updatedText" class="form-control" rows="2"><%= c.commentText %></textarea>
-          <button class="btn btn-success btn-sm mt-2">Save</button>
-          <button type="button" class="btn btn-secondary btn-sm mt-2"
+          
+          <!-- Enhanced Edit Textarea -->
+          <div class="edit-textarea-container">
+            <textarea name="updatedText" class="form-control" rows="4"><%= c.commentText %></textarea>
+          </div>
+
+          <button class="btn btn-success btn-sm mt-3">Save</button>
+          <button type="button" class="btn btn-secondary btn-sm mt-3"
                   onclick="cancelEdit('<%= c.commentID %>')">Cancel</button>
         </form>
 
@@ -360,13 +443,23 @@
   <% } %>
 
 <% }) %>
- 
-<!-- Add new comment box -->
-<form action="/content/<%= content.contentID %>/comment" method="POST" style="max-width:750px; margin:25px auto 0;">
-  <label class="form-label" style="font-size:0.98em;">Write a comment:</label>
-  <textarea name="commentText" class="comment-area" required></textarea>
-  <button type="submit" class="publish-btn">Publish</button>
-</form>
+
+  <!-- Add new comment box -->
+  <form action="/content/<%= content.contentID %>/comment" 
+        method="POST" 
+        class="comment-form">
+
+    <label class="form-label">Write a comment:</label>
+
+    <textarea 
+      name="commentText" 
+      class="comment-area" 
+      placeholder="Share your thoughts respectfully 🌱"
+      required></textarea>
+
+    <div class="comment-actions">
+      <button type="submit" class="publish-btn">Publish</button>
+    </div>
  
       <a href="/contentType/<%= content.contentTypeID %>/content" class="back-link">← Back to <%= content.contentTypeName %></a>
  

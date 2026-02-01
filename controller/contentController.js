@@ -1,6 +1,7 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
 const missionController = require("./missionController");
+const { isUnsafeComment } = require("../hfModeration");
 
 // ============================
 // GET CONTENT BY content_type
@@ -210,7 +211,6 @@ exports.postComment = async (req, res) => {
     const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
-    // manual profanity filter (regex for variations)
     const profanityRegex = /\b(f+[\W_]*u+[\W_]*c+[\W_]*k+|s+[\W_]*h+[\W_]*i+[\W_]*t+|b+[\W_]*i+[\W_]*t+[\W_]*c+[\W_]*h+|a+[\W_]*s+[\W_]*s+[\W_]*h+[\W_]*o+[\W_]*l+e+)\b/gi;
 
     if (profanityRegex.test(commentText)) {
@@ -221,40 +221,11 @@ exports.postComment = async (req, res) => {
         const OpenAI = require("openai");   
         const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         // ============================
-        // GPT-4o-mini Moderation
+        // Hugging Face Moderation
         // ============================
-        const response = await client.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "system",
-                    content: `
-                    You are a strict moderation system. 
-                    Your job is to classify the user's comment. 
-                    If the comment contains ANY of these:
-                    - hate speech
-                    - harassment or bullying
-                    - sexual or NSFW content
-                    - violence
-                    - threats
-                    - self-harm mention
-                    - spam or scams
-                    - profanity or offensive language (e.g., curse words)
-                    - rude or disrespectful expressions
-
-                    Respond ONLY with: "unsafe"
-                    Otherwise, respond ONLY: "safe"
-                    `
-                },
-                { role: "user", content: commentText }
-            ]
-        });
-
-        const result = response.choices[0].message.content.trim();
-        const flagged = (result === "unsafe");
+        const flagged = await isUnsafeComment(commentText);
 
         if (flagged) {
-            // AI says inappropriate
             return res.redirect(`/content/${contentID}?error=inappropriate`);
         }
 
@@ -282,13 +253,17 @@ exports.postComment = async (req, res) => {
 // SHARE BUTTON
 // ============================
 exports.trackShare = (req, res) => {
+  if (!req.session.user) {
+        return res.status(401).json({ success: false });
+    }
+
     const userID = req.session.user.userID;
     const contentID = req.params.contentID;
 
-    const sql = `
+    const updateSql = `
         UPDATE engagement
         SET share = share + 1
-        WHERE userID = $1 AND contentID = $2
+        WHERE userID = ? AND contentID = ?
     `;
 
     const insertSql = `
@@ -296,20 +271,15 @@ exports.trackShare = (req, res) => {
         VALUES ($1, $2, 1)
     `;
 
-    // First try to update existing row
-    db.query(sql, [userID, contentID], (err, result) => {
+    db.query(updateSql, [userID, contentID], (err, result) => {
         if (err) return res.status(500).json({ success: false });
-
-        const rowCount = result.rowCount || 0;
-
-        if (rowCount === 0) {
-            // No row exists → insert new one
-            db.query(insertSql, [userID, contentID], (err2) => {
+        
+        if (result.affectedRows === 0) {
+            db.query(insertSql, [userID, contentID], err2 => {
                 if (err2) return res.status(500).json({ success: false });
                 return res.json({ success: true });
             });
         } else {
-            // Updated existing row
             return res.json({ success: true });
         }
     });

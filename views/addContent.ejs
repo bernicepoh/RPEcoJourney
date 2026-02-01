@@ -12,11 +12,8 @@
       font-size: larger;
       margin: 0;
       padding: 0;
-      background-image: url("/uploads/background.png");
-  background-repeat: no-repeat;
-  background-size: cover; 
-  background-position: center;
       min-height: 100vh;
+      background-color: #e8dfcf;
     }
 
     h2 {
@@ -29,7 +26,7 @@
     .form-container {
       display: grid;
       grid-template-columns: 180px auto;
-      gap: 25px 40px; /* <-- Increased spacing between label and input */
+      gap: 25px 40px; 
       align-items: center;
       justify-content: center;
       max-width: 750px;
@@ -41,9 +38,11 @@
       font-weight: 500;
     }
 
+    /* UPDATED: Changed color to #000 (Black) for typed text and dropdowns */
     .custom-input,
     .custom-textarea {
       background: #86a3ae;
+      color: #000; /* Actual text color changed to black */
       border: none;
       border-radius: 10px;
       padding: 10px 14px;
@@ -51,9 +50,16 @@
       width: 100%;
     }
 
+    /* NEW: This targets the placeholder text specifically */
+    .custom-input::placeholder,
+    .custom-textarea::placeholder {
+      color: #000;
+      opacity: 1; /* Ensures color isn't faded by browser defaults */
+    }
+
     button {
       background-color: #b6cca1;
-      color: #fff;
+      color: #222;
       border: none;
       border-radius: 10px;
       padding: 10px 14px;
@@ -63,7 +69,6 @@
 
     button:hover {
       background-color: #8dcc6b;
-      color: #222;
     }
 
     input[type="file"]::file-selector-button {
@@ -105,7 +110,7 @@
 
       <label for="contentTypeID">Category:</label>
       <select name="contentTypeID" id="contentTypeID" required class="custom-input">
-        <option value="">Select category</option> <!-- Empty value ensures it's invalid -->
+        <option value="">Select category</option> 
         <option value="1">Environmental</option>
         <option value="2">Social</option>
         <option value="3">Governance</option>
@@ -131,8 +136,8 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     function autoExpand(textarea) {
-    textarea.style.height = "auto";
-    textarea.style.height = textarea.scrollHeight + "px";
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
     }
   </script>
 
