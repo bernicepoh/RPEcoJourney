@@ -299,50 +299,46 @@
   </script>
 
   <script>
-  async function getBaseURL() {
-      try {
-          const res = await fetch('/ngrok-url');
-          const data = await res.json();
-          if (data.url) return data.url;
-      } catch (error) {
-        console.log("No ngrok URL found, using local");
-      }
-      return window.location.origin;
-  }
+  document.addEventListener("DOMContentLoaded", () => {
 
-  document.addEventListener("DOMContentLoaded", async () => {
-      const baseURL = await getBaseURL();
+    const baseURL = window.location.origin;
 
-      document.querySelectorAll('.share-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-              const contentID = btn.dataset.contentId;
-              const shareURL = `${baseURL}/content/${contentID}`;
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
 
-              // PHONE SHARE
-              if (navigator.share) {
-                  try {
-                      await navigator.share({
-                          title: "RPEcoJourney Content",
-                          text: "Check out this sustainability content!",
-                          url: shareURL
-                      });
-                  } catch (err) {}
-              } 
-              // DESKTOP
-              else {
-                  await navigator.clipboard.writeText(shareURL);
-                  alert("Link copied!");
-              }
+        const contentID = btn.dataset.contentId;
+        const shareURL = `${baseURL}/content/${contentID}`;
 
-              // UPDATE BACKEND
-              await fetch(`/share/${contentID}`, { method: "POST" });
+        // PHONE / MOBILE SHARE
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "RPEcoJourney Content",
+              text: "Check out this sustainability content!",
+              url: shareURL
+            });
+          } catch (err) {}
+        }
+        // DESKTOP FALLBACK
+        else {
+          await navigator.clipboard.writeText(shareURL);
+          alert("Link copied!");
+        }
 
-              // 🔥 UPDATE UI COUNTER
-              const countSpan = btn.parentElement.querySelector('.count');
-              const current = parseInt(countSpan.textContent);
-              countSpan.textContent = current + 1;
-          });
+        // UPDATE BACKEND (will fail silently if not logged in)
+        try {
+          await fetch(`/share/${contentID}`, { method: "POST" });
+        } catch (e) {}
+
+        // UPDATE UI COUNTER  
+        const countSpan = btn.parentElement.querySelector('.count');
+        if (countSpan) {
+          countSpan.textContent = parseInt(countSpan.textContent) + 1;
+        }
+
       });
+    });
+
   });
   </script>
 
