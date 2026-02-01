@@ -1,33 +1,44 @@
 <nav>
-  <a href="/adminDashboard" style="flex-shrink: 0;">
+  <a href="<%= (user && user.userType === 'Guest') ? '/guest' : '/adminDashboard' %>" style="flex-shrink: 0;">
     <h1>RPEcoJourney</h1>
   </a>
 
   <ul>
 
-    <% if (user && user.userType !== "Guest") { %>  
+    <% if (user && user.userType === "Guest") { %>
+      <!-- GUEST NAV LINKS -->
+      <li><a href="/guest" class="nav-home">Home</a></li>
+      <li><a href="/categories" class="nav-browse">Browse Content</a></li>
+      <li><a href="#" onclick="showLoginPrompt('quiz'); return false;" class="nav-quiz">Quiz Me!</a></li>
+    <% } else if (user && user.userType !== "Guest") { %>  
       <!-- NORMAL USER NAV LINKS -->
       <li><a href="/homepage" class="nav-home">Home</a></li>
       <li><a href="/aboutus" class="nav-about">About Us</a></li>
       <li><a href="/categories" class="nav-browse">Browse Content</a></li>
+      <!-- BOTH user + guest can see Quiz -->
+      <li><a href="/ai/select" class="nav-quiz">Quiz Me!</a></li>
     <% } %>
-
-    <!-- BOTH user + guest can see Quiz -->
-    <li><a href="/ai/select" class="nav-quiz">Quiz Me!</a></li>
 
   </ul>
 
-  <% if (user && user.userType !== "Guest") { %>
+  <% if (user && user.userType === "Guest") { %>
     <ul>
-      <!-- Language Switcher -->
-      <li>
-        <select id="languageSelector" onchange="changeLanguage(this.value)">
-          <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>🇬🇧 English</option>
-          <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>🇲🇾 Bahasa Melayu</option>
-          <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>🇮🇳 தமிழ்</option>
-          <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
-        </select>
-      </li>
+      <li><a href="/">Login</a></li>
+      <li><a href="/register">Register</a></li>
+    </ul>
+  <% } else if (user && user.userType !== "Guest") { %>
+    <ul>
+      <!-- Language Switcher - Only for regular Users -->
+      <% if (user.userType === "User") { %>
+        <li>
+          <select id="languageSelector" onchange="changeLanguage(this.value)">
+            <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>🇬🇧 English</option>
+            <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>🇲🇾 Bahasa Melayu</option>
+            <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>🇮🇳 தமிழ்</option>
+            <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
+          </select>
+        </li>
+      <% } %>
       <li><a href="/viewProfile/<%= user.userID %>" class="nav-profile">Profile</a></li>
       <li><a href="#" id="logoutBtn" class="nav-logout">Logout</a></li>
     </ul>
@@ -44,6 +55,31 @@
 <script src="/translations.js"></script>
 
 <script>
+  // Show login prompt for guest users
+  function showLoginPrompt(feature) {
+    const featureNames = {
+      'quiz': 'Quiz',
+      'leaderboard': 'Leaderboard',
+      'dashboard': 'Dashboard'
+    };
+    
+    Swal.fire({
+      title: 'Login Required',
+      text: `Please login or register to access ${featureNames[feature] || 'this feature'}`,
+      icon: 'info',
+      showCancelButton: true,
+      confirmButtonColor: '#2e7d32',
+      cancelButtonColor: '#757575',
+      confirmButtonText: 'Login',
+      cancelButtonText: 'Register'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = '/';
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        window.location.href = '/register';
+      }
+    });
+  }
 
   document.addEventListener('DOMContentLoaded', () => {
     const navHome = document.querySelector('.nav-home');

@@ -378,77 +378,57 @@ exports.getAllUsers = (req, res) => {
   // Trim whitespace from query parameters
   let email = req.query.email ? req.query.email.trim() : '';
   let contactNo = req.query.contactNo ? req.query.contactNo.trim() : '';
+  let userType = req.query.userType ? req.query.userType.trim() : '';
 
-  console.log('Search parameters received:', { email, contactNo });
+  console.log('Search parameters received:', { email, contactNo, userType });
 
-  // If both email and contact number are provided, search for specific user
+  // Build dynamic SQL query based on provided filters
+  let conditions = [];
+  let params = [];
+
   if (email && contactNo) {
-    const searchSql = 'SELECT * FROM user WHERE email = ? AND contactNo = ?';
-    
-    console.log('Executing search query with:', email, contactNo);
-    
-    db.query(searchSql, [email, contactNo], (error, results) => {
-      if (error) {
-        console.error('Database Query Error', error.message);
-        return res.status(500).send('Error searching users');
-      }
+    conditions.push('email = ?');
+    conditions.push('contactNo = ?');
+    params.push(email, contactNo);
+  } else if (email) {
+    conditions.push('email = ?');
+    params.push(email);
+  } else if (contactNo) {
+    conditions.push('contactNo = ?');
+    params.push(contactNo);
+  }
 
-      console.log('Search results count:', results.length);
+  if (userType) {
+    conditions.push('userType = ?');
+    params.push(userType);
+  }
 
-      if (results.length === 0) {
-        return res.render('adminUsers', {
-          users: [],
-          user,
-          error: 'No user found with the provided email and contact number.',
-          success: [],
-          searchEmail: email,
-          searchContactNo: contactNo
-        });
-      }
+  // Build SQL query
+  let sql = 'SELECT * FROM user';
+  if (conditions.length > 0) {
+    sql += ' WHERE ' + conditions.join(' AND ');
+  }
 
-      res.render('adminUsers', {
-        users: results,
-        user,
-        error: null,
-        success: [],
-        searchEmail: email,
-        searchContactNo: contactNo
-      });
-    });
-  } 
-  // If only one field is provided, show error
-  else if (email || contactNo) {
-    console.log('Only one field provided');
-    return res.render('adminUsers', {
-      users: [],
+  console.log('Executing query:', sql, 'with params:', params);
+
+  db.query(sql, params, (error, results) => {
+    if (error) {
+      console.error('Database Query Error', error.message);
+      return res.status(500).send('Error retrieving users');
+    }
+
+    console.log('Search results count:', results.length);
+
+    res.render('adminUsers', {
+      users: results,
       user,
-      success: [],
-      error: 'Both email and contact number are required for search.',
+      error: results.length === 0 ? 'No users found matching your search criteria.' : null,
+      success: req.flash("success") || [],
       searchEmail: email,
-      searchContactNo: contactNo
+      searchContactNo: contactNo,
+      searchUserType: userType
     });
-  }
-  // If no search parameters, show all users
-  else {
-    console.log('No search parameters, showing all users');
-    const sql = 'SELECT * FROM user';
-    
-    db.query(sql, (error, results) => {
-      if (error) {
-        console.error('Database Query Error', error.message);
-        return res.status(500).send('Error retrieving users');
-      }
-
-      res.render('adminUsers', {
-        users: results,
-        user,
-        error: null,
-        success: req.flash("success") || [],
-        searchEmail: '',
-        searchContactNo: ''
-      });
-    });
-  }
+  });
 };
 
 exports.deleteUser = (req, res) => {

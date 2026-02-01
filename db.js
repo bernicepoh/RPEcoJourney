@@ -5,10 +5,9 @@ const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'Republic_c207',
-    database: 'C300_RPecoJourneyfinal'
+    database: 'c300_rpecojourneyfinaldb'
   });
 
-//Connecting to database
 db.connect((err) => {
     if (err) {
         console.error('Error connecting to MySQL:', err);

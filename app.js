@@ -137,6 +137,15 @@ app.get('/forgot-password', userController.getForgotPassword);
 app.post('/forgot-password', userController.postForgotPassword);
 app.post('/reset-password', userController.postResetPassword);
 
+// Guest Route
+app.get('/guest', (req, res) => {
+    // Set guest user in session
+    req.session.user = { userType: 'Guest' };
+    res.render('guest', {
+        user: { userType: 'Guest' }
+    });
+});
+
 //Admin Routes 
 app.get('/adminDashboard',allowAdminManagerWriter, userController.getAdminDashboard);
 app.get('/adminUsers', checkAdmin, userController.getAllUsers);
@@ -224,7 +233,7 @@ app.post("/ai/word-meaning", aiQuizController.getWordMeaning);
 
 
 //CHECK IN DASHBOARD ROUTES
-app.get('/checkin-board', checkinController.getCheckInBoard);
+app.get('/checkin-board',checkUser, checkinController.getCheckInBoard);
 app.post('/do-checkin', checkinController.doCheckIn);
 
 //leaderboard 
