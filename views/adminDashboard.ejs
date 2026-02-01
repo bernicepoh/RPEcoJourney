@@ -100,7 +100,6 @@
 </head>
 
 <body>
-
   <!-- NAVBAR -->
   <%- include('partials/navbar') %>
 
@@ -133,6 +132,15 @@
             <a href="/adminUsers" class="card workspace-card text-decoration-none">
               <div class="card-icon">👥</div>
               <h5 class="card-title">Manage Users</h5>
+            </a>
+          </div>
+        <% } %>
+
+        <% if (userType === 'Admin') { %>
+          <div class="col-md-4">
+            <a href="/admin/editor" class="card workspace-card text-decoration-none">
+              <div class="card-icon">📺</div>
+              <h5 class="card-title">Manage Digital Signage</h5>
             </a>
           </div>
         <% } %>

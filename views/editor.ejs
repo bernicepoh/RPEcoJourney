@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Signage Editor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-container { 
+            display: flex; 
+            flex-direction: row; 
+            flex: 1; 
+            overflow: hidden;
+        }
+
+        .sidebar { 
+            width: 300px; 
+            background: #2c3e50; 
+            color: white; 
+            padding: 20px; 
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+
+        .main-area { 
+            flex: 1; 
+            background: #e8dfcf; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .asset-item {
+            background: #34495e;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .asset-item:hover { 
+            transform: scale(1.02); 
+            background: #1abc9c; 
+        }
+
+        .canvas-container {
+            border: 2px solid #bdc3c7;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+
+        .canvas-label {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/navbar.ejs') %>
+    
+    <div class="editor-container">
+        <div class="sidebar">
+            <h3 style="border-bottom: 1px solid #34495e; padding-bottom: 10px;">Project Assets</h3>
+            <% projectContents.forEach(item => { %>
+                <div class="asset-item" 
+                    onclick="addEcoPostToCanvas('<%= item.contentFile %>', '<%= item.contentTitle %>', '<%= item.contentDescription %>')">
+                    <img src="<%= item.contentFile %>" style="width: 100%; border-radius: 3px; margin-bottom: 10px;">
+                    <p style="font-size: 14px; font-weight: bold; margin: 0; color: #ecf0f1;"><%= item.contentTitle %></p>
+                </div>
+            <% }); %>
+        </div>
+
+        <div class="main-area">
+            <div style="padding: 20px; text-align: center; background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: fit-content;">
+                
+                <div style="display: flex; gap: 15px; align-items: center; justify-content: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold; display: block; color: #7f8c8d; text-align: left;">SCREEN ID</label>
+                        <input type="number" id="screenId" value="1" style="width: 50px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold; display: block; color: #7f8c8d; text-align: left;">LAYOUT NAME</label>
+                        <input type="text" id="layoutName" value="Daily Special" style="width: 140px; padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold; display: block; color: #7f8c8d; text-align: left;">START TIME</label>
+                        <input type="time" id="startTime" value="00:00" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: bold; display: block; color: #7f8c8d; text-align: left;">END TIME</label>
+                        <input type="time" id="endTime" value="23:59" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                </div>
+
+                <button onclick="saveLayout()" style="padding: 10px 25px; background: #27ae60; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold; transition: 0.3s;">
+                    SAVE TO SCREEN
+                </button>
+                <button onclick="clearCanvas()" style="padding: 10px 25px; background: #e74c3c; color: white; border: none; cursor: pointer; border-radius: 5px; margin-left: 10px; transition: 0.3s;">
+                    CLEAR CANVAS
+                </button>
+            </div>
+
+            <div class="canvas-label">Signage Preview (1920 x 1080)</div>
+            <canvas id="signageCanvas"></canvas>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Setup canvas with 40% zoom to fit on laptop screen
+        const canvas = new fabric.Canvas('signageCanvas',{
+            backgroundColor: '#ffffff'
+        });
+
+        canvas.setZoom(0.4);
+        canvas.setWidth(1920 * 0.4);
+        canvas.setHeight(1080 * 0.4);
+
+        function addEcoPostToCanvas(imageUrl, title, description) {
+            const laptopIP = "http://172.20.10.2:3000"; 
+
+            fabric.Image.fromURL(imageUrl, function(img) {
+                img.scaleToWidth(800);
+                img.set({ 
+                    left: 560, 
+                    top: 50, 
+                    crossOrigin: 'anonymous' 
+                }); 
+                canvas.add(img);
+
+                const titleText = new fabric.IText(title, {
+                    left: 560,
+                    top: img.top + (img.height * img.scaleY) + 20, 
+                    width: 800,
+                    fontSize: 48,
+                    fontWeight: 'bold',
+                    fontFamily: 'Arial',
+                    fill: '#27ae60',
+                    textAlign: 'left'
+                });
+                canvas.add(titleText);
+
+                const descText = new fabric.Textbox(description, {
+                    left: 560,
+                    top: titleText.top + titleText.getBoundingRect().height + 40, 
+                    width: 800,
+                    fontSize: 28,
+                    fontFamily: 'Arial',
+                    fill: '#333',
+                    textAlign: 'left'
+                });
+                canvas.add(descText);
+
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+        }
+
+        async function saveLayout() {
+            const screenId = document.getElementById('screenId').value;
+            const layoutName = document.getElementById('layoutName').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const layout_json = JSON.stringify(canvas.toJSON());
+
+            try {
+                const response = await fetch('/admin/save-layout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        screen_id: screenId, 
+                        layout_name: layoutName,
+                        start_time: startTime,
+                        end_time: endTime,
+                        layout_data: layout_json 
+                    })
+                });
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Schedule Saved!",
+                        text: `Layout "${layoutName}" set for ${startTime} - ${endTime}`,
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    throw new Error("Server Error");
+                }
+            } catch (err) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Save Failed",
+                    text: "Check your terminal for database errors."
+                });
+            }
+        }
+
+        function clearCanvas() {
+            Swal.fire({
+                title: 'Clear Canvas?',
+                text: "Your unsaved design will be lost!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#27ae60',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, clear it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    canvas.clear();
+                    canvas.setBackgroundColor('#ffffff', canvas.renderAll.bind(canvas));
+                    Swal.fire({ icon: "success", title: "Cleared!", timer: 1000, showConfirmButton: false });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
