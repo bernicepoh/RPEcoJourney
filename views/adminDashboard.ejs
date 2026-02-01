@@ -101,6 +101,11 @@
 
 <body>
 
+    <% if (userType === 'Admin') { %>
+      <a href="/adminUsers">Manage Users</a>
+      <a href="/admin/editor" class="btn-workspace">Manage Digital Signage</a>
+    <% } %>
+  </div>
   <!-- NAVBAR -->
   <%- include('partials/navbar') %>
 
