@@ -1,6 +1,8 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
 const { translateText, translateMultiple } = require('../middleware/translator');
+const missionController = require("./missionController");
+const { isUnsafeComment } = require("../hfModeration");
 
 // ============================
 // GET CONTENT BY content_type
@@ -50,7 +52,7 @@ exports.getContentByContentType = async (req, res) => {
 
                 FROM content c
                 JOIN content_type cat
-                    ON c.contentTypeID = cat.contentTypeID
+                ON c.contentTypeID = cat.contentTypeID
                 WHERE cat.contentTypeID = ?
             `;
 
@@ -102,10 +104,10 @@ exports.getContentByContentType = async (req, res) => {
                 }
 
                 const contentTypeInfo = {
-                    contentTypeName,
-                    contentTypeDescription,
-                    contentTypeImage: catRows[0].contentTypeImage,
-                };
+                    contentTypeName: catRows[0].contentTypeName,
+                    contentTypeDescription: catRows[0].contentTypeDescription,
+                    contentTypeImage: catRows[0].contentTypeImage
+                };  
                 res.render('viewContentByContentType', {
                     contentType: contentTypeInfo,
                     contentList: [],
@@ -115,6 +117,7 @@ exports.getContentByContentType = async (req, res) => {
         }
     });
 };
+
 // ============================
 // TOGGLE LIKE (Correct Version)
 // ============================
@@ -134,7 +137,6 @@ exports.toggleLike = (req, res) => {
     `;
 
     db.query(checkSql, [userID, contentID], (err, rows) => {
-
         console.log("📌 SQL rows found:", rows);
         console.log("📌 SQL error:", err);
 
@@ -160,7 +162,7 @@ exports.toggleLike = (req, res) => {
                 if (updateErr) return res.status(500).json({ success: false });
 
                 const countSql = `
-                    SELECT COUNT(*) AS likeCount 
+                    SELECT COUNT(*) AS likeCount
                     FROM engagement 
                     WHERE contentID = ? AND likes = 1
                 `;
@@ -193,7 +195,7 @@ exports.toggleLike = (req, res) => {
                 if (insErr) return res.status(500).json({ success: false });
 
                 const countSql = `
-                    SELECT COUNT(*) AS likeCount 
+                    SELECT COUNT(*) AS likeCount
                     FROM engagement 
                     WHERE contentID = ? AND likes = 1
                 `;
@@ -215,37 +217,16 @@ exports.toggleLike = (req, res) => {
     });
 };
 
-// exports.getLikesList = (req, res) => {
-//     const contentID = req.params.id;
-
-//     const sql = `
-//         SELECT u.userName, u.profilePic, u.userID
-//         FROM engagement e
-//         JOIN user u ON e.userID = u.userID
-//         WHERE e.contentID = ? AND e.likes = 1
-//     `;
-
-//     db.query(sql, [contentID], (err, rows) => {
-//         if (err) return res.status(500).json({ success: false });
-
-//         res.json({
-//             success: true,
-//             users: rows
-//         });
-//     });
-// };
 
 // ============================
 // POSTING OF COMMENT 
 // ============================
-
 
 exports.postComment = async (req, res) => {
     const contentID = req.params.id;
     const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
-    // manual profanity filter (regex for variations)
     const profanityRegex = /\b(f+[\W_]*u+[\W_]*c+[\W_]*k+|s+[\W_]*h+[\W_]*i+[\W_]*t+|b+[\W_]*i+[\W_]*t+[\W_]*c+[\W_]*h+|a+[\W_]*s+[\W_]*s+[\W_]*h+[\W_]*o+[\W_]*l+e+)\b/gi;
 
     if (profanityRegex.test(commentText)) {
@@ -256,40 +237,11 @@ exports.postComment = async (req, res) => {
         const OpenAI = require("openai");   
         const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         // ============================
-        // GPT-4o-mini Moderation
+        // Hugging Face Moderation
         // ============================
-        const response = await client.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "system",
-                    content: `
-                    You are a strict moderation system. 
-                    Your job is to classify the user's comment. 
-                    If the comment contains ANY of these:
-                    - hate speech
-                    - harassment or bullying
-                    - sexual or NSFW content
-                    - violence
-                    - threats
-                    - self-harm mention
-                    - spam or scams
-                    - profanity or offensive language (e.g., curse words)
-                    - rude or disrespectful expressions
-
-                    Respond ONLY with: "unsafe"
-                    Otherwise, respond ONLY: "safe"
-                    `
-                },
-                { role: "user", content: commentText }
-            ]
-        });
-
-        const result = response.choices[0].message.content.trim();
-        const flagged = (result === "unsafe");
+        const flagged = await isUnsafeComment(commentText);
 
         if (flagged) {
-            // AI says inappropriate
             return res.redirect(`/content/${contentID}?error=inappropriate`);
         }
 
@@ -312,18 +264,22 @@ exports.postComment = async (req, res) => {
     }
 };
 
+
 // ============================
 // SHARE BUTTON
 // ============================
 exports.trackShare = (req, res) => {
+  if (!req.session.user) {
+        return res.status(401).json({ success: false });
+    }
+
     const userID = req.session.user.userID;
     const contentID = req.params.contentID;
 
-    const sql = `
+    const updateSql = `
         UPDATE engagement
         SET share = share + 1
         WHERE userID = ? AND contentID = ?
-        LIMIT 1
     `;
 
     const insertSql = `
@@ -331,22 +287,20 @@ exports.trackShare = (req, res) => {
         VALUES (?, ?, 1)
     `;
 
-    // First try to update existing row
-    db.query(sql, [userID, contentID], (err, result) => {
+    db.query(updateSql, [userID, contentID], (err, result) => {
         if (err) return res.status(500).json({ success: false });
-
+        
         if (result.affectedRows === 0) {
-            // No row exists → insert new one
-            db.query(insertSql, [userID, contentID], (err2) => {
+            db.query(insertSql, [userID, contentID], err2 => {
                 if (err2) return res.status(500).json({ success: false });
                 return res.json({ success: true });
             });
         } else {
-            // Updated existing row
             return res.json({ success: true });
         }
     });
 };
+
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
@@ -372,7 +326,7 @@ exports.getContent = (req, res) => {
     `;
 
     const commentSql = `
-            SELECT 
+        SELECT 
                 e.engagementID AS commentID,
                 e.comments AS commentText,
                 e.isBlocked,
@@ -442,6 +396,7 @@ exports.getContent = (req, res) => {
     });
 };
 
+
 // ======================================
 // BLOCKED COMMENT - ADMIN/MANAGER ONLY
 // ======================================
@@ -460,10 +415,11 @@ exports.blockComment = (req, res) => {
     WHERE engagementID = ?
   `;
 
-    db.query(sql, [commentID], () => {
+  db.query(sql, [commentID], () => {
         res.redirect(`/content/${contentID}?moderation=blocked`);
     });
 };
+
 
 // ======================================
 // UNBLOCK COMMENT - ADMIN / MANAGER ONLY
@@ -494,6 +450,7 @@ exports.unblockComment = (req, res) => {
   });
 };
 
+
 exports.editComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
@@ -505,7 +462,7 @@ exports.editComment = (req, res) => {
 
     // First get the contentID of this comment
     const getSQL = `
-        SELECT contentID 
+        SELECT contentID
         FROM engagement 
         WHERE engagementID = ? AND userID = ?
     `;
@@ -533,13 +490,14 @@ exports.editComment = (req, res) => {
     });
 };
 
+
 exports.deleteComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
 
     // 1) Get contentID first
     const sqlGet = `
-        SELECT contentID 
+        SELECT contentID
         FROM engagement 
         WHERE engagementID = ? AND userID = ?
     `;
@@ -568,9 +526,10 @@ exports.deleteComment = (req, res) => {
     });
 };
 
+
 exports.addContentForm = (req, res) => {
     const sql = 'SELECT * FROM content_type';
-    const user = req.session.user 
+    const user = req.session.user;
     db.query(sql, (error, results) => {
         if (error) {
             console.error("Error fetching categories:", error);
@@ -582,18 +541,13 @@ exports.addContentForm = (req, res) => {
     });
 };
 
+
 exports.addContent = (req, res) => {
     const { contentTypeID, contentTitle, contentDescription } = req.body;
-    let contentFile;
-    if (req.file) {
-        contentFile = req.file.filename; // Save only the filename
-    } else {
-        contentFile = null;
-    }
+    const contentFile = req.file ? req.file.path : null;
 
     const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
    
-
     // Insert the new content into the database
     db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
         if (error) {
@@ -607,6 +561,7 @@ exports.addContent = (req, res) => {
     });
 };
 
+
 const getAllCategories = (db, callback) => {
     const sql = 'SELECT * FROM content_type';
 
@@ -617,12 +572,13 @@ const getAllCategories = (db, callback) => {
         }
 
         if (results.length > 0) {
-            return callback(null, results); // Call callback with categories
+            return callback(null, results);
         } else {
             return callback(null, []); // No categories found, return empty array
         }
     });
 };
+
 
 exports.editContentForm = async (req, res) => {
     const contentID = req.params.id;
@@ -654,6 +610,7 @@ exports.editContentForm = async (req, res) => {
 
 };
 
+
 exports.editContent = (req, res) => {
 
     const contentID = req.params.id;
@@ -679,6 +636,7 @@ exports.editContent = (req, res) => {
         }
     });
 };
+
 
 exports.deleteContent = (req, res) => {
     const contentID = req.params.id;
@@ -707,6 +665,7 @@ exports.deleteContent = (req, res) => {
         });
     });
 };
+
 
 // contentController.js
 exports.manageContent = (req, res) => {

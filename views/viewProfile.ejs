@@ -13,7 +13,7 @@
             min-height: 100vh;
             margin: 0;
             font-family: 'Georgia', serif;
-            background-image: url("/uploads/background.png");
+            background-color: #e8dfcf;
             background-repeat: no-repeat;
             background-size: cover; 
             background-position: center;
@@ -158,6 +158,11 @@
             <div><b id="usernameLabel">Username</b>: <%= user.userName %></div>
             <div><b id="emailLabel">Email</b>: <%= user.email %></div>
             <div><b id="contactLabel">Contact Number</b>: <%= user.contactNo %></div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                <b>Level</b>: 
+                <img src="/uploads/levelbadge/<%= user.levelBadge %>" style="width:25px; height:25px; border-radius:50%;">
+                Level <%= user.level %> - <%= user.levelTitle %>
+            </div>
             <br>
             <a href="/editProfile/<%= user.userID %>">
                 <button class="edit-btn" id="editProfileBtn">Edit Profile</button>

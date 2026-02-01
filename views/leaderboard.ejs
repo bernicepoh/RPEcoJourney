@@ -7,7 +7,7 @@
 
     <style>
         body {
-            background: url("/uploads/background.png") no-repeat center center fixed;
+            background-color: #e8dfcf;
             background-size: cover;
             font-family: 'Poppins', sans-serif;
             margin: 0;
@@ -154,7 +154,14 @@
                 </td>
 
                 <!-- Level -->
-                <td>Lv <%= u.level %></td>
+                <td>
+                    <div class="user-flex">
+                        <% if (u.levelBadge) { %>
+                            <img src="/uploads/levelbadge/<%= u.levelBadge %>" style="width:25px; height:25px; border-radius:50%; margin-right:8px;" alt="Level Badge">
+                        <% } %>
+                        Lv <%= u.level %>
+                    </div>
+                </td>
 
                 <!-- XP -->
                 <td><%= u.totalXP %> XP</td>

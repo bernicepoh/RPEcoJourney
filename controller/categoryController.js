@@ -169,6 +169,7 @@ exports.updateCategory = (req, res) => {
     if (req.file) { //if new image is uploaded
         contentTypeImage = req.file.filename; // set image to be new image filename
     }
+    
     console.log("new file: " + contentTypeImage);
     
     const sql = 'UPDATE content_type SET contentName = ?, contentDescription = ?, contentTypeImage = ? WHERE contentID = ?';

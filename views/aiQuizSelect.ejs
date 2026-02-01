@@ -5,8 +5,15 @@
     <script src="/translations.js"></script>
     <style>
         
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background: url("/uploads/background.png") no-repeat center center fixed;
+            background-color: #e8dfcf;
             background-size: cover;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
@@ -20,6 +27,17 @@
             align-items: center;
             min-height: calc(100vh - 100px);
             padding: 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
         }
 
         .container {
@@ -34,7 +52,12 @@
         h2 { margin-bottom: 10px; color: #4CAF50; text-align: center; }
         p { margin-bottom: 25px; font-size: 14px; color: #ddd; text-align: center; }
 
-        label { display: block; text-align: left; margin-top: 15px; font-weight: bold; }
+        label { 
+            display: block; 
+            text-align: left; 
+            margin-top: 15px; 
+            font-weight: bold; 
+        }
 
         select, button {
             width: 100%;
@@ -45,7 +68,11 @@
             font-size: 16px;
         }
 
-        select { background: white; color: #333; cursor: pointer; }
+        select { 
+            background: white; 
+            color: #333; 
+            cursor: pointer; 
+        }
 
         button {
             background: #4CAF50;
@@ -56,7 +83,10 @@
             margin-top: 25px;
         }
 
-        button:hover { background: #45a049; transform: translateY(-2px); }
+        button:hover { 
+            background: #45a049; 
+            transform: translateY(-2px); 
+        }
 
         /* LOADING SPINNER */
         #loadingOverlay {
@@ -84,11 +114,26 @@
             margin-bottom: 12px;
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin { 
+            100% { transform: rotate(360deg); } 
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 90%;
+                padding: 30px 20px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <%- include ('partials/navbar.ejs') %>
+
+<%- include('partials/navbar') %>
 
 <div id="loadingOverlay">
     <div class="spinner"></div>
@@ -150,3 +195,14 @@
 </body>
 </html>
 
+<script>
+    const form = document.getElementById("aiForm");
+    const overlay = document.getElementById("loadingOverlay");
+
+    form.addEventListener("submit", function () {
+        overlay.style.display = "flex";
+    });
+</script>
+
+</body>
+</html>
