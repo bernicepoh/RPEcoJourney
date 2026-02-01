@@ -236,38 +236,38 @@
 
   <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
     <!-- Images -->
-    <img src="<%= content.contentFile %>">
+    <img src="/uploads/<%= content.contentFile %>">
 
   <% } else if (ext === 'pdf') { %>
     <!-- PDFs: embed with iframe -->
     <iframe
-      src="<%= content.contentFile %>"
+      src="/uploads/<%= content.contentFile %>"
       style="width:100%; height:100%; border:none;"
     ></iframe>
 
   <% } else if (['doc','docx'].includes(ext)) { %>
     <!-- Word docs: use Office Web Viewer -->
-    <iframe src="<%= content.contentFile %>" 
+    <iframe src="https://docs.google.com/gview?url=<%= encodeURIComponent('https://localhost:3000/uploads/' + content.contentFile) %>&embedded=true" 
         style="width:100%; height:100%; border:none;"></iframe>
 
 
   <% } else if (['ppt','pptx'].includes(ext)) { %>
     <!-- PowerPoint: use Office Web Viewer -->
     <iframe
-      src="<%= content.contentFile %>"
+      src="https://view.officeapps.live.com/op/view.aspx?src<%= encodeURIComponent('http://localhost:3000/uploads/' + content.contentFile) %>"
       style="width:100%; height:100%; border:none;"
     ></iframe>
 
   <% } else if (['mp4','mov','avi'].includes(ext)) { %>
     <!-- Videos (you already had this) -->
     <video autoplay loop muted playsinline controls style="max-width:100%; max-height:100%; object-fit:contain;">
-      <source src="<%= content.contentFile %>">
+      <source src="/uploads/<%= content.contentFile %>">
     </video>
 
   <% } else { %>
     <!-- Fallback: still allow download -->
-    <a href="<%= content.contentFile %>" target="_blank">
-      <img class="file-icon" src="<%= content.contentFile %>" style="width: 150px;">
+    <a href="/uploads/<%= content.contentFile %>" target="_blank">
+      <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
     </a>
   <% } %>
 </div>
@@ -316,7 +316,7 @@
 
   <div class="comment-box blocked" style="display:flex; gap:12px;">
     <img
-      src="<%= c.userImage || 'default-avatar.png' %>"
+      src="/uploads/<%= c.userImage || 'default-avatar.png' %>"
       class="comment-avatar"
     >
 
@@ -361,7 +361,7 @@
 
       <!-- ✅ AVATAR IS BACK -->
       <img
-        src="<%= c.userImage || 'default-avatar.png' %>"
+        src="/uploads/<%= c.userImage || 'default-avatar.png' %>"
         class="comment-avatar"
       >
 
@@ -414,10 +414,10 @@
               </button>
             <% } %>
 
-            <!-- 🚫 BLOCK (ADMIN ON OTHER USERS ONLY) -->
+            <!-- 🚫 BLOCK (ADMIN / MANAGER ON OTHER USERS ONLY) -->
             <% if (
               sessionUser.userID !== c.userID &&
-              ['Admin'].includes(sessionUser.userType)
+              ['Admin','Manager'].includes(sessionUser.userType)
             ) { %>
               <form
                 action="/comment/block/<%= c.commentID %>"

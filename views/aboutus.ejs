@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About Us | RPECOJOURNEY</title>
+  <script src="/translations.js"></script>
 
   <style>
     html, body {
@@ -147,16 +148,16 @@
   <div class="about-container">
     <!-- ABOUT US SECTION -->
     <section class="about-section">
-      <h2>About Us</h2>
+      <h2 id="aboutHeading">About Us</h2>
       <div class="about-row">
         <div class="about-text">
-          <p>
+          <p id="aboutPara1">
             <strong>RPEcoJourney</strong> is a platform created by Republic Polytechnic students to
             celebrate and share our commitment to sustainability. Our goal is to
             showcase innovative projects, creative solutions, and meaningful initiatives
             that contribute to a greener and more sustainable future.
           </p>
-          <p>
+          <p id="aboutPara2">
             Through this website, RP students can highlight their environmental efforts,
             inspire others to take action, and connect with like-minded individuals who
             care about our planet. RPEcoJourney is not just a collection of projects—it’s
@@ -164,15 +165,15 @@
           </p>
         </div>
         <div class="about-image">
-          <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769654898/aboutus_gmc0gx.jpg" alt="RP Students Sustainability Project" />
+          <img src="/uploads/aboutus.jpg" alt="RP Students Sustainability Project" />
         </div>
       </div>
     </section>
 
     <!-- VISION SECTION -->
     <section class="vision-section">
-      <h3>Vision</h3>
-      <p>
+      <h3 id="visionHeading">Vision</h3>
+      <p id="visionText">
         To inspire a community of Republic Polytechnic students who lead the way in building a
         sustainable and environmentally conscious future.
       </p>
@@ -180,21 +181,21 @@
 
     <!-- MISSION SECTION -->
     <section class="mission-section">
-      <h3>Mission</h3>
+      <h3 id="missionHeading">Mission</h3>
       <ul>
-        <li>To provide a platform for RP students to showcase their sustainability projects and creative green solutions.</li>
-        <li>To raise awareness about environmental challenges and promote sustainable practices within the RP community.</li>
-        <li>To encourage collaboration and innovation among students passionate about making a positive impact on the planet.</li>
-        <li>To celebrate student achievements in sustainability and motivate others to join the journey toward a greener tomorrow.</li>
+        <li id="mission1">To provide a platform for RP students to showcase their sustainability projects and creative green solutions.</li>
+        <li id="mission2">To raise awareness about environmental challenges and promote sustainable practices within the RP community.</li>
+        <li id="mission3">To encourage collaboration and innovation among students passionate about making a positive impact on the planet.</li>
+        <li id="mission4">To celebrate student achievements in sustainability and motivate others to join the journey toward a greener tomorrow.</li>
       </ul>
     </section>
 
      <div class="Location-Info">
         <div class="Locate">
-            <h2>Locate Us!</h2>
+            <h2 id="locateHeading">Locate Us!</h2>
            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.5533339967915!2d103.78298867359057!3d1.4428309985435963!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31da1305aa7388d7%3A0x2b7f5e0463382f8!2sRepublic%20Polytechnic!5e0!3m2!1sen!2ssg!4v1763017441787!5m2!1sen!2ssg" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
         </div>
-        <h2 class="address">
+        <h2 class="address" id="addressText">
             Republic Polytechnic<br>
             9 Woodlands Ave 9, Singapore 738964
 
@@ -202,8 +203,53 @@
     </div>
   </div>
 
-  <footer>
+  <footer id="footerText">
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+
+  <script>
+    // Translate page content on load
+    document.addEventListener('DOMContentLoaded', () => {
+      // About Us section
+      const aboutHeading = document.getElementById('aboutHeading');
+      const aboutPara1 = document.getElementById('aboutPara1');
+      const aboutPara2 = document.getElementById('aboutPara2');
+      
+      if (aboutHeading) aboutHeading.textContent = t('aboutUsTitle');
+      if (aboutPara1) aboutPara1.innerHTML = t('aboutPara1');
+      if (aboutPara2) aboutPara2.innerHTML = t('aboutPara2');
+
+      // Vision section
+      const visionHeading = document.getElementById('visionHeading');
+      const visionText = document.getElementById('visionText');
+      
+      if (visionHeading) visionHeading.textContent = t('visionHeading');
+      if (visionText) visionText.textContent = t('visionText');
+
+      // Mission section
+      const missionHeading = document.getElementById('missionHeading');
+      const mission1 = document.getElementById('mission1');
+      const mission2 = document.getElementById('mission2');
+      const mission3 = document.getElementById('mission3');
+      const mission4 = document.getElementById('mission4');
+      
+      if (missionHeading) missionHeading.textContent = t('missionHeading');
+      if (mission1) mission1.textContent = t('mission1');
+      if (mission2) mission2.textContent = t('mission2');
+      if (mission3) mission3.textContent = t('mission3');
+      if (mission4) mission4.textContent = t('mission4');
+
+      // Location
+      const locateHeading = document.getElementById('locateHeading');
+      const addressText = document.getElementById('addressText');
+      
+      if (locateHeading) locateHeading.textContent = t('locateUs');
+      if (addressText) addressText.innerHTML = t('address');
+
+      // Footer
+      const footerText = document.getElementById('footerText');
+      if (footerText) footerText.innerHTML = t('footer');
+    });
+  </script>
 </body>
 </html>

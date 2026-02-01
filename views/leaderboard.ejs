@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Leaderboard | RPEcoJourney</title>
+    <script src="/translations.js"></script>
 
     <style>
         body {
@@ -106,24 +107,24 @@
 
 <div class="leaderboard-container">
 
-    <h1>LEADERBOARD</h1>
+    <h1 id="leaderboardTitle">LEADERBOARD</h1>
 
     <!-- Tabs -->
     <div class="tabs">
-        <div class="tab active">Overall</div>
-        <div class="tab">Monthly</div>
-        <div class="tab">Friends</div>
+        <div class="tab active" id="tabOverall">Overall</div>
+        <div class="tab" id="tabMonthly">Monthly</div>
+        <div class="tab" id="tabFriends">Friends</div>
     </div>
 
     <!-- Table -->
     <table>
         <thead>
             <tr>
-                <th>Rank</th>
-                <th>User</th>
-                <th>Level</th>
+                <th id="thRank">Rank</th>
+                <th id="thUser">User</th>
+                <th id="thLevel">Level</th>
                 <th>XP</th>
-                <th>Streak</th>
+                <th id="thStreak">Streak</th>
             </tr>
         </thead>
 
@@ -147,7 +148,7 @@
                 <!-- User + Picture -->
                 <td>
                     <div class="user-flex">
-                        <img class="profile-pic" src="<%= u.image %>" alt="">
+                        <img class="profile-pic" src="/uploads/<%= u.image %>" alt="">
                         <%= u.userName %>
                     </div>
                 </td>
@@ -180,6 +181,29 @@
     </table>
 
 </div>
+
+<script>
+    // Translate page content on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const leaderboardTitle = document.getElementById('leaderboardTitle');
+        const tabOverall = document.getElementById('tabOverall');
+        const tabMonthly = document.getElementById('tabMonthly');
+        const tabFriends = document.getElementById('tabFriends');
+        const thRank = document.getElementById('thRank');
+        const thUser = document.getElementById('thUser');
+        const thLevel = document.getElementById('thLevel');
+        const thStreak = document.getElementById('thStreak');
+
+        if (leaderboardTitle) leaderboardTitle.textContent = t('leaderboardTitle');
+        if (tabOverall) tabOverall.textContent = t('tabOverall');
+        if (tabMonthly) tabMonthly.textContent = t('tabMonthly');
+        if (tabFriends) tabFriends.textContent = t('tabFriends');
+        if (thRank) thRank.textContent = t('rank');
+        if (thUser) thUser.textContent = t('user');
+        if (thLevel) thLevel.textContent = t('level');
+        if (thStreak) thStreak.textContent = t('streak');
+    });
+</script>
 
 </body>
 </html>

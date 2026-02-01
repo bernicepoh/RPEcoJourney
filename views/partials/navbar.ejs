@@ -7,26 +7,97 @@
 
     <% if (user && user.userType !== "Guest") { %>  
       <!-- NORMAL USER NAV LINKS -->
-      <li><a href="/homepage">Home</a></li>
-      <li><a href="/aboutus">About Us</a></li>
-      <li><a href="/categories">Categories</a></li>
+      <li><a href="/homepage" class="nav-home">Home</a></li>
+      <li><a href="/aboutus" class="nav-about">About Us</a></li>
+      <li><a href="/categories" class="nav-browse">Browse Content</a></li>
     <% } %>
 
     <!-- BOTH user + guest can see Quiz -->
-    <li><a href="/ai/select">Quiz Me!</a></li>
+    <li><a href="/ai/select" class="nav-quiz">Quiz Me!</a></li>
 
   </ul>
 
   <% if (user && user.userType !== "Guest") { %>
     <ul>
-      <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
-      <li><a href="/">Logout</a></li>
+      <!-- Language Switcher -->
+      <li>
+        <select id="languageSelector" onchange="changeLanguage(this.value)">
+          <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>🇬🇧 English</option>
+          <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>🇲🇾 Bahasa Melayu</option>
+          <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>🇮🇳 தமிழ்</option>
+          <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
+        </select>
+      </li>
+      <li><a href="/viewProfile/<%= user.userID %>" class="nav-profile">Profile</a></li>
+      <li><a href="#" id="logoutBtn" class="nav-logout">Logout</a></li>
     </ul>
   <% } %>
 
 </nav>
 
+
+<form id="languageForm" action="/change-language" method="POST" style="display:none;">
+  <input type="hidden" name="language" id="languageInput">
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/translations.js"></script>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const navHome = document.querySelector('.nav-home');
+    const navAbout = document.querySelector('.nav-about');
+    const navBrowse = document.querySelector('.nav-browse');
+    const navQuiz = document.querySelector('.nav-quiz');
+    const navProfile = document.querySelector('.nav-profile');
+    const navLogout = document.querySelector('.nav-logout');
+
+    if (navHome) navHome.textContent = t('home');
+    if (navAbout) navAbout.textContent = t('aboutUs');
+    if (navBrowse) navBrowse.textContent = t('browseContent');
+    if (navQuiz) navQuiz.textContent = t('quizMe');
+    if (navProfile) navProfile.textContent = t('profile');
+    if (navLogout) navLogout.textContent = t('logout');
+  });
+
+  // Language change function
+  function changeLanguage(lang) {
+    document.getElementById('languageInput').value = lang;
+    document.getElementById('languageForm').submit();
+  }
+
+  // Logout confirmation
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      Swal.fire({
+        title: t('areYouSure'),
+        text: t('logoutText'),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#4CAF50',
+        confirmButtonText: t('yesLogout'),
+        cancelButtonText: t('noStay')
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/';
+        }
+      });
+    });
+  }
+</script>
+
 <style>
+  /* Remove default spacing */
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
   nav {
     background-color: #0b3d1b;
     display: flex;
@@ -34,10 +105,12 @@
     align-items: center;
     padding: 1rem 3rem;
     font-family: 'Georgia', serif;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    position: sticky;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
     top: 0;
-    z-index: 100;
+    left: 0;
   }
 
   nav h1 {
@@ -75,6 +148,29 @@
   nav ul li a:hover {
     text-decoration: underline;
     color: #1a1a1a;
+  }
+
+  /* Language selector styling */
+  #languageSelector {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 2px solid #0b2535;
+    border-radius: 8px;
+    background-color: white;
+    color: #0b2535;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  #languageSelector:hover {
+    background-color: #f0f0f0;
+    border-color: #003b2b;
+  }
+
+  #languageSelector:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.3);
   }
 
   .profile-pic {

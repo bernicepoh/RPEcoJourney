@@ -1,22 +1,20 @@
 const mysql = require('mysql2');
-const fs = require('fs');
 
+// Database connection details
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '4000'),
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: process.env.DB_CA ? { ca: fs.readFileSync(process.env.DB_CA) } : undefined
-});
+    host: 'localhost',
+    user: 'root',
+    password: 'Republic_c207',
+    database: 'C300_RPecoJourneyfinal'
+  });
 
-// Test on startup
+//Connecting to database
 db.connect((err) => {
-  if (err) {
-    console.error('MySQL Connection failed:', err);
-    return;
-  }
-  console.log('Connected to MySQL with SSL');
+    if (err) {
+        console.error('Error connecting to MySQL:', err);
+        return;
+    }
+    console.log('Connected to MySQL database');
 });
 
 module.exports = db;

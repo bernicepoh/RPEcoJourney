@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RPEcoJourney | Home</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/translations.js"></script>
 
   <style>
     
@@ -332,32 +333,32 @@ Swal.fire({
   <%- include('partials/navbar') %>
 
   <section class="hero">
-    <h1>Welcome to RPEcoJourney 🌿</h1>
-    <p>Empowering green living through awareness and fun quizzes.</p>
-    <a href="/categories" class="btn">Get Started</a>
+    <h1 id="heroTitle">Welcome to RPEcoJourney 🌿</h1>
+    <p id="heroSubtitle">Empowering green living through awareness and fun quizzes.</p>
+    <a href="/categories" class="btn" id="getStartedBtn">Get Started</a>
   </section>
 
   <section class="features">
     <div class="feature-card">
-      <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769654454/leaderboard_ifa70m.png" alt="leaderboard">
-      <h3><a href="/leaderboard" style="color:inherit; text-decoration:none;">🌍 Join the Journey</a></h3>
-      <p>Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
+      <img src="/uploads/leaderboard.png" alt="leaderboard">
+      <h3><a href="/leaderboard" style="color:inherit; text-decoration:none;" id="feature1Title">🌍 Join the Journey</a></h3>
+      <p id="feature1Desc">Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
     </div>
 
     <div class="feature-card">
-      <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769654854/quiz_qgidrs.png" alt="Take Quizzes">
-      <h3><a href="/quiz" style="color:inherit; text-decoration:none;">🎯 Challenge Yourself</a></h3>
-      <p>Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
+      <img src="/uploads/quiz.png" alt="Take Quizzes">
+      <h3><a href="/ai/select" style="color:inherit; text-decoration:none;" id="feature2Title">🎯 Challenge Yourself</a></h3>
+      <p id="feature2Desc">Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
     </div>
 
     <div class="feature-card">
-      <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769655538/dashboard_vz0x2m.png" alt="Dashboard">
-      <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;">🧭 Your Sustainability Dashboard</a></h3>
-      <p>Track your personal growth in sustainability</p>
+      <img src="/uploads/dashboard.png" alt="Dashboard">
+      <h3><a href="/checkin-board" style="color:inherit; text-decoration:none;" id="feature3Title">🧭 Your Sustainability Dashboard</a></h3>
+      <p id="feature3Desc">Track your personal growth in sustainability</p>
     </div>
   </section>
 
-  <footer>
+  <footer id="footerText">
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
 
@@ -368,12 +369,12 @@ Swal.fire({
 
   <div class="chatbot-container" id="chatbotContainer">
     <div class="chatbot-header">
-      <h3>🌿 RPEco Assistant</h3>
+      <h3 id="chatbotTitle">🌿 RPEco Assistant</h3>
       <button class="chatbot-close" id="chatbotClose">×</button>
     </div>
     <div class="chatbot-messages" id="chatbotMessages">
       <div class="chat-message bot">
-        <div class="message-bubble">
+        <div class="message-bubble" id="chatbotWelcome">
           Hi! I'm your RPEcoJourney assistant. How can I help you today? 🌱
         </div>
       </div>
@@ -396,7 +397,7 @@ Swal.fire({
   <script>
   Swal.fire({
     icon: 'success',
-    title: 'Welcome!',
+    title: t('loginWelcome'),
     text: '<%= loginSuccess %>',
     timer: 1800,
     showConfirmButton: false
@@ -569,7 +570,50 @@ Swal.fire({
         sendMessage();
       }
     });
+
+    // Translate page content on load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Hero section
+      const heroTitle = document.getElementById('heroTitle');
+      const heroSubtitle = document.getElementById('heroSubtitle');
+      const getStartedBtn = document.getElementById('getStartedBtn');
+      
+      if (heroTitle) heroTitle.textContent = t('heroTitle');
+      if (heroSubtitle) heroSubtitle.textContent = t('heroSubtitle');
+      if (getStartedBtn) getStartedBtn.textContent = t('getStarted');
+
+      // Features
+      const feature1Title = document.getElementById('feature1Title');
+      const feature1Desc = document.getElementById('feature1Desc');
+      const feature2Title = document.getElementById('feature2Title');
+      const feature2Desc = document.getElementById('feature2Desc');
+      const feature3Title = document.getElementById('feature3Title');
+      const feature3Desc = document.getElementById('feature3Desc');
+
+      if (feature1Title) feature1Title.textContent = t('feature1Title');
+      if (feature1Desc) feature1Desc.textContent = t('feature1Description');
+      if (feature2Title) feature2Title.textContent = t('feature2Title');
+      if (feature2Desc) feature2Desc.textContent = t('feature2Description');
+      if (feature3Title) feature3Title.textContent = t('feature3Title');
+      if (feature3Desc) feature3Desc.textContent = t('feature3Description');
+
+      // Footer
+      const footerText = document.getElementById('footerText');
+      if (footerText) footerText.innerHTML = t('footer');
+
+      // Chatbot
+      const chatbotTitle = document.getElementById('chatbotTitle');
+      const chatbotWelcome = document.getElementById('chatbotWelcome');
+      const chatbotInput = document.getElementById('chatbotInput');
+      const chatbotSend = document.getElementById('chatbotSend');
+
+      if (chatbotTitle) chatbotTitle.textContent = t('chatbotTitle');
+      if (chatbotWelcome) chatbotWelcome.textContent = t('chatbotWelcome');
+      if (chatbotInput) chatbotInput.placeholder = t('chatbotPlaceholder');
+      if (chatbotSend) chatbotSend.textContent = t('chatbotSend');
+    });
   </script>
 
 </body>
 </html>
+
