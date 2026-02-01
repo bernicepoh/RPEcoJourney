@@ -157,6 +157,11 @@
             <div><b>Username</b>: <%= user.userName %></div>
             <div><b>Email</b>: <%= user.email %></div>
             <div><b>Contact Number</b>: <%= user.contactNo %></div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                <b>Level</b>: 
+                <img src="/uploads/levelbadge/<%= user.levelBadge %>" style="width:25px; height:25px; border-radius:50%;">
+                Level <%= user.level %> - <%= user.levelTitle %>
+            </div>
             <br>
             <a href="/editProfile/<%= user.userID %>">
                 <button class="edit-btn">Edit Profile</button>

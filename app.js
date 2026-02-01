@@ -138,6 +138,11 @@ app.post("/comment/unblock/:commentID", checkAuthenticated, contentController.un
 // Admin/Manager block comment
 app.post('/comment/block/:id', contentController.blockComment);
 
+// Content Requests Routes
+app.get('/content-requests', checkAdmin, contentController.getContentRequests);
+app.post('/admin/content-requests/approve/:id', checkAdmin, contentController.approveContentRequest);
+app.post('/admin/content-requests/reject/:id', checkAdmin, contentController.rejectContentRequest);
+
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories 
 app.get('/categories/:id', categoryController.getCategory);     // View single category

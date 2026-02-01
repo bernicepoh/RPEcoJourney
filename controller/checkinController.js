@@ -36,11 +36,11 @@ exports.getCheckInBoard = (req, res) => {
             }
             // -----------------------------
 
-            const titles = ["Eco Novice", "Eco Learner", "Eco Seeker", "Eco Explorer", "Eco Ranger", "Eco Guardian", "Eco Warrior", "Eco Champion", "Eco Hero", "Eco Master", "Eco Legend"];
-            const badges = ["eco-novice.png", "eco-learner.png", "eco-seeker.png", "eco-explorer.png", "eco-ranger.png", "eco-guardian.png", "eco-warrior.png", "eco-champion.png", "eco-hero.png", "eco-master.png", "eco-legend.png"];
+            const titles = ["Eco Novice", "Eco Learner", "Eco Seeker", "Eco Explorer", "Eco Defender", "Eco Guardian", "Eco Warrior", "Eco Champion", "Eco Hero", "Eco Master", "Eco Legend"];
+            const badges = ["eco-novice.png", "eco-defender.png", "eco-seeker.png", "eco-explorer.png", "activist.png", "eco-guardian.png", "eco-warrior.png", "eco-champion.png", "eco-hero.png", "eco-master.png", "eco-legend.png"];
 
-            progress.levelTitle = titles[Math.min(progress.level, 10)];
-            progress.levelBadge = badges[Math.min(progress.level, 10)];
+            progress.levelTitle = titles[Math.min(progress.level - 1, 10)];
+            progress.levelBadge = badges[Math.min(progress.level - 1, 10)];
 
             // Pass the dynamic xpNeeded to the frontend
             const currentXPNeeded = getXPRequirement(progress.level);
