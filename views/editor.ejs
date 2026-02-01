@@ -31,7 +31,7 @@
 
         .main-area { 
             flex: 1; 
-            background: #f4f7f6; 
+            background: #e8dfcf; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -76,8 +76,8 @@
             <h3 style="border-bottom: 1px solid #34495e; padding-bottom: 10px;">Project Assets</h3>
             <% projectContents.forEach(item => { %>
                 <div class="asset-item" 
-                    onclick="addEcoPostToCanvas('/uploads/<%= item.contentFile %>', '<%= item.contentTitle %>', '<%= item.contentDescription %>')">
-                    <img src="/uploads/<%= item.contentFile %>" style="width: 100%; border-radius: 3px; margin-bottom: 10px;">
+                    onclick="addEcoPostToCanvas('<%= item.contentFile %>', '<%= item.contentTitle %>', '<%= item.contentDescription %>')">
+                    <img src="<%= item.contentFile %>" style="width: 100%; border-radius: 3px; margin-bottom: 10px;">
                     <p style="font-size: 14px; font-weight: bold; margin: 0; color: #ecf0f1;"><%= item.contentTitle %></p>
                 </div>
             <% }); %>
@@ -131,10 +131,9 @@
         canvas.setHeight(1080 * 0.4);
 
         function addEcoPostToCanvas(imageUrl, title, description) {
-            const laptopIP = "http://192.168.50.89:3000"; 
-            const fullImageUrl = laptopIP + imageUrl; 
+            const laptopIP = "http://172.20.10.2:3000"; 
 
-            fabric.Image.fromURL(fullImageUrl, function(img) {
+            fabric.Image.fromURL(imageUrl, function(img) {
                 img.scaleToWidth(800);
                 img.set({ 
                     left: 560, 
