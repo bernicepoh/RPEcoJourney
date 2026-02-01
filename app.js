@@ -218,6 +218,23 @@ app.get('/homepage', homepageController.getHomePage);
 // About Us page
 app.get('/aboutus', homepageController.getAboutPage);
 
+// Digital Signage Routes
+const signageController = require('./controller/signageController');
+// Open the editor (For your laptop)
+app.get('/admin/editor', checkAdmin, signageController.getEditor);
+// Save logic (Laptop -> Database)
+app.post('/admin/save-layout', signageController.saveLayout);
+// Pi Fetch logic (Pi -> Database)
+app.get('/api/screen/:id', signageController.getScreenContent);
+// NEW: The actual page the TV shows (The "Slide Show" mode)
+app.get('/display/:id', signageController.getDisplay);
+// Allows the Pi to access these files
+app.use('/uploads', (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*"); // Allows any device to see the image
+    res.header("Access-Control-Allow-Methods", "GET");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    next();
+}, express.static(path.join(__dirname, 'public/uploads'))); 
 
 app.get('/ai/select',checkUser, (req, res) => {
     res.render('aiQuizSelect');

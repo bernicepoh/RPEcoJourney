@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RPEcoJourney Kiosk</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        /* display.ejs */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white; /* Force the body to be white */
+            overflow: hidden;
+        } 
+
+        #status-bar {
+            position: fixed; /* Keep it fixed to the screen coordinates */
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9); 
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 2px solid #27ae60;
+            /* This is the secret sauce: */
+            z-index: 999999 !important; 
+            pointer-events: none; /* Allows you to still click things under it if needed */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Ensure the canvas doesn't try to fight for the top spot */
+        .canvas-container {
+            z-index: 1 !important;
+        }
+
+        #clock { font-size: 32px; font-weight: bold; color: #2c3e50; }
+        #weather { font-size: 18px; color: #27ae60; }
+
+        #displayCanvas {
+            background-color: white; /* Force the canvas element to be white */
+        }
+
+        canvas { border: none; }
+    </style>
+</head>
+<body>
+
+    <div id="status-bar">
+        <div id="clock">00:00:00</div>
+        <div id="weather">Loading weather...</div>
+    </div>
+
+    <canvas id="kioskCanvas"></canvas>
+
+    <script>
+        // --- Keep your updateClock and updateWeather functions the same ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString();
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        async function updateWeather() {
+            const apiKey = "044b1d8608ac5be1776d1bf278acd182";
+            const city = "Singapore";
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const temp = Math.round(data.main.temp);
+                const condition = data.weather[0].main;
+                const icon = data.weather[0].icon;
+                document.getElementById('weather').innerHTML = 
+                    `${temp}°C | ${condition} <img src="http://openweathermap.org/img/wn/${icon}.png" style="vertical-align: middle; width: 30px;">`;
+            } catch (error) {
+                console.error("Weather error:", error);
+                document.getElementById('weather').innerText = "Weather Unavailable";
+            }
+        }
+        setInterval(updateWeather, 1800000);
+        updateWeather();
+
+        // --- THE UPDATED DISPLAY LOGIC ---
+
+        const canvas = new fabric.Canvas('kioskCanvas', {
+            width: window.innerWidth,
+            height: window.innerHeight,
+            interactive: false
+        });
+
+        // We store the last layout string to avoid constant refreshing if nothing changed
+        let currentLayoutString = "";
+
+        async function updateDisplay() {
+            try {
+                console.log("Checking for updates..."); // Debug log
+                const response = await fetch('/api/screen/<%= screenId %>');
+                
+                if (response.ok) {
+                    const layoutData = await response.json();
+                    
+                    // Debug: See what the server is actually sending
+                    console.log("New data received:", layoutData);
+
+                    // FORCE UPDATE: Clear and reload every time for now to ensure it works
+                    canvas.clear();
+
+                    canvas.loadFromJSON(layoutData, () => {
+                        canvas.setBackgroundColor('#ffffff', () => {
+                            // Fix CORS for any images
+                            canvas.getObjects('image').forEach(img => {
+                                img.set({ crossOrigin: 'anonymous' });
+                            });
+                            canvas.renderAll();
+                            console.log("✅ Render Complete");
+                        });
+                    }, (o, object) => {
+                        // Handle image paths
+                        if (object.type === 'image' && object.src && !object.src.startsWith('http')) {
+                            object.src = window.location.origin + object.src;
+                        }
+                    });
+                } else {
+                    console.log("⚠️ Server returned status:", response.status);
+                }
+            } catch (err) {
+                console.error("❌ Connection error:", err);
+            }
+        }
+
+        // Check for schedule changes every 10 seconds
+        setInterval(updateDisplay, 10000);
+        updateDisplay(); 
+    </script>
+</body>
+</html>
