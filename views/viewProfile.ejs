@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
+    <script src="/translations.js"></script>
 
     <style>
         body {
@@ -140,32 +141,53 @@
 
 <div class="profile-wrapper">
 
-    <div class="profile-title">Profile</div>
+    <div class="profile-title" id="profileTitle">Profile</div>
 
     <div class="profile-card">
 
         <!-- Profile Image -->
         <% if (user.image) { %>
-            <img src="<%= user.image %>" alt="Profile Picture">
+            <img src="/uploads/<%= user.image %>" alt="Profile Picture">
             
         <% } else { %>
-            <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769803913/defaultUser_jzwft8.png" alt="Profile Picture">
+            <img src="/uploads/defaultUser.png" alt="Profile Picture">
         <% } %>
 
       
         <div class="profile-info">
-            <div><b>Username</b>: <%= user.userName %></div>
-            <div><b>Email</b>: <%= user.email %></div>
-            <div><b>Contact Number</b>: <%= user.contactNo %></div>
+            <div><b id="usernameLabel">Username</b>: <%= user.userName %></div>
+            <div><b id="emailLabel">Email</b>: <%= user.email %></div>
+            <div><b id="contactLabel">Contact Number</b>: <%= user.contactNo %></div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+                <b>Level</b>: 
+                <img src="/uploads/levelbadge/<%= user.levelBadge %>" style="width:25px; height:25px; border-radius:50%;">
+                Level <%= user.level %> - <%= user.levelTitle %>
+            </div>
             <br>
             <a href="/editProfile/<%= user.userID %>">
-                <button class="edit-btn">Edit Profile</button>
+                <button class="edit-btn" id="editProfileBtn">Edit Profile</button>
             </a>
         </div>
 
     </div>
 
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const profileTitle = document.getElementById('profileTitle');
+        const usernameLabel = document.getElementById('usernameLabel');
+        const emailLabel = document.getElementById('emailLabel');
+        const contactLabel = document.getElementById('contactLabel');
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        
+        if (profileTitle) profileTitle.textContent = t('profileTitle');
+        if (usernameLabel) usernameLabel.textContent = t('usernameLabel');
+        if (emailLabel) emailLabel.textContent = t('emailLabel');
+        if (contactLabel) contactLabel.textContent = t('contactLabel');
+        if (editProfileBtn) editProfileBtn.textContent = t('editProfileBtn');
+    });
+</script>
 
 </body>
 </html>

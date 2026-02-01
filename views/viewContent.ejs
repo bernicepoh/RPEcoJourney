@@ -85,7 +85,7 @@
       max-width: 750px;
       margin: 30px auto 0;
       padding: 20px;
-      background: #f9fff7; /* 👈 solid light eco white */
+      background: white; /* 👈 solid light eco white */
       border-radius: 14px;
       border: 1px solid #cfe6cf;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
@@ -108,7 +108,7 @@
       font-size: 0.95em;
       line-height: 1.6;
       border-radius: 10px;
-      border: 1.5px solid #a7cfa9;
+      border: 2px solid #a7cfa9;
       background-color: #ffffff;
       color: #2c2c2c;
       resize: vertical;
@@ -316,7 +316,7 @@
 
   <div class="comment-box blocked" style="display:flex; gap:12px;">
     <img
-      src="<%= c.userImage || 'default-avatar.png' %>"
+      src="/uploads/<%= c.userImage || 'default-avatar.png' %>"
       class="comment-avatar"
     >
 
@@ -361,7 +361,7 @@
 
       <!-- ✅ AVATAR IS BACK -->
       <img
-        src="<%= c.userImage || 'default-avatar.png' %>"
+        src="/uploads/<%= c.userImage || 'default-avatar.png' %>"
         class="comment-avatar"
       >
 
@@ -414,10 +414,10 @@
               </button>
             <% } %>
 
-            <!-- 🚫 BLOCK (ADMIN ON OTHER USERS ONLY) -->
+            <!-- 🚫 BLOCK (ADMIN / MANAGER ON OTHER USERS ONLY) -->
             <% if (
               sessionUser.userID !== c.userID &&
-              ['Admin'].includes(sessionUser.userType)
+              ['Admin','Manager'].includes(sessionUser.userType)
             ) { %>
               <form
                 action="/comment/block/<%= c.commentID %>"

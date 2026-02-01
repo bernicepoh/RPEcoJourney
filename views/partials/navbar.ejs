@@ -1,5 +1,5 @@
 <nav>
-  <a href="/adminDashboard">
+  <a href="/adminDashboard" style="flex-shrink: 0;">
     <h1>RPEcoJourney</h1>
   </a>
 
@@ -7,41 +7,119 @@
 
     <% if (user && user.userType !== "Guest") { %>  
       <!-- NORMAL USER NAV LINKS -->
-      <li><a href="/homepage">Home</a></li>
-      <li><a href="/aboutus">About Us</a></li>
-      <li><a href="/categories">Categories</a></li>
+      <li><a href="/homepage" class="nav-home">Home</a></li>
+      <li><a href="/aboutus" class="nav-about">About Us</a></li>
+      <li><a href="/categories" class="nav-browse">Browse Content</a></li>
     <% } %>
 
     <!-- BOTH user + guest can see Quiz -->
-    <li><a href="/ai/select">Quiz Me!</a></li>
+    <li><a href="/ai/select" class="nav-quiz">Quiz Me!</a></li>
 
   </ul>
 
   <% if (user && user.userType !== "Guest") { %>
     <ul>
-      <li><a href="/viewProfile/<%= user.userID %>">Profile</a></li>
-      <li><a href="/">Logout</a></li>
+      <!-- Language Switcher -->
+      <li>
+        <select id="languageSelector" onchange="changeLanguage(this.value)">
+          <option value="en" <%= currentLanguage === 'en' ? 'selected' : '' %>>🇬🇧 English</option>
+          <option value="ms" <%= currentLanguage === 'ms' ? 'selected' : '' %>>🇲🇾 Bahasa Melayu</option>
+          <option value="ta" <%= currentLanguage === 'ta' ? 'selected' : '' %>>🇮🇳 தமிழ்</option>
+          <option value="zh" <%= currentLanguage === 'zh' ? 'selected' : '' %>>🇨🇳 中文</option>
+        </select>
+      </li>
+      <li><a href="/viewProfile/<%= user.userID %>" class="nav-profile">Profile</a></li>
+      <li><a href="#" id="logoutBtn" class="nav-logout">Logout</a></li>
     </ul>
   <% } %>
 
 </nav>
 
+
+<form id="languageForm" action="/change-language" method="POST" style="display:none;">
+  <input type="hidden" name="language" id="languageInput">
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/translations.js"></script>
+
+<script>
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const navHome = document.querySelector('.nav-home');
+    const navAbout = document.querySelector('.nav-about');
+    const navBrowse = document.querySelector('.nav-browse');
+    const navQuiz = document.querySelector('.nav-quiz');
+    const navProfile = document.querySelector('.nav-profile');
+    const navLogout = document.querySelector('.nav-logout');
+
+    if (navHome) navHome.textContent = t('home');
+    if (navAbout) navAbout.textContent = t('aboutUs');
+    if (navBrowse) navBrowse.textContent = t('browseContent');
+    if (navQuiz) navQuiz.textContent = t('quizMe');
+    if (navProfile) navProfile.textContent = t('profile');
+    if (navLogout) navLogout.textContent = t('logout');
+  });
+
+  // Language change function
+  function changeLanguage(lang) {
+    document.getElementById('languageInput').value = lang;
+    document.getElementById('languageForm').submit();
+  }
+
+  // Logout confirmation
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      Swal.fire({
+        title: t('areYouSure'),
+        text: t('logoutText'),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#4CAF50',
+        cancelButtonColor: '#4CAF50',
+        confirmButtonText: t('yesLogout'),
+        cancelButtonText: t('noStay')
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/';
+        }
+      });
+    });
+  }
+</script>
+
 <style>
+  /* Remove default spacing */
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
   nav {
     background-color: #0b3d1b;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.2rem 2.5rem;
+    padding: 1rem 3rem;
     font-family: 'Georgia', serif;
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+    top: 0;
+    left: 0;
   }
 
   nav h1 {
     margin: 0;
-    font-size: 2.3rem;
+    font-size: 1.8rem;
     font-weight: 900;
     letter-spacing: 1px;
     color: white;
+    white-space: nowrap;
   }
 
   nav a {
@@ -51,18 +129,20 @@
   nav ul {
     list-style: none;
     display: flex;
-    gap: 45px;
+    gap: 2rem;
     margin: 0;
     padding: 0;
+    align-items: center;
   }
 
   nav ul li a {
     color: white;
     text-decoration: none;
     font-style: italic;
-    font-size: 1.4rem;
+    font-size: 1rem;
     font-weight: 700;
     transition: all 0.25s ease-in-out;
+    white-space: nowrap;
   }
 
   nav ul li a:hover {
@@ -70,9 +150,32 @@
     color: #1a1a1a;
   }
 
+  /* Language selector styling */
+  #languageSelector {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border: 2px solid #0b2535;
+    border-radius: 8px;
+    background-color: white;
+    color: #0b2535;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  #languageSelector:hover {
+    background-color: #f0f0f0;
+    border-color: #003b2b;
+  }
+
+  #languageSelector:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.3);
+  }
+
   .profile-pic {
-    width: 75px;
-    height: 75px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #0b2535;

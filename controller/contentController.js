@@ -1,13 +1,21 @@
 const db = require('../db');
 const nodemailer = require('nodemailer');
+const { translateText, translateMultiple } = require('../middleware/translator');
+const missionController = require("./missionController");
 const { isUnsafeComment } = require("../hfModeration");
+const { cloudinary } = require("../cloudinary");
 
 // ============================
 // GET CONTENT BY content_type
 // ============================
-exports.getContentByContentType = (req, res) => {
+exports.getContentByContentType = async (req, res) => {
     const contentTypeID = req.params.id;
     const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
+    const currentLang = req.session.language || req.cookies.language || 'en';
+    
+    console.log('🌐 Current Language:', currentLang);
+    console.log('📝 Session Language:', req.session.language);
+    console.log('🍪 Cookie Language:', req.cookies.language);
 
     const sql = `SELECT 
                     c.contentID, 
@@ -45,16 +53,29 @@ exports.getContentByContentType = (req, res) => {
 
                 FROM content c
                 JOIN content_type cat
-                    ON c.contentTypeID = cat.contentTypeID
+                ON c.contentTypeID = cat.contentTypeID
                 WHERE cat.contentTypeID = ?
             `;
 
-    db.query(sql, [userID, contentTypeID], (error, results) => {
+    db.query(sql, [userID, contentTypeID], async (error, results) => {
         if (error) {
             console.log("🔥 SQL ERROR:", error);
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
+            // Translate content if not English
+            if (currentLang !== 'en') {
+                console.log('🔄 Translating content to:', currentLang);
+                for (let item of results) {
+                    console.log('📖 Original contentTypeDescription:', item.contentTypeDescription);
+                    item.contentTitle = await translateText(item.contentTitle, currentLang);
+                    item.contentDescription = await translateText(item.contentDescription, currentLang);
+                    item.contentTypeName = await translateText(item.contentTypeName, currentLang);
+                    item.contentTypeDescription = await translateText(item.contentTypeDescription, currentLang);
+                    console.log('✅ Translated contentTypeDescription:', item.contentTypeDescription);
+                }
+            }
+
             // Use data from first item for content type info
             const contentTypeInfo = {
                 contentTypeName: results[0].contentTypeName,
@@ -69,15 +90,25 @@ exports.getContentByContentType = (req, res) => {
         } else {
             // No content, but still try to get content_type info for banner, etc.
             const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
-            db.query(catSql, [contentTypeID], (catError, catRows) => {
+            db.query(catSql, [contentTypeID], async (catError, catRows) => {
                 if (catError || catRows.length === 0) {
                     return res.status(404).send('content type not found');
                 }
+
+                let contentTypeName = catRows[0].contentTypeName;
+                let contentTypeDescription = catRows[0].contentTypeDescription;
+
+                // Translate if not English
+                if (currentLang !== 'en') {
+                    contentTypeName = await translateText(contentTypeName, currentLang);
+                    contentTypeDescription = await translateText(contentTypeDescription, currentLang);
+                }
+
                 const contentTypeInfo = {
                     contentTypeName: catRows[0].contentTypeName,
                     contentTypeDescription: catRows[0].contentTypeDescription,
-                    contentTypeImage: catRows[0].contentTypeImage,
-                };
+                    contentTypeImage: catRows[0].contentTypeImage
+                };  
                 res.render('viewContentByContentType', {
                     contentType: contentTypeInfo,
                     contentList: [],
@@ -107,7 +138,6 @@ exports.toggleLike = (req, res) => {
     `;
 
     db.query(checkSql, [userID, contentID], (err, rows) => {
-
         console.log("📌 SQL rows found:", rows);
         console.log("📌 SQL error:", err);
 
@@ -133,7 +163,7 @@ exports.toggleLike = (req, res) => {
                 if (updateErr) return res.status(500).json({ success: false });
 
                 const countSql = `
-                    SELECT COUNT(*) AS likeCount 
+                    SELECT COUNT(*) AS likeCount
                     FROM engagement 
                     WHERE contentID = ? AND likes = 1
                 `;
@@ -166,7 +196,7 @@ exports.toggleLike = (req, res) => {
                 if (insErr) return res.status(500).json({ success: false });
 
                 const countSql = `
-                    SELECT COUNT(*) AS likeCount 
+                    SELECT COUNT(*) AS likeCount
                     FROM engagement 
                     WHERE contentID = ? AND likes = 1
                 `;
@@ -188,25 +218,6 @@ exports.toggleLike = (req, res) => {
     });
 };
 
-// exports.getLikesList = (req, res) => {
-//     const contentID = req.params.id;
-
-//     const sql = `
-//         SELECT u.userName, u.profilePic, u.userID
-//         FROM engagement e
-//         JOIN user u ON e.userID = u.userID
-//         WHERE e.contentID = ? AND e.likes = 1
-//     `;
-
-//     db.query(sql, [contentID], (err, rows) => {
-//         if (err) return res.status(500).json({ success: false });
-
-//         res.json({
-//             success: true,
-//             users: rows
-//         });
-//     });
-// };
 
 // ============================
 // POSTING OF COMMENT 
@@ -254,6 +265,7 @@ exports.postComment = async (req, res) => {
     }
 };
 
+
 // ============================
 // SHARE BUTTON
 // ============================
@@ -290,6 +302,7 @@ exports.trackShare = (req, res) => {
     });
 };
 
+
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
 
@@ -314,7 +327,7 @@ exports.getContent = (req, res) => {
     `;
 
     const commentSql = `
-            SELECT 
+        SELECT 
                 e.engagementID AS commentID,
                 e.comments AS commentText,
                 e.isBlocked,
@@ -384,6 +397,7 @@ exports.getContent = (req, res) => {
     });
 };
 
+
 // ======================================
 // BLOCKED COMMENT - ADMIN/MANAGER ONLY
 // ======================================
@@ -402,10 +416,11 @@ exports.blockComment = (req, res) => {
     WHERE engagementID = ?
   `;
 
-    db.query(sql, [commentID], () => {
+  db.query(sql, [commentID], () => {
         res.redirect(`/content/${contentID}?moderation=blocked`);
     });
 };
+
 
 // ======================================
 // UNBLOCK COMMENT - ADMIN / MANAGER ONLY
@@ -436,6 +451,7 @@ exports.unblockComment = (req, res) => {
   });
 };
 
+
 exports.editComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
@@ -447,7 +463,7 @@ exports.editComment = (req, res) => {
 
     // First get the contentID of this comment
     const getSQL = `
-        SELECT contentID 
+        SELECT contentID
         FROM engagement 
         WHERE engagementID = ? AND userID = ?
     `;
@@ -475,13 +491,14 @@ exports.editComment = (req, res) => {
     });
 };
 
+
 exports.deleteComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
 
     // 1) Get contentID first
     const sqlGet = `
-        SELECT contentID 
+        SELECT contentID
         FROM engagement 
         WHERE engagementID = ? AND userID = ?
     `;
@@ -510,9 +527,10 @@ exports.deleteComment = (req, res) => {
     });
 };
 
+
 exports.addContentForm = (req, res) => {
     const sql = 'SELECT * FROM content_type';
-    const user = req.session.user 
+    const user = req.session.user;
     db.query(sql, (error, results) => {
         if (error) {
             console.error("Error fetching categories:", error);
@@ -524,12 +542,13 @@ exports.addContentForm = (req, res) => {
     });
 };
 
+
 exports.addContent = (req, res) => {
     const { contentTypeID, contentTitle, contentDescription } = req.body;
-    
     const contentFile = req.file ? req.file.path : null;
-    const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
 
+    const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
+   
     // Insert the new content into the database
     db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
         if (error) {
@@ -543,6 +562,7 @@ exports.addContent = (req, res) => {
     });
 };
 
+
 const getAllCategories = (db, callback) => {
     const sql = 'SELECT * FROM content_type';
 
@@ -553,12 +573,13 @@ const getAllCategories = (db, callback) => {
         }
 
         if (results.length > 0) {
-            return callback(null, results); // Call callback with categories
+            return callback(null, results);
         } else {
             return callback(null, []); // No categories found, return empty array
         }
     });
 };
+
 
 exports.editContentForm = async (req, res) => {
     const contentID = req.params.id;
@@ -590,13 +611,14 @@ exports.editContentForm = async (req, res) => {
 
 };
 
+
 exports.editContent = (req, res) => {
 
     const contentID = req.params.id;
     const { contentTypeID, contentTitle, contentDescription } = req.body;
     let contentFile = req.body.currentFile; //retrieve current image filename
     if (req.file) { //if new image is uploaded
-        contentFile = req.file.path ; // set image to be new image filename
+        contentFile = req.file.filename; // set image to be new image filename
     }
     console.log("new file: " + contentFile);
     const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
@@ -616,32 +638,73 @@ exports.editContent = (req, res) => {
     });
 };
 
-exports.deleteContent = (req, res) => {
+
+exports.deleteContent = async (req, res) => {
     const contentID = req.params.id;
-    // First, get the categoryID of the content
-    const getCategorySql = 'SELECT contentTypeID FROM content WHERE contentID = ?';
-    db.query(getCategorySql, [contentID], (getError, getResults) => {
-        if (getError) {
-            console.error("Error fetching contentTypeID:", getError);
-            return res.status(500).send('Error deleting content');
-        }
+    
+    try {
+        const getContentSql = 'SELECT contentFile, contentTypeID FROM content WHERE contentID = ?';
+        const [getResults] = await db.promise().query(getContentSql, [contentID]);
+        
         if (getResults.length === 0) {
-            return res.status(404).send('Content not found');
+            req.flash('error', 'Content not found');
+            return res.redirect('/manageContent');
         }
+        
+        const contentFile = getResults[0].contentFile;
         const contentTypeID = getResults[0].contentTypeID;
-        // Now delete the content
-        const deleteSql = 'DELETE FROM content WHERE contentID = ?';
-        db.query(deleteSql, [contentID], (deleteError, deleteResults) => {
-            if (deleteError) {
-                console.error("Error deleting content:", deleteError);
-                return res.status(500).send('Error deleting content');
-            } else {
-                // Redirect to viewContentBycontent_type for the content_type
-                req.flash('success', 'Content deleted successfully!');
-                res.redirect(`/manageContent`);
+        
+        const publicIdMatch = contentFile.match(/\/(?:image|raw|video)\/upload\/v\d+\/(.*)$/);
+        if (!publicIdMatch) {
+            console.error('Could not extract public_id from:', contentFile);
+        } else {
+            const publicId = publicIdMatch[1]; // "uploads/filename.docx"
+            
+            try {
+                await new Promise((resolve, reject) => {
+                    cloudinary.uploader.destroy(publicId, { 
+                        invalidate: true 
+                    }, (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    });
+                });
+                console.log(`Deleted original file: ${publicId}`);
+            } catch (deleteError) {
+                console.error('Error deleting original file:', deleteError);
             }
-        });
-    });
+            
+            const pdfPublicId = publicId.endsWith('.pdf') ? publicId : publicId + '.pdf';
+            try {
+                await new Promise((resolve, reject) => {
+                    cloudinary.uploader.destroy(pdfPublicId, { 
+                        resource_type: "image",
+                        invalidate: true 
+                    }, (error, result) => {
+                        if (error) {
+                            if (error.http_code !== 404) reject(error); // Ignore "not found"
+                        } else {
+                            console.log(`Deleted derived PDF: ${pdfPublicId}`);
+                        }
+                        resolve(result);
+                    });
+                });
+            } catch (pdfError) {
+                console.error('Error deleting PDF (might not exist):', pdfError.message);
+            }
+        }
+        
+        const deleteSql = 'DELETE FROM content WHERE contentID = ?';
+        await db.promise().query(deleteSql, [contentID]);
+        
+        req.flash('success', 'Content deleted successfully!');
+        res.redirect('/manageContent');
+        
+    } catch (error) {
+        console.error("Error deleting content:", error);
+        req.flash('error', 'Error deleting content');
+        res.redirect('/manageContent');
+    }
 };
 
 // contentController.js
@@ -665,6 +728,6 @@ exports.manageContent = (req, res) => {
             flashError: req.flash("error") });
         } else {
             res.status(404).send('No content');
-        }   
+        }
     });
 };

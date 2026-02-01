@@ -2,19 +2,39 @@
 <html>
 <head>
     <title>Select Quiz Difficulty</title>
+    <script src="/translations.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             background-color: #e8dfcf;
             background-size: cover;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: white;
-            padding: 30px;
-            text-align: center;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .page-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: calc(100vh - 100px);
+            padding: 30px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
         }
 
         .container {
@@ -26,10 +46,15 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
 
-        h2 { margin-bottom: 10px; color: #4CAF50; }
-        p { margin-bottom: 25px; font-size: 14px; color: #ddd; }
+        h2 { margin-bottom: 10px; color: #4CAF50; text-align: center; }
+        p { margin-bottom: 25px; font-size: 14px; color: #ddd; text-align: center; }
 
-        label { display: block; text-align: left; margin-top: 15px; font-weight: bold; }
+        label { 
+            display: block; 
+            text-align: left; 
+            margin-top: 15px; 
+            font-weight: bold; 
+        }
 
         select, button {
             width: 100%;
@@ -40,7 +65,11 @@
             font-size: 16px;
         }
 
-        select { background: white; color: #333; cursor: pointer; }
+        select { 
+            background: white; 
+            color: #333; 
+            cursor: pointer; 
+        }
 
         button {
             background: #4CAF50;
@@ -51,7 +80,10 @@
             margin-top: 25px;
         }
 
-        button:hover { background: #45a049; transform: translateY(-2px); }
+        button:hover { 
+            background: #45a049; 
+            transform: translateY(-2px); 
+        }
 
         /* LOADING SPINNER */
         #loadingOverlay {
@@ -79,33 +111,85 @@
             margin-bottom: 12px;
         }
 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin { 
+            100% { transform: rotate(360deg); } 
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 90%;
+                padding: 30px 20px;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
 
+<%- include('partials/navbar') %>
+
 <div id="loadingOverlay">
     <div class="spinner"></div>
-    <p><b>Generating your Sustainability Quiz...</b></p>
+    <p id="loadingText"><b>Generating your Sustainability Quiz...</b></p>
 </div>
 
-<div class="container">
-    <h2>Ready for a Challenge?</h2>
-    <p>Select your level and let the AI test your knowledge!</p>
+<div class="page-wrapper">
+    <div class="container">
+        <h2 id="quizHeading">Ready for a Challenge?</h2>
+        <p id="quizSubtitle">Select your level and let the AI test your knowledge!</p>
 
-    <form id="aiForm" action="/ai/start" method="POST">
+        <form id="aiForm" action="/ai/start" method="POST">
 
-        <label>Select Difficulty:</label>
-        <select name="difficulty" required>
-            <option value="">-- Choose Difficulty --</option>
-            <option value="1">Easy</option>
-            <option value="2">Medium</option>
-            <option value="3">Hard</option>
-        </select>
+            <label id="difficultyLabel">Select Difficulty:</label>
+            <select name="difficulty" id="difficultySelect" required>
+                <option value="" id="chooseDifficulty">-- Choose Difficulty --</option>
+                <option value="1" id="easyOption">Easy</option>
+                <option value="2" id="mediumOption">Medium</option>
+                <option value="3" id="hardOption">Hard</option>
+            </select>
 
-        <button id="startBtn" type="submit">Start Quiz</button>
-    </form>
+            <button id="startBtn" type="submit">Start Quiz</button>
+        </form>
+    </div>
 </div>
+
+<script>
+    const form = document.getElementById("aiForm");
+    const overlay = document.getElementById("loadingOverlay");
+
+    form.addEventListener("submit", function () {
+        overlay.style.display = "flex";
+    });
+
+    // Translate page content on load
+    document.addEventListener('DOMContentLoaded', () => {
+        const loadingText = document.getElementById('loadingText');
+        const quizHeading = document.getElementById('quizHeading');
+        const quizSubtitle = document.getElementById('quizSubtitle');
+        const difficultyLabel = document.getElementById('difficultyLabel');
+        const chooseDifficulty = document.getElementById('chooseDifficulty');
+        const easyOption = document.getElementById('easyOption');
+        const mediumOption = document.getElementById('mediumOption');
+        const hardOption = document.getElementById('hardOption');
+        const startBtn = document.getElementById('startBtn');
+
+        if (loadingText) loadingText.innerHTML = '<b>' + t('generating') + '</b>';
+        if (quizHeading) quizHeading.textContent = t('quizHeading');
+        if (quizSubtitle) quizSubtitle.textContent = t('quizSubtitle');
+        if (difficultyLabel) difficultyLabel.textContent = t('selectDifficulty');
+        if (chooseDifficulty) chooseDifficulty.textContent = t('chooseDifficulty');
+        if (easyOption) easyOption.textContent = t('easy');
+        if (mediumOption) mediumOption.textContent = t('medium');
+        if (hardOption) hardOption.textContent = t('hard');
+        if (startBtn) startBtn.textContent = t('startQuiz');
+    });
+</script>
+
+</body>
+</html>
 
 <script>
     const form = document.getElementById("aiForm");

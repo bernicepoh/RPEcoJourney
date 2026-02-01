@@ -4,7 +4,7 @@ const checkAuthenticated = (req, res, next) => {
         return next();
     } else {
         req.flash('error', 'Please log in to view this resource');
-        res.redirect('/');
+        return res.redirect('/');
     }
 };
 
@@ -15,7 +15,7 @@ const checkAdmin = (req, res, next) => {
         return next();
     } else {
         console.log("User DO NOT have admin rights");
-        res.redirect('/homepage');
+        return res.redirect('/homepage');
     }
 };
 
@@ -27,7 +27,7 @@ const checkManager = (req, res, next) => {
     } else {
         console.log("User DO NOT have manager rights");
         req.flash('error', 'Manager access only');
-        
+        return res.redirect('/401');
     }
 };
 
@@ -41,7 +41,7 @@ const allowAdminOrManager = (req, res, next) => {
     } else {
         console.log("Access denied: Not Admin/Manager");
         req.flash('error', 'Only Admin or Manager can perform this action');
-        
+        return res.redirect('/401');
     }
 };
 
@@ -53,7 +53,7 @@ const checkUser = (req, res, next) => {
     } else {
         console.log("This function is for users only.");
         req.flash('error', 'This function is for users only.');
-       
+        return res.redirect('/401');
     }
 };
 
@@ -79,7 +79,7 @@ const allowAdminManagerWriter = (req, res, next) => {
     } else {
         console.log("Access denied: Not Admin/Manager/writer");
         req.flash('error', 'Only Admin or Manager can perform this action');
-        
+        return res.redirect('/401');
     }
 };
 
@@ -92,9 +92,15 @@ const allowAdminOrWriter = (req, res, next) => {
     } else {
         console.log("Access denied: Not Admin/Manager");
         req.flash('error', 'Only Admin or Manager can perform this action');
-        
+        return res.redirect('/401');
     }
 };
+
+
+
+
+        
+       
 
 module.exports = {
     checkAuthenticated,

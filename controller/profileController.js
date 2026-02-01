@@ -99,7 +99,7 @@ exports.updateProfile = (req, res) => {
             const oldPath = "./public/uploads/" + Image;
             if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
           }
-          Image = req.file.path; // use new image
+          Image = req.file.filename; // use new image
         }
 
         // Update profile
@@ -207,8 +207,15 @@ exports.getViewProfile = (req, res) => {
         }
 
         if (results.length > 0) {
+            const titles = ["Eco Novice", "Eco Learner", "Eco Seeker", "Eco Explorer", "Eco Defender", "Eco Guardian", "Eco Warrior", "Eco Champion", "Eco Hero", "Eco Master", "Eco Legend"];
+            const badges = ["eco-novice.png", "eco-defender.png", "eco-seeker.png", "eco-explorer.png", "activist.png", "eco-guardian.png", "eco-warrior.png", "eco-champion.png", "eco-hero.png", "eco-master.png", "eco-legend.png"];
+            
+            const user = results[0];
+            user.levelTitle = titles[Math.min(user.level - 1, 10)];
+            user.levelBadge = badges[Math.min(user.level - 1, 10)];
+            
             res.render('viewProfile', { 
-                user: results[0],
+                user: user,
                 error: req.flash("error") || [],
                 success: req.flash("success") || []
             });
@@ -217,3 +224,4 @@ exports.getViewProfile = (req, res) => {
         }
     });
 };
+

@@ -159,3 +159,8 @@ exports.getWordMeaning = async (req, res) => {
     missionController.completeMission(req.session.user.userID, 'Learn a New Eco Word');
     res.json({ meaning: result.response.text() });
 };
+
+
+
+
+

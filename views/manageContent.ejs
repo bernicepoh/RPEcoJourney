@@ -133,26 +133,26 @@
                             <% const ext = c.contentFile?.split('.').pop().toLowerCase(); %>
 
                             <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
-                                <img src="<%= c.contentFile %>">
+                                <img src="/uploads/<%= c.contentFile %>">
                             <% } else if (ext === 'pdf') { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
+                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
+                                    <img src="/uploads/pdf.png" style="width:150px;">
                                 </a>
                             <% } else if (['doc','docx'].includes(ext)) { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
+                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
+                                    <img src="/uploads/word.png" style="width:150px;">
                                 </a>
                             <% } else if (['ppt','pptx'].includes(ext)) { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
+                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
+                                    <img src="/uploads/ppt.png" style="width:150px;">
                                 </a>
                             <% } else if (['mp4','mov','avi'].includes(ext)) { %>
                                 <video autoplay loop muted playsinline>
-                                    <source src="<%= c.contentFile %>">
+                                    <source src="/uploads/<%= c.contentFile %>">
                                 </video>
                             <% } else { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
+                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
+                                    <img src="/uploads/file.png" style="width:150px;">
                                 </a>
                             <% } %>
                         </div>

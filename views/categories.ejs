@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RPEcoJourney | Categories</title>
   <link rel="stylesheet" href="/css/style.css">
+  <script src="/translations.js"></script>
   <style>
     body {
       background-color: #e8dfcf;
@@ -154,8 +155,8 @@
 
     <section class="intro">
       <div class="intro-text">
-        <h2>RP Sustainability</h2>
-        <p>
+        <h2 id="rpSustainabilityTitle">RP Sustainability</h2>
+        <p id="rpSustainabilityDesc">
           At RP, we are committed to embracing sustainability, and our RP Green Plan lays out the roadmap for our sustainability journey.
           The RP Green Plan is strategically designed to embed sustainability into everything we do
           whether it's our daily operations, practices, initiatives, or even what we teach in our classes.
@@ -169,8 +170,6 @@
     <% if (categories && categories.length) { %>
 
       <% categories.forEach(c => { %>
-
-        <% if (c.contentTypeName === "Uncategorized") { return; } %>
 
         <div class="category-card">
 
@@ -199,14 +198,28 @@
       <% }) %>
 
     <% } else { %>
-      <p>No categories yet. Please add some data.</p>
+      <p id="noCategoriesMsg">No categories yet. Please add some data.</p>
     <% } %>
 
   </main>
 
-  <footer>
+  <footer id="categoriesFooter">
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const rpSustainabilityTitle = document.getElementById('rpSustainabilityTitle');
+      const rpSustainabilityDesc = document.getElementById('rpSustainabilityDesc');
+      const noCategoriesMsg = document.getElementById('noCategoriesMsg');
+      const categoriesFooter = document.getElementById('categoriesFooter');
+      
+      if (rpSustainabilityTitle) rpSustainabilityTitle.textContent = t('rpSustainabilityTitle');
+      if (rpSustainabilityDesc) rpSustainabilityDesc.textContent = t('rpSustainabilityDesc');
+      if (noCategoriesMsg) noCategoriesMsg.textContent = t('noCategoriesMsg');
+      if (categoriesFooter) categoriesFooter.innerHTML = t('footer');
+    });
+  </script>
 
 </body>
 </html>

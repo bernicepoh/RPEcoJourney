@@ -19,72 +19,15 @@
       padding: 0;
     }
 
-    /* ------------------------ HAMBURGER BUTTON ------------------------ */
-    #menu-btn {
-      position: fixed;
-      top: 85px; 
-      left: 25px;
-      font-size: 28px;
-      cursor: pointer;
-      z-index: 2000;
-      background: rgba(255,255,255,0.85);
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
-    /* ------------------------ SIDEBAR ------------------------ */
-    .sidebar {
-      width: 260px;
-      background-color: #733E24; 
-      color: white;
-      min-height: 100vh;
-      padding: 30px 20px;
-      position: fixed;
-      top: 0;
-      left: -260px; 
-      transition: 0.3s ease;
-      z-index: 1500;
-    }
-
-    .sidebar.active {
-      left: 0;
-    }
-
-    .sidebar h2 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 30px;
-      text-align: center;
-    }
-
-    .sidebar a {
-      display: block;
-      padding: 12px 15px;
-      margin: 8px 0;
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      background: rgba(255, 255, 255, 0.12);
-      border-radius: 8px;
-      transition: 0.2s;
-    }
-
-    .sidebar a:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: translateX(5px);
-    }
-
     /* ------------------------ MAIN CONTENT ------------------------ */
     .main-content {
       padding: 40px 30px;
-      transition: 0.3s ease;
     }
 
-    /* HERO INSIDE SAME CONTAINER AS CARDS */
+    /* HERO SECTION */
     .hero {
-      margin-top: 10px;   /* just vertical spacing */
-      margin-bottom: 20px;
+      margin-top: 10px;
+      margin-bottom: 30px;
     }
 
     .hero h1 {
@@ -103,6 +46,7 @@
       border-radius: 15px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
       transition: 0.3s ease;
+      height: 100%;
     }
 
     .card:hover {
@@ -115,47 +59,93 @@
       font-size: 1.3rem;
       font-weight: 700;
     }
+
+    .workspace-card {
+      background: linear-gradient(135deg, #733E24 0%, #8B4E36 100%);
+      color: white;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      min-height: 150px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .workspace-card:hover {
+      background: linear-gradient(135deg, #8B4E36 0%, #733E24 100%);
+      color: white;
+    }
+
+    .workspace-card .card-icon {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    .workspace-card .card-title {
+      color: white;
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      color: #0b2535;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.5);
+    }
   </style>
 </head>
 
 <body>
-
-  <!-- NAVBAR -->
-  <%- include('partials/navbar') %>
-
-  <!-- HAMBURGER BUTTON -->
-  <div id="menu-btn">☰</div>
-
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <h2>Workspace</h2>
-
-    <% if (userType === 'Writer' || userType === 'Admin') { %>
-      <a href="/manageContent">Manage Content</a>
-    <% } %>
-
-    <% if (userType === 'Manager' || userType === 'Admin') { %>
-      <a href="/manageQuizCategories">Manage Quiz</a>
-      <a href="/manageCategories">Manage Categories</a>
-    <% } %>
 
     <% if (userType === 'Admin') { %>
       <a href="/adminUsers">Manage Users</a>
       <a href="/admin/editor" class="btn-workspace">Manage Digital Signage</a>
     <% } %>
   </div>
+  <!-- NAVBAR -->
+  <%- include('partials/navbar') %>
 
   <!-- MAIN CONTENT -->
   <div class="main-content">
 
-    <!-- NOW HERO + CARDS SHARE SAME CONTAINER -->
-    <div class="container-fluid mt-4" style="max-width:1100px;">
+    <div class="container-fluid mt-4" style="max-width:1200px;">
 
       <section class="hero">
         <% if (userName) { %>
           <h1>Welcome, <%= userName %><br><%= userType %> Workspace</h1>
         <% } %>
       </section>
+
+      <!-- WORKSPACE CARDS SECTION -->
+      <h2 class="section-title">📂 Workspace</h2>
+      <div class="row g-4 mb-5">
+        
+        <% if (userType === 'Writer' || userType === 'Manager' || userType === 'Admin') { %>
+          <div class="col-md-4">
+            <a href="/manageContent" class="card workspace-card text-decoration-none">
+              <div class="card-icon">📝</div>
+              <h5 class="card-title">Manage Content</h5>
+            </a>
+          </div>
+        <% } %>
+
+        <% if (userType === 'Admin') { %>
+          <div class="col-md-4">
+            <a href="/adminUsers" class="card workspace-card text-decoration-none">
+              <div class="card-icon">👥</div>
+              <h5 class="card-title">Manage Users</h5>
+            </a>
+          </div>
+        <% } %>
+
+      </div>
+
+      <!-- STATISTICS SECTION -->
+      <h2 class="section-title">📊 Statistics</h2>
 
       <div class="row g-4">
 
@@ -187,23 +177,13 @@
           <li class="mb-2">📨 Feedback Tickets — <b>0</b></li>
         </ul>
 
-        <a href="/requestPage" class="btn btn-success" style="background:#4CAF50; border-radius:8px;">
+        <a href="/content-requests" class="btn btn-success" style="background:#4CAF50; border-radius:8px;">
           Go to Requests Page
         </a>
       </div>
 
     </div>
   </div>
-
-  <!-- SIDEBAR TOGGLE SCRIPT -->
-  <script>
-    const menuBtn = document.getElementById('menu-btn');
-    const sidebar = document.getElementById('sidebar');
-
-    menuBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('active');
-    });
-  </script>
 
   <!-- SweetAlert -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -219,5 +199,25 @@
   </script>
   <% } %>
 
+  <!-- Access Denied Alert -->
+  <% const errors = flash('error'); %>
+  <% if (errors && errors.length > 0) { %>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: 'Access Denied',
+      text: '<%= errors[0] %>',
+      confirmButtonColor: '#733E24',
+      confirmButtonText: 'OK'
+    });
+  </script>
+  <% } %>
+
 </body>
 </html>
+
+
+
+
+
+

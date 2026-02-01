@@ -421,8 +421,8 @@ exports.getAllUsers = (req, res) => {
     console.log('Only one field provided');
     return res.render('adminUsers', {
       users: [],
-      uuccess: [],
-      sser,
+      user,
+      success: [],
       error: 'Both email and contact number are required for search.',
       searchEmail: email,
       searchContactNo: contactNo
@@ -450,3 +450,59 @@ exports.getAllUsers = (req, res) => {
     });
   }
 };
+
+exports.deleteUser = (req, res) => {
+  const userID = req.params.id;
+  const currentUser = req.session.user;
+
+  console.log('Attempting to delete user with UserID:', userID);
+
+  // Prevent admin from deleting themselves
+  if (currentUser && currentUser.userID == userID) {
+    req.flash('error', 'You cannot delete your own account.');
+    return res.redirect('/adminUsers');
+  }
+
+  // First, check if the user exists
+  const checkSql = 'SELECT userName FROM user WHERE UserID = ?';
+  db.query(checkSql, [userID], (error, results) => {
+    if (error) {
+      console.error('Database Query Error:', error.message);
+      req.flash('error', 'Error checking user.');
+      return res.redirect('/adminUsers');
+    }
+
+    if (results.length === 0) {
+      req.flash('error', 'User not found.');
+      return res.redirect('/adminUsers');
+    }
+
+    const userName = results[0].userName;
+
+    // Try to delete the user directly - the database should handle cascading deletes
+    const deleteSql = 'DELETE FROM user WHERE UserID = ?';
+    db.query(deleteSql, [userID], (error, result) => {
+      if (error) {
+        console.error('Database Delete Error:', error);
+        console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
+        req.flash('error', `Cannot delete user: ${error.message}`);
+        return res.redirect('/adminUsers');
+      }
+
+      console.log('User deleted successfully:', userName);
+      const deletionTime = new Date().toLocaleString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit', 
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true 
+      });
+      req.flash('success', `User "${userName}" has been deleted successfully at ${deletionTime}.`);
+      res.redirect('/adminUsers');
+    });
+  });
+};
+

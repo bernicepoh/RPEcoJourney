@@ -10,14 +10,24 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
-  params: {
-    folder: 'uploads',
-    allowed_formats: [
-      'jpg', 'jpeg', 'png', 'gif',
-      'pdf', 'docx', 'pptx',
-      'mp4'
-    ],
-    resource_type: 'auto'
+  params: async (req, file) => {
+    const ext = file.originalname.split('.').pop().toLowerCase();
+    const isOfficeFile = ['doc','docx','ppt','pptx','xls','xlsx'].includes(ext);
+    
+    return {
+      folder: 'uploads',
+      allowed_formats: [
+        'jpg', 'jpeg', 'png', 'gif', 'webp',
+        'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx',
+        'mp4', 'mov', 'avi'
+      ],
+      resource_type: 'auto',
+      // ONLY trigger Aspose for Office files
+      ...(isOfficeFile && { 
+        raw_convert: "aspose",
+        resource_type: "raw"  // Force raw for Office files
+      })
+    };
   }
 });
 
