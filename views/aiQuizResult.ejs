@@ -224,26 +224,26 @@
 
     <div class="left-panel">
 
-        <h1>🎉 Quiz Completed!</h1>
+        <h1 id="quizCompletedTitle">🎉 Quiz Completed!</h1>
 
         <div class="score-box">
             <%= score %> / 50
-            <div style="font-size:14px;">Total Points Scored</div>
+            <div style="font-size:14px;" id="totalPointsText">Total Points Scored</div>
         </div>
 
         <div class="xp-box">
-            🌟 Total XP: <%= xpEarned %><br>
+            🌟 <span id="totalXpLabel">Total XP:</span> <%= xpEarned %><br>
             <span style="font-size: 12px; font-weight: normal; color: #795548;">
-                (Base: <%= score * 2 %> + Streak: <%= streakBonus %> + Perfect: <%= perfectBonus %>)
+                (<span id="baseLabel">Base:</span> <%= score * 2 %> + <span id="streakLabel">Streak:</span> <%= streakBonus %> + <span id="perfectLabel">Perfect:</span> <%= perfectBonus %>)
             </span>
         </div>
 
-        <div class="stat-box"><span>📅 Completed On:</span> <b><%= completedAt %></b></div>
-        <div class="stat-box"><span>⏳ User:</span> <b><%= user.userName %></b></div>
-        <div class="stat-box"><span>🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
+        <div class="stat-box"><span id="completedOnLabel">📅 Completed On:</span> <b><%= completedAt %></b></div>
+        <div class="stat-box"><span id="userLabel">⏳ User:</span> <b><%= user.userName %></b></div>
+        <div class="stat-box"><span id="difficultyLabel">🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
 
         <div class="btn-area">
-            <button class="btn home-btn" onclick="window.location.href='/ai/select'">Back to Quiz Selection</button>
+            <button class="btn home-btn" id="backToQuizBtn" onclick="window.location.href='/ai/select'">Back to Quiz Selection</button>
         </div>
 
     </div>
@@ -489,17 +489,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (quizCompletedTitle) quizCompletedTitle.textContent = t('quizCompleted');
     if (totalPointsText) totalPointsText.textContent = t('totalPointsScored');
-    if (totalXpLabel) totalXpLabel.textContent = t('totalXP');
-    if (baseLabel) baseLabel.textContent = t('base');
-    if (streakLabel) streakLabel.textContent = t('streakBonus');
-    if (perfectLabel) perfectLabel.textContent = t('perfectBonus');
-    if (completedOnLabel) completedOnLabel.innerHTML = t('completedOn');
-    if (userLabel) userLabel.innerHTML = t('userLabel');
-    if (difficultyLabel) difficultyLabel.innerHTML = t('difficultyLevel');
+    if (totalXpLabel) totalXpLabel.textContent = t('totalXP') + ':';
+    if (baseLabel) baseLabel.textContent = t('base') + ':';
+    if (streakLabel) streakLabel.textContent = t('streak') + ':';
+    if (perfectLabel) perfectLabel.textContent = t('perfect') + ':';
+    if (completedOnLabel) completedOnLabel.innerHTML = '📅 ' + t('completedOn') + ':';
+    if (userLabel) userLabel.innerHTML = '⏳ ' + t('userLabel') + ':';
+    if (difficultyLabel) difficultyLabel.innerHTML = '🔥 ' + t('difficultyLevel') + ':';
     if (backToQuizBtn) backToQuizBtn.textContent = t('backToQuizSelection');
-    if (speedLabel) speedLabel.textContent = t('speed');
-    if (prevBtn) prevBtn.innerHTML = t('prev');
-    if (nextBtn) nextBtn.innerHTML = t('next');
+    if (speedLabel) speedLabel.textContent = t('speed') + ':';
+    if (prevBtn) prevBtn.innerHTML = '← ' + t('prev');
+    if (nextBtn) nextBtn.innerHTML = t('next') + ' →';
     if (aiTitle) aiTitle.textContent = t('aiFeedback');
     if (aiFeedback && aiFeedback.textContent === 'Loading AI insights...') {
         aiFeedback.textContent = t('loadingInsights');
