@@ -1,4 +1,4 @@
-// AI moderation using Hugging Face (replaced OpenAI due to cost constraints)
+
 
 const HF_API_URL =
   "https://router.huggingface.co/hf-inference/models/unitary/toxic-bert";
@@ -16,14 +16,14 @@ async function isUnsafeComment(text) {
 
   const data = await res.json();
 
-  // Handle HF errors or model loading
+  
   if (!res.ok || data.error) {
     throw new Error(data.error || "Hugging Face inference failed");
   }
 
   const labels = Array.isArray(data[0]) ? data[0] : data;
 
-  // Thresholds (match old OpenAI strictness)
+ 
   const TOXIC_THRESHOLD = 0.7;
   const INSULT_THRESHOLD = 0.7;
   const OBSCENE_THRESHOLD = 0.6;
@@ -39,7 +39,7 @@ async function isUnsafeComment(text) {
     if (label === "obscene") obscene = item.score || 0;
   }
 
-  // Same role as OpenAI: unsafe = true / safe = false
+  
   return (
     toxic >= TOXIC_THRESHOLD ||
     insult >= INSULT_THRESHOLD ||

@@ -103,10 +103,10 @@
     <label>Category Description:</label>
     <textarea name="categoryDescription" rows="3" required><%= category.categoryDescription %></textarea>
 
-    <!-- IMAGE SECTION (Side-by-side layout) -->
+    
     <div style="display:flex; gap:40px; align-items:flex-start; margin-top:20px;">
 
-      <!-- LEFT: CURRENT IMAGE -->
+    
       <div style="flex:1; text-align:center;">
         <label><strong>Current Image:</strong></label>
         <input type="hidden" name="currentImage" value="<%= category.categoryImage %>">
@@ -132,7 +132,7 @@
         >
       </div>
 
-      <!-- RIGHT: UPLOAD NEW IMAGE -->
+      
       <div style="flex:1; text-align:center;">
         <label><strong>Upload New Image:</strong></label>
         <input type="file" name="categoryImage" accept="image/*"

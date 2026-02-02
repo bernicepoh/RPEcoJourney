@@ -25,7 +25,7 @@
       overflow-x: hidden;
     }
 
-    /* Guest Navbar Styles */
+   
     nav {
       background-color: #0b3d1b;
       display: flex;
@@ -369,7 +369,7 @@
 </head>
 
 <body>
-  <!-- Guest Navbar -->
+  
   <nav>
     <a href="/guest" style="flex-shrink: 0;">
       <h1>RPEcoJourney</h1>
@@ -449,9 +449,9 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
-    // Translate page elements on load
+    
     document.addEventListener('DOMContentLoaded', () => {
-      // Navbar
+      
       const navHome = document.getElementById('navHome');
       const navBrowse = document.getElementById('navBrowse');
       const navQuiz = document.getElementById('navQuiz');
@@ -464,16 +464,16 @@
       if (navLogin) navLogin.textContent = t('loginBtn');
       if (navRegister) navRegister.textContent = t('registerBtn');
       
-      // Hero Section
+      
       const heroTitle = document.getElementById('heroTitle');
       const heroSubtitle = document.getElementById('heroSubtitle');
       const joinBtn = document.getElementById('joinBtn');
       
       if (heroTitle) heroTitle.textContent = t('heroTitle');
       if (heroSubtitle) heroSubtitle.textContent = t('heroSubtitle');
-      if (joinBtn) joinBtn.textContent = 'Join Now'; // Could use a translation key
+      if (joinBtn) joinBtn.textContent = 'Join Now'; 
       
-      // Features
+     
       const feature1Title = document.getElementById('feature1Title');
       const feature1Desc = document.getElementById('feature1Desc');
       const feature2Title = document.getElementById('feature2Title');
@@ -488,11 +488,11 @@
       if (feature3Title) feature3Title.textContent = t('feature3Title');
       if (feature3Desc) feature3Desc.textContent = t('feature3Description');
       
-      // Footer
+      
       const footerText = document.getElementById('footerText');
       if (footerText) footerText.innerHTML = t('footer');
       
-      // Chatbot
+      
       const chatbotTitle = document.getElementById('chatbotTitle');
       const chatbotWelcomeMsg = document.getElementById('chatbotWelcomeMsg');
       const chatbotInput = document.getElementById('chatbotInput');
@@ -504,7 +504,7 @@
       if (chatbotSend) chatbotSend.textContent = t('chatbotSend');
     });
 
-    // Show login prompt for restricted features
+    
     function showLoginPrompt(feature) {
       const featureNames = {
         'quiz': t('quizMe') || 'Quiz',
@@ -530,7 +530,7 @@
       });
     }
 
-    // Chatbot functionality
+    
     const chatbotButton = document.getElementById('chatbotButton');
     const chatbotContainer = document.getElementById('chatbotContainer');
     const chatbotClose = document.getElementById('chatbotClose');
@@ -539,7 +539,7 @@
     const chatbotMessages = document.getElementById('chatbotMessages');
     const WEBHOOK_URL = 'https://n8ngc.codeblazar.org/webhook/99d64e35-fddc-4af9-9aef-ef519d6a0cc6/chat';
 
-    // Generate or retrieve session ID
+   
     function getSessionId() {
       let sessionId = sessionStorage.getItem('chatbot_session_id');
       if (!sessionId) {
@@ -549,10 +549,10 @@
       return sessionId;
     }
 
-    // Store conversation history
+    
     let conversationHistory = [];
 
-    // Toggle chatbot
+    
     chatbotButton.addEventListener('click', () => {
       chatbotContainer.classList.toggle('active');
       if (chatbotContainer.classList.contains('active')) {
@@ -564,7 +564,7 @@
       chatbotContainer.classList.remove('active');
     });
 
-    // Add message to chat
+    
     function addMessage(text, isUser = false) {
       const messageDiv = document.createElement('div');
       messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
@@ -576,11 +576,11 @@
       messageDiv.appendChild(bubbleDiv);
       chatbotMessages.appendChild(messageDiv);
       
-      // Scroll to bottom
+      
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
 
-    // Show typing indicator
+    
     function showTypingIndicator() {
       const typingDiv = document.createElement('div');
       typingDiv.className = 'chat-message bot';
@@ -600,7 +600,7 @@
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
 
-    // Remove typing indicator
+   
     function removeTypingIndicator() {
       const typingIndicator = document.getElementById('typing-indicator');
       if (typingIndicator) {
@@ -608,24 +608,24 @@
       }
     }
 
-    // Send message to webhook
+    
     async function sendMessage() {
       const message = chatbotInput.value.trim();
       if (!message) return;
 
-      // Add user message
+     
       addMessage(message, true);
       chatbotInput.value = '';
       chatbotSend.disabled = true;
 
-      // Add to conversation history
+      
       conversationHistory.push({
         role: 'user',
         content: message,
         timestamp: new Date().toISOString()
       });
 
-      // Show typing indicator
+      
       showTypingIndicator();
 
       try {
@@ -651,7 +651,7 @@
 
         const data = await response.json();
         
-        // Handle the response
+        
         let botResponse = '';
         if (data.output) {
           botResponse = data.output;
@@ -667,7 +667,7 @@
           botResponse = 'I received your message! How else can I help you?';
         }
 
-        // Add to conversation history
+       
         conversationHistory.push({
           role: 'assistant',
           content: botResponse,
@@ -685,10 +685,10 @@
       }
     }
 
-    // Send message on button click
+    
     chatbotSend.addEventListener('click', sendMessage);
 
-    // Send message on Enter key
+    
     chatbotInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         sendMessage();

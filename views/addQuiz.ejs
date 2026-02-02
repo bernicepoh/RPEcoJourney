@@ -20,7 +20,7 @@
       padding: 20px;
     }
 
-    /* LEFT MENU */
+   
     .add-quiz-left {
       width: 300px;
       background: #e3f5e1;
@@ -61,7 +61,7 @@
       transform: translateX(5px);
     }
 
-    /* MAIN PANEL */
+   
     .add-quiz-main {
       flex: 1;
     }
@@ -165,7 +165,7 @@
 <form action="/createQuiz" method="POST">
   <div class="add-quiz-wrapper">
 
-    <!-- LEFT MENU -->
+   
     <div class="add-quiz-left">
       <h2>Quiz Builder</h2>
       <button type="button" class="menu-btn active" onclick="showPanel('titlePanel', this)">Add Title</button>
@@ -176,7 +176,7 @@
       <button type="button" class="menu-btn" onclick="showPanel('timerPanel', this)">Timer</button>
     </div>
 
-    <!-- MAIN PANEL -->
+   
     <div class="add-quiz-main">
 
       <div class="preview-section">
@@ -193,7 +193,7 @@
         </div>
       </div>
 
-      <!-- PANELS -->
+      
       <div class="panel active-panel" id="titlePanel">
         <label>Quiz Title</label>
         <input type="text" name="title" required oninput="updateTitle(this.value)">

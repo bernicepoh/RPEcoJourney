@@ -22,10 +22,10 @@ const storage = new CloudinaryStorage({
         'mp4', 'mov', 'avi'
       ],
       resource_type: 'auto',
-      // ONLY trigger Aspose for Office files
+      
       ...(isOfficeFile && { 
         raw_convert: "aspose",
-        resource_type: "raw"  // Force raw for Office files
+        resource_type: "raw"  
       })
     };
   }
@@ -34,7 +34,7 @@ const storage = new CloudinaryStorage({
 const parser = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB
+    fileSize: 10 * 1024 * 1024 
   }
 });
 

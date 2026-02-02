@@ -462,8 +462,9 @@
     <div class="comment-actions">
       <button type="submit" class="publish-btn" id="publishBtn">Publish</button>
     </div>
- 
-      <a href="/contentType/<%= content.contentTypeID %>/content" class="back-link" id="backLink">← Back to <%= content.contentTypeName %></a>
+  </form>
+
+  <a href="/contentType/<%= content.contentTypeID %>/content" class="back-link" id="backLink">← Back to <%= content.contentTypeName %></a>
  
     <% } else { %>
       <p>No content found.</p>
