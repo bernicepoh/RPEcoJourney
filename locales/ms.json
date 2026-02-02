@@ -195,5 +195,103 @@
     "shareTitle": "Kandungan RPEcoJourney",
     "shareText": "Lihat kandungan kemampanan ini!",
     "linkCopied": "Pautan disalin!",
-    "loginToLike": "Sila log masuk untuk menyukai siaran."  }
+    "loginToLike": "Sila log masuk untuk menyukai siaran."
+  },
+  "contentManagement": {
+    "publishContent": "Terbitkan Kandungan",
+    "updateContent": "Kemas Kini Kandungan",
+    "category": "Kategori",
+    "selectCategory": "Pilih kategori",
+    "title": "Tajuk",
+    "inputTitle": "Masukkan Tajuk",
+    "description": "Keterangan",
+    "inputDescription": "Masukkan Keterangan",
+    "contentTitle": "Tajuk Kandungan",
+    "contentDescription": "Keterangan Kandungan",
+    "fileUpload": "Muat Naik Fail",
+    "newFile": "Fail Baru",
+    "currentFile": "Fail Semasa",
+    "selectFile": "Pilih Fail",
+    "submit": "Hantar",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "publishBtn": "Terbitkan Kandungan",
+    "updateBtn": "Kemas Kini Kandungan",
+    "addContent": "Tambah Kandungan",
+    "editContent": "Edit Kandungan",
+    "deleteContent": "Padam Kandungan",
+    "viewContent": "Lihat Kandungan"
+  },
+  "forms": {
+    "username": "Nama Pengguna",
+    "email": "E-mel",
+    "password": "Kata Laluan",
+    "confirmPassword": "Sahkan Kata Laluan",
+    "contactNumber": "Nombor Telefon",
+    "newPassword": "Kata Laluan Baru",
+    "registerBtn": "Daftar",
+    "loginBtn": "Log Masuk",
+    "forgotPasswordBtn": "Lupa Kata Laluan?",
+    "createAccount": "Buat akaun",
+    "continueAsGuest": "Teruskan sebagai Tetamu"
+  },
+  "admin": {
+    "adminDashboard": "Papan Pemuka Admin",
+    "manageUsers": "Urus Pengguna",
+    "manageContent": "Urus Kandungan",
+    "addCategory": "Tambah Kategori",
+    "editCategory": "Edit Kategori",
+    "deleteCategory": "Padam Kategori",
+    "categoryName": "Nama Kategori",
+    "dashboard": "Papan Pemuka",
+    "totalUsers": "Jumlah Pengguna",
+    "totalContent": "Jumlah Kandungan",
+    "totalCategories": "Jumlah Kategori"
+  },
+  "roles": {
+    "admin": "Admin",
+    "manager": "Pengurus",
+    "writer": "Penulis",
+    "user": "Pengguna",
+    "role": "Peranan",
+    "editRole": "Edit Peranan",
+    "changeRole": "Ubah Peranan"
+  },
+  "requests": {
+    "contentRequests": "Permintaan Kandungan",
+    "managerRequests": "Permintaan Pengurus",
+    "requests": "Permintaan",
+    "pending": "Menunggu",
+    "approved": "Diluluskan",
+    "rejected": "Ditolak",
+    "approve": "Luluskan",
+    "reject": "Tolak"
+  },
+  "actions": {
+    "view": "Lihat",
+    "edit": "Edit",
+    "delete": "Padam",
+    "confirm": "Sahkan",
+    "close": "Tutup",
+    "noResults": "Tiada hasil yang ditemui",
+    "loading": "Memuatkan...",
+    "errorMessage": "Ralat telah berlaku. Sila cuba lagi.",
+    "successMessage": "Operasi selesai berjaya."
+  },
+  "editor": {
+    "editor": "Editor",
+    "screenID": "ID Skrin",
+    "layoutName": "Nama Susun Atur",
+    "dailySpecial": "Istimewa Harian",
+    "startTime": "Masa Mula",
+    "endTime": "Masa Tamat",
+    "saveLayout": "Simpan Susun Atur"
+  },
+  "xpAndMissions": {
+    "xpHistory": "Sejarah XP",
+    "missions": "Misi",
+    "completedMissions": "Misi Selesai",
+    "activeMissions": "Misi Aktif",
+    "totalXP": "Jumlah XP"
+  }
 }

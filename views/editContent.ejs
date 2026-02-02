@@ -3,8 +3,9 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.js" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/translations.js"></script>
         <title>RPEcoJourney - Update content</title>
 
         <style>
@@ -123,16 +124,16 @@
 
     <div class="container text-center mt-4">
         <br>
-        <h2>Update Content</h2>
+        <h2 id="pageTitle">Update Content</h2>
         <div class="text-center">
             <form action="/editContent/<%=content.contentID%>" method="POST" enctype="multipart/form-data" class="form-container">
-            <label for="contentTitle">Content Title:</label>
+            <label for="contentTitle" id="titleLabel">Content Title:</label>
             <input type="text" id="contentTitle" name="contentTitle" value="<%=content.contentTitle%>" required class="custom-input">
 
-            <label for="contentDescription">Content Description:</label>
+            <label for="contentDescription" id="descLabel">Content Description:</label>
             <textarea id="contentDescription" name="contentDescription" required class="custom-textarea" oninput="autoExpand(this)"><%=content.contentDescription%></textarea>
 
-            <label for="categoryID">Category:</label>
+            <label for="categoryID" id="categoryLabel">Category:</label>
             <select name="contentTypeID" id="contentTypeID" required class="custom-input">
               <option value="">Select category</option> <!-- Empty value ensures it's invalid -->
               <option value="1">Environmental</option>
@@ -140,40 +141,40 @@
               <option value="3">Governance</option>
             </select>
             
-                <label for="file">Current File:</label>
+                <label for="file" id="currentFileLabel">Current File:</label>
                 <input type="hidden" name="currentFile" value = "<%= content.contentFile %>" >
                 <div class="file-box">
                   <% const ext = content.contentFile.split('.').pop().toLowerCase(); %>
                   <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
-                  <img src="/uploads/<%= content.contentFile %>">
+                  <img src="<%= content.contentFile %>">
                   <% } else if (ext === 'pdf') { %>
-                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
-                      <img class="file-icon" src="/uploads/pdf.png" style="width: 150px;">
+                  <a href="<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="<%= content.contentFile %>" style="width: 150px;">
                   </a>
                   <% } else if (['doc','docx'].includes(ext)) { %>
-                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
-                      <img class="file-icon" src="/uploads/word.png" style="width: 150px;">
+                  <a href="<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="<%= content.contentFile %>" style="width: 150px;">
                   </a>
                   <% } else if (['ppt','pptx'].includes(ext)) { %>
-                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
-                      <img class="file-icon" src="/uploads/ppt.png" style="width: 150px;">
+                  <a href="<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="<%= content.contentFile %>" style="width: 150px;">
                   </a>
                   <% } else if (['mp4','mov','avi'].includes(ext)) { %>
                   <video autoplay loop muted playsinline>
-                      <source src="/uploads/<%= content.contentFile %>">
+                      <source src="<%= content.contentFile %>">
                   </video>
                   <% } else { %>
-                  <a href="/uploads/<%= content.contentFile %>" target="_blank">
-                      <img class="file-icon" src="/uploads/file.png" style="width: 150px;">
+                  <a href="<%= content.contentFile %>" target="_blank">
+                      <img class="file-icon" src="<%= content.contentFile %>" style="width: 150px;">
                   </a>
                   <% } %>
                 </div>
                 
-                <label for="contentFile">New File:</label>
+                <label for="contentFile" id="newFileLabel">New File:</label>
                 <input type="file" id="contentFile" name="contentFile">
 
                 <div class="submit-container">
-                    <button type="submit">Update Content</button> <br><br>
+                    <button type="submit" id="submitBtn">Update Content</button> <br><br>
                 </div>
             </form>
         </div>
@@ -187,6 +188,23 @@
 
         window.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('textarea').forEach(autoExpand);
+        
+        // Translate form labels
+        const pageTitle = document.getElementById('pageTitle');
+        const titleLabel = document.getElementById('titleLabel');
+        const descLabel = document.getElementById('descLabel');
+        const categoryLabel = document.getElementById('categoryLabel');
+        const currentFileLabel = document.getElementById('currentFileLabel');
+        const newFileLabel = document.getElementById('newFileLabel');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (pageTitle) pageTitle.textContent = t('updateContent');
+        if (titleLabel) titleLabel.textContent = t('contentTitle') + ':';
+        if (descLabel) descLabel.textContent = t('contentDescription') + ':';
+        if (categoryLabel) categoryLabel.textContent = t('category') + ':';
+        if (currentFileLabel) currentFileLabel.textContent = t('currentFile') + ':';
+        if (newFileLabel) newFileLabel.textContent = t('newFile') + ':';
+        if (submitBtn) submitBtn.textContent = t('updateBtn');
         });
     </script>
 
