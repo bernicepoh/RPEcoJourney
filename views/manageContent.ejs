@@ -31,7 +31,7 @@
             transform: translateY(-2px);
         }
 
-        /* Content Card (using category-card format) */
+      
         .content-card {
             height: 380px;
             display: flex;
@@ -44,7 +44,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         }
 
-        /* File preview box (KEEPING ORIGINAL FILE PREVIEW CSS) */
+       
         .file-box {
             width: 100%;
             height: 180px;
@@ -62,7 +62,7 @@
             border-radius: 10px;
         }
 
-        /* Title text */
+       
         .content-title {
             font-size: 1.1rem;
             font-weight: bold;
@@ -77,7 +77,7 @@
             padding-top: 0;
         }
 
-        /* Edit button (same style as category page) */
+        
         .edit-btn {
             font-size: 0.8rem !important;
             font-weight: 500 !important;
@@ -89,7 +89,7 @@
             width: auto !important;
         }
 
-        /* Delete button */
+       
         .delete-btn {
             background-color: #e63946;
             color: white;
@@ -137,31 +137,47 @@
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-sm content-card">
 
-                        <div class="file-box">
+                        <div class="file-box" style="position: relative; background:#f5f5f5; border-radius:10px;">
                             <% const ext = c.contentFile?.split('.').pop().toLowerCase(); %>
 
                             <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
-                                <img src="/uploads/<%= c.contentFile %>">
-                            <% } else if (ext === 'pdf') { %>
-                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
-                                    <img src="/uploads/pdf.png" style="width:150px;">
-                                </a>
-                            <% } else if (['doc','docx'].includes(ext)) { %>
-                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
-                                    <img src="/uploads/word.png" style="width:150px;">
-                                </a>
-                            <% } else if (['ppt','pptx'].includes(ext)) { %>
-                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
-                                    <img src="/uploads/ppt.png" style="width:150px;">
-                                </a>
+                                <!-- Image preview -->
+                                <img src="<%= c.contentFile %>?w=250&h=180&c=fill" alt="<%= c.contentTitle %>" style="width:100%; height:100%; object-fit:contain;">
+                            
                             <% } else if (['mp4','mov','avi'].includes(ext)) { %>
-                                <video autoplay loop muted playsinline>
-                                    <source src="/uploads/<%= c.contentFile %>">
+                                <!-- Video preview with play button -->
+                                <video style="width:100%; height:100%; object-fit:cover;" muted>
+                                    <source src="<%= c.contentFile %>">
                                 </video>
+                                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:35px;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;">▶️</div>
+                            
+                            <% } else if (ext === 'pdf') { %>
+                                <!-- PDF preview: show document icon -->
+                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#d32f2f;">
+                                  <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1770013716/pdf_bnonfy.png" alt="PDF" style="width:80px; height:80px; object-fit:contain;">
+                                </div>
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(211,47,47,0.9);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;">PDF</div>
+                            
+                            <% } else if (['doc','docx'].includes(ext)) { %>
+                                <!-- Word document preview -->
+                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#1976d2;">
+                                  <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1770013716/word_kwqxym.png" alt="Word Document" style="width:80px; height:80px; object-fit:contain;">
+                                </div>
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(25,118,210,0.9);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;">DOC</div>
+                            
+                            <% } else if (['ppt','pptx'].includes(ext)) { %>
+                                <!-- PowerPoint preview -->
+                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#d84315;">
+                                  <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1770013716/ppt_s5awbi.png" alt="PowerPoint Document" style="width:80px; height:80px; object-fit:contain;">
+                                </div>
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(216,67,21,0.9);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;">PPT</div>
+                            
                             <% } else { %>
-                                <a href="/uploads/<%= c.contentFile %>" target="_blank">
-                                    <img src="/uploads/file.png" style="width:150px;">
-                                </a>
+                                <!-- Fallback generic file -->
+                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#757575;">
+                                  <div style="font-size:50px;">📃</div>
+                                  <div style="margin-top:8px; font-weight:bold; color:#666; font-size:12px;"><%= ext?.toUpperCase() || 'FILE' %></div>
+                                </div>
                             <% } %>
                         </div>
 
@@ -192,10 +208,10 @@
 
     </div>
 
-    <!-- SweetAlert2 -->
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- FLASH SUCCESS / ERROR -->
+    
     <script>
         const successMsg = "<%= flashSuccess ? flashSuccess : '' %>";
         const errorMsg   = "<%= flashError ? flashError : '' %>";
@@ -224,7 +240,7 @@
         }
     </script>
 
-    <!-- SWEETALERT DELETE CONFIRM -->
+    
     <script>
         function confirmDelete(id) {
             Swal.fire({

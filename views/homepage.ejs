@@ -362,7 +362,7 @@ Swal.fire({
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
 
-  <!-- Chatbot Widget -->
+  
   <button class="chatbot-button" id="chatbotButton">
     💬
   </button>
@@ -406,7 +406,7 @@ Swal.fire({
   <% } %>
 
   <script>
-    // Chatbot functionality
+    
     const chatbotButton = document.getElementById('chatbotButton');
     const chatbotContainer = document.getElementById('chatbotContainer');
     const chatbotClose = document.getElementById('chatbotClose');
@@ -415,7 +415,7 @@ Swal.fire({
     const chatbotMessages = document.getElementById('chatbotMessages');
     const WEBHOOK_URL = 'https://n8ngc.codeblazar.org/webhook/99d64e35-fddc-4af9-9aef-ef519d6a0cc6/chat';
 
-    // Generate or retrieve session ID
+    
     function getSessionId() {
       let sessionId = sessionStorage.getItem('chatbot_session_id');
       if (!sessionId) {
@@ -425,10 +425,10 @@ Swal.fire({
       return sessionId;
     }
 
-    // Store conversation history
+    
     let conversationHistory = [];
 
-    // Toggle chatbot
+    
     chatbotButton.addEventListener('click', () => {
       chatbotContainer.classList.toggle('active');
       if (chatbotContainer.classList.contains('active')) {
@@ -440,7 +440,7 @@ Swal.fire({
       chatbotContainer.classList.remove('active');
     });
 
-    // Add message to chat
+    
     function addMessage(text, isUser = false) {
       const messageDiv = document.createElement('div');
       messageDiv.className = `chat-message ${isUser ? 'user' : 'bot'}`;
@@ -452,11 +452,11 @@ Swal.fire({
       messageDiv.appendChild(bubbleDiv);
       chatbotMessages.appendChild(messageDiv);
       
-      // Scroll to bottom
+      
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
 
-    // Show typing indicator
+    
     function showTypingIndicator() {
       const typingDiv = document.createElement('div');
       typingDiv.className = 'chat-message bot';
@@ -476,7 +476,7 @@ Swal.fire({
       chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
     }
 
-    // Remove typing indicator
+    
     function removeTypingIndicator() {
       const typingIndicator = document.getElementById('typing-indicator');
       if (typingIndicator) {
@@ -484,24 +484,24 @@ Swal.fire({
       }
     }
 
-    // Send message to webhook
+    
     async function sendMessage() {
       const message = chatbotInput.value.trim();
       if (!message) return;
 
-      // Add user message
+      
       addMessage(message, true);
       chatbotInput.value = '';
       chatbotSend.disabled = true;
 
-      // Add to conversation history
+      
       conversationHistory.push({
         role: 'user',
         content: message,
         timestamp: new Date().toISOString()
       });
 
-      // Show typing indicator
+      
       showTypingIndicator();
 
       try {
@@ -527,7 +527,7 @@ Swal.fire({
 
         const data = await response.json();
         
-        // Handle the response - adjust based on your webhook response structure
+        
         let botResponse = '';
         if (data.output) {
           botResponse = data.output;
@@ -543,7 +543,7 @@ Swal.fire({
           botResponse = 'I received your message! How else can I help you?';
         }
 
-        // Add to conversation history
+        
         conversationHistory.push({
           role: 'assistant',
           content: botResponse,
@@ -561,19 +561,19 @@ Swal.fire({
       }
     }
 
-    // Send message on button click
+    
     chatbotSend.addEventListener('click', sendMessage);
 
-    // Send message on Enter key
+    
     chatbotInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         sendMessage();
       }
     });
 
-    // Translate page content on load
+    
     document.addEventListener('DOMContentLoaded', () => {
-      // Hero section
+      
       const heroTitle = document.getElementById('heroTitle');
       const heroSubtitle = document.getElementById('heroSubtitle');
       const getStartedBtn = document.getElementById('getStartedBtn');
@@ -582,7 +582,7 @@ Swal.fire({
       if (heroSubtitle) heroSubtitle.textContent = t('heroSubtitle');
       if (getStartedBtn) getStartedBtn.textContent = t('getStarted');
 
-      // Features
+      
       const feature1Title = document.getElementById('feature1Title');
       const feature1Desc = document.getElementById('feature1Desc');
       const feature2Title = document.getElementById('feature2Title');
@@ -597,11 +597,11 @@ Swal.fire({
       if (feature3Title) feature3Title.textContent = t('feature3Title');
       if (feature3Desc) feature3Desc.textContent = t('feature3Description');
 
-      // Footer
+      
       const footerText = document.getElementById('footerText');
       if (footerText) footerText.innerHTML = t('footer');
 
-      // Chatbot
+      
       const chatbotTitle = document.getElementById('chatbotTitle');
       const chatbotWelcome = document.getElementById('chatbotWelcome');
       const chatbotInput = document.getElementById('chatbotInput');

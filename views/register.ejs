@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Register</title>
+  <script src="/translations.js"></script>
 
   <style>
     body {
@@ -13,7 +14,7 @@
       display: flex;
     }
 
-    /* LEFT SIDE (same as login) */
+    
     .left-panel {
       width: 50%;
       background: url("/uploads/login.png") no-repeat center center;
@@ -25,7 +26,7 @@
       justify-content: center;
     }
 
-    /* DARK OVERLAY */
+    
     .left-panel::before {
       content: "";
       position: absolute;
@@ -52,7 +53,7 @@
       margin-bottom: 15px;
     }
 
-    /* RIGHT SIDE */
+    
     .right-panel {
       width: 50%;
       background: #e8dfcf;
@@ -182,34 +183,34 @@
 
 <body>
 
-  <!-- LEFT PANEL -->
+ 
   <div class="left-panel">
-    <h1>Join RPEcoJourney</h1>
-    <p>Start your sustainability adventure with XP, badges & missions</p>
-    <p>Create an account to begin your EcoJourney 🌱</p>
+    <h1 id="registerTitle">Join RPEcoJourney</h1>
+    <p id="registerSubtitle1">Start your sustainability adventure with XP, badges & missions</p>
+    <p id="registerSubtitle2">Create an account to begin your EcoJourney 🌱</p>
   </div>
 
-  <!-- RIGHT PANEL -->
+  
   <div class="right-panel">
     <div class="register-box">
 
-      <h1>Create Account</h1>
+      <h1 id="createAccountTitle">Create Account</h1>
 
-      <!-- Display errors -->
+      
       <% if (errors && errors.length > 0) { %>
         <% errors.forEach(err => { %>
           <div class="message error"><%= err %></div>
         <% }) %>
       <% } %>
 
-      <!-- Display success messages -->
+      
       <% if (messages && messages.length > 0) { %>
         <% messages.forEach(msg => { %>
           <div class="message success"><%= msg %></div>
         <% }) %>
       <% } %>
 
-      <!-- ERROR PROCESSING (kept exactly as your original logic) -->
+      
       <%
       const fieldErrors = {};
       if (errors) {
@@ -226,11 +227,11 @@
       }
       %>
 
-      <!-- REGISTRATION FORM -->
+      
       <form action="/register" method="POST">
 
         <div class="field-wrapper <%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>">
-          <label for="userName">Username:</label>
+          <label for="userName" id="usernameLbl">Username:</label>
           <input type="text" id="userName" name="userName"
             value="<%= formData?.userName || '' %>"
             placeholder="<%= fieldErrors.userName || 'Enter username' %>"
@@ -238,7 +239,7 @@
         </div>
 
         <div class="field-wrapper <%= fieldErrors.email ? 'error' : '' %>">
-          <label for="email">Email:</label>
+          <label for="email" id="emailLbl">Email:</label>
           <input type="email" id="email" name="email"
             value="<%= formData?.email || '' %>"
             placeholder="<%= fieldErrors.email || 'Enter your email' %>"
@@ -246,14 +247,14 @@
         </div>
 
         <div class="field-wrapper <%= fieldErrors.password ? 'error' : '' %>">
-          <label for="password">Password:</label>
+          <label for="password" id="passwordLbl">Password:</label>
           <input type="password" id="password" name="password"
             placeholder="<%= fieldErrors.password || 'Enter password' %>"
             class="<%= fieldErrors.password ? 'error' : '' %>" required>
         </div>
 
         <div class="field-wrapper <%= fieldErrors.confirmPassword ? 'error' : '' %>">
-          <label for="confirmPassword">Confirm Password:
+          <label for="confirmPassword" id="confirmPasswordLbl">Confirm Password:
             <span id="confirmIcon" class="confirm-status"></span>
           </label>
           <input type="password" id="confirmPassword" name="confirmPassword"
@@ -262,18 +263,18 @@
         </div>
 
         <div class="field-wrapper <%= fieldErrors.contactNo ? 'error' : '' %>">
-          <label for="contactNo">Contact Number:</label>
+          <label for="contactNo" id="contactNoLbl">Contact Number:</label>
           <input type="text" id="contactNo" name="contactNo"
             value="<%= formData?.contactNo || '' %>"
             placeholder="<%= fieldErrors.contactNo || 'Enter contact number' %>"
             class="<%= fieldErrors.contactNo ? 'error' : '' %>">
         </div>
 
-        <button type="submit">Register</button>
+        <button type="submit" id="registerBtn">Register</button>
       </form>
 
       <div class="login-link">
-        <p>Already have an account? <a href="/">Login here</a></p>
+        <p id="loginLinkText">Already have an account? <a href="/" id="loginLink">Login here</a></p>
       </div>
 
     </div>
@@ -283,12 +284,38 @@
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
 
-  <!-- YOUR ORIGINAL JS KEPT EXACTLY SAME -->
+  
   <script>
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      const registerTitle = document.getElementById('registerTitle');
+      const createAccountTitle = document.getElementById('createAccountTitle');
+      const usernameLbl = document.getElementById('usernameLbl');
+      const emailLbl = document.getElementById('emailLbl');
+      const passwordLbl = document.getElementById('passwordLbl');
+      const confirmPasswordLbl = document.getElementById('confirmPasswordLbl');
+      const contactNoLbl = document.getElementById('contactNoLbl');
+      const registerBtn = document.getElementById('registerBtn');
+      const loginLinkText = document.getElementById('loginLinkText');
+
+      if (registerTitle) registerTitle.textContent = t('joinRPEcoJourney');
+      if (createAccountTitle) createAccountTitle.textContent = t('createAccountTitle');
+      if (usernameLbl) usernameLbl.textContent = t('usernameLabel');
+      if (emailLbl) emailLbl.textContent = t('emailLabel');
+      if (passwordLbl) passwordLbl.textContent = t('passwordLabel');
+      if (confirmPasswordLbl) {
+        confirmPasswordLbl.innerHTML = t('confirmPasswordLabel') + ':' +
+          '<span id="confirmIcon" class="confirm-status"></span>';
+      }
+      if (contactNoLbl) contactNoLbl.textContent = t('contactNoLabel');
+      if (registerBtn) registerBtn.textContent = t('registerBtn');
+      if (loginLinkText) loginLinkText.innerHTML = t('haveAccountText') + ' <a href="/" id="loginLink">' + t('loginLink') + '</a>';
+    });
+
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
     const label = document.querySelector('label[for="confirmPassword"]');
-    label.innerHTML = 'Confirm Password: <span id="confirmIcon" class="confirm-status"></span>';
     const confirmIcon = document.getElementById('confirmIcon');
 
     function checkMatch() {

@@ -10,7 +10,7 @@ const db = mysql.createConnection({
   ssl: process.env.DB_CA ? { ca: fs.readFileSync(process.env.DB_CA) } : undefined
 });
 
-// Test on startup
+
 db.connect((err) => {
   if (err) {
     console.error('MySQL Connection failed:', err);

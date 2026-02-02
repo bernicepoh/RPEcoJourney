@@ -145,28 +145,28 @@
                     <% } %>
                 </td>
 
-                <!-- User + Picture -->
+                
                 <td>
                     <div class="user-flex">
-                        <img class="profile-pic" src="/uploads/<%= u.image %>" alt="">
+                        <img class="profile-pic" src="<%= u.image %>" alt="">
                         <%= u.userName %>
                     </div>
                 </td>
 
-                <!-- Level -->
+                
                 <td>
                     <div class="user-flex">
                         <% if (u.levelBadge) { %>
-                            <img src="/uploads/levelbadge/<%= u.levelBadge %>" style="width:25px; height:25px; border-radius:50%; margin-right:8px;" alt="Level Badge">
+                            <img src="<%= u.levelBadge %>" style="width:25px; height:25px; border-radius:50%; margin-right:8px;" alt="Level Badge">
                         <% } %>
                         Lv <%= u.level %>
                     </div>
                 </td>
 
-                <!-- XP -->
+               
                 <td><%= u.totalXP %> XP</td>
 
-                <!-- Streak -->
+              
                 <td>
                     <% if (u.streak > 0) { %>
                         <span class="fire">🔥</span> <%= u.streak %>
@@ -183,7 +183,7 @@
 </div>
 
 <script>
-    // Translate page content on load
+    
     document.addEventListener('DOMContentLoaded', () => {
         const leaderboardTitle = document.getElementById('leaderboardTitle');
         const tabOverall = document.getElementById('tabOverall');

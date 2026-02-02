@@ -66,6 +66,21 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 50px;
+            text-decoration: none;
+            color: #256b45;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            color: #1a4b32;
+        }
     </style>
 </head>
 <body>
@@ -115,6 +130,10 @@
 
             <div class="canvas-label">Signage Preview (1920 x 1080)</div>
             <canvas id="signageCanvas"></canvas>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="/adminDashboard" class="back-link" id="backLink">← Back to Admin Dashboard</a>
+            </div>
         </div>
     </div>
 

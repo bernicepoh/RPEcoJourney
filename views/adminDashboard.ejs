@@ -64,20 +64,19 @@
 
 <body>
 
-<!-- NAVBAR -->
+
 <%- include('partials/navbar') %>
 
 <div class="main-content">
 <div class="container-fluid" style="max-width:1200px;">
 
-<!-- HERO -->
 <section class="hero mb-4">
   <% if (userName) { %>
     <h1>Welcome, <%= userName %><br><%= userType %> Workspace</h1>
   <% } %>
 </section>
 
-<!-- WORKSPACE (UNCHANGED) -->
+
 <h2 class="section-title">📂 Workspace</h2>
 <div class="row g-4 mb-5">
 
@@ -110,10 +109,10 @@
 
 </div>
 
-<!-- STATISTICS -->
+
 <h2 class="section-title">📊 Statistics</h2>
 
-<!-- ORIGINAL STAT CARDS -->
+
 <div class="row g-4 mb-4">
   <div class="col-md-6">
     <div class="card p-4">
@@ -132,7 +131,7 @@
   </div>
 </div>
 
-<!-- EXTRA GA METRICS -->
+
 <div class="row g-4 mb-5">
   <div class="col-md-3">
     <div class="card p-4 text-center">
@@ -208,7 +207,7 @@
 </div>
 </div>
 
-<!-- GA FETCH -->
+
 <script>
 console.log('📋 Admin Dashboard loaded');
 console.log('User Type:', '<%= userType %>');

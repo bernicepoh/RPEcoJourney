@@ -197,5 +197,102 @@
     "shareText": "இந்த நிலைத்தன்மை உள்ளடக்கத்தைப் பாருங்கள்!",
     "linkCopied": "இணைப்பு நகலெடுக்கப்பட்டது!",
     "loginToLike": "இடுகைகளை விரும்ப தயவுசெய்து உள்நுழையவும்."
+  },
+  "contentManagement": {
+    "publishContent": "உள்ளடக்கத்தை வெளியிடு",
+    "updateContent": "உள்ளடக்கத்தை புதுப்பி",
+    "category": "வகை",
+    "selectCategory": "வகையைத் தேர்ந்தெடுக்கவும்",
+    "title": "தலைப்பு",
+    "inputTitle": "தலைப்பைத் தட்டச்சு செய்யவும்",
+    "description": "விளக்கம்",
+    "inputDescription": "விளக்கத்தைத் தட்டச்சு செய்யவும்",
+    "contentTitle": "உள்ளடக்க தலைப்பு",
+    "contentDescription": "உள்ளடக்க விளக்கம்",
+    "fileUpload": "கோப்பு பதிவேற்றம்",
+    "newFile": "புதிய கோப்பு",
+    "currentFile": "தற்போதைய கோப்பு",
+    "selectFile": "கோப்பைத் தேர்ந்தெடுக்கவும்",
+    "submit": "சமர்பிக்கவும்",
+    "save": "சேமிக்கவும்",
+    "cancel": "ரத்து செய்க",
+    "publishBtn": "உள்ளடக்கத்தை வெளியிடு",
+    "updateBtn": "உள்ளடக்கத்தை புதுப்பி",
+    "addContent": "உள்ளடக்கத்தைச் சேர்க்கவும்",
+    "editContent": "உள்ளடக்கத்தை திருத்தவும்",
+    "deleteContent": "உள்ளடக்கத்தை அழிக்கவும்",
+    "viewContent": "உள்ளடக்கத்தைப் பாருங்கள்"
+  },
+  "forms": {
+    "username": "பயனர்பெயர்",
+    "email": "மின்னஞ்சல்",
+    "password": "கடவுச்சொல்",
+    "confirmPassword": "கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+    "contactNumber": "தொடர்பு எண்",
+    "newPassword": "புதிய கடவுச்சொல்",
+    "registerBtn": "பதிவு செய்க",
+    "loginBtn": "உள்நுழைக",
+    "forgotPasswordBtn": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
+    "createAccount": "கணக்கை உருவாக்கவும்",
+    "continueAsGuest": "விருந்தினராக தொடரவும்"
+  },
+  "admin": {
+    "adminDashboard": "நிர்வாகக் கட்டளைப்பீடம்",
+    "manageUsers": "பயனர்களை நிர்வகிக்கவும்",
+    "manageContent": "உள்ளடக்கத்தை நிர்வகிக்கவும்",
+    "addCategory": "வகையைச் சேர்க்கவும்",
+    "editCategory": "வகையை திருத்தவும்",
+    "deleteCategory": "வகையை அழிக்கவும்",
+    "categoryName": "வகை பெயர்",
+    "dashboard": "கட்டளைப்பீடம்",
+    "totalUsers": "மொத்த பயனர்கள்",
+    "totalContent": "மொத்த உள்ளடக்கம்",
+    "totalCategories": "மொத்த வகைகள்"
+  },
+  "roles": {
+    "admin": "நிர்வாகக்குழு",
+    "manager": "மேலாளர்",
+    "writer": "எழுத்தாளர்",
+    "user": "பயனர்",
+    "role": "பாத்திரம்",
+    "editRole": "பாத்திரத்தை திருத்தவும்",
+    "changeRole": "பாத்திரத்தை மாற்றவும்"
+  },
+  "requests": {
+    "contentRequests": "உள்ளடக்க கோரிக்கைகள்",
+    "managerRequests": "மேலாளர் கோரிக்கைகள்",
+    "requests": "கோரிக்கைகள்",
+    "pending": "நிலுவையில்",
+    "approved": "அனுமதிக்கப்பட்ட",
+    "rejected": "நிராகரிக்கப்பட்ட",
+    "approve": "ஆமோதிக்கவும்",
+    "reject": "நிராகரிக்கவும்"
+  },
+  "actions": {
+    "view": "பார்க்கவும்",
+    "edit": "திருத்தவும்",
+    "delete": "அழிக்கவும்",
+    "confirm": "உறுதிப்படுத்தவும்",
+    "close": "மூடவும்",
+    "noResults": "எந்த முடிவுகளும் கண்டுபிடிக்கப்படவில்லை",
+    "loading": "ஏற்றுகிறது...",
+    "errorMessage": "ஒரு பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
+    "successMessage": "செயல்பாடு வெற்றிகரமாக முடிந்தது."
+  },
+  "editor": {
+    "editor": "ஆசிரியர்",
+    "screenID": "திரை அடையாளம்",
+    "layoutName": "தளவமைப்பு பெயர்",
+    "dailySpecial": "தினசரி சிறப்பு",
+    "startTime": "தொடக்க நேரம்",
+    "endTime": "முடிவு நேரம்",
+    "saveLayout": "தளவமைப்பைச் சேமிக்கவும்"
+  },
+  "xpAndMissions": {
+    "xpHistory": "XP வரலாறு",
+    "missions": "பணிகள்",
+    "completedMissions": "முடிந்த பணிகள்",
+    "activeMissions": "செயல்பட்ட பணிகள்",
+    "totalXP": "மொத்த XP"
   }
 }

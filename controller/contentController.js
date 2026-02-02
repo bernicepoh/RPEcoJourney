@@ -5,12 +5,9 @@ const missionController = require("./missionController");
 const { isUnsafeComment } = require("../hfModeration");
 const { cloudinary } = require("../cloudinary");
 
-// ============================
-// GET CONTENT BY content_type
-// ============================
 exports.getContentByContentType = async (req, res) => {
     const contentTypeID = req.params.id;
-    const userID = req.session.user ? req.session.user.userID : 0; // if no login, treat as 0
+    const userID = req.session.user ? req.session.user.userID : 0; 
     const currentLang = req.session.language || req.cookies.language || 'en';
     
     console.log('🌐 Current Language:', currentLang);
@@ -63,7 +60,6 @@ exports.getContentByContentType = async (req, res) => {
             return res.status(500).send('Error retrieving content');
         }
         if (results.length > 0) {
-            // Translate content if not English
             if (currentLang !== 'en') {
                 console.log('🔄 Translating content to:', currentLang);
                 for (let item of results) {
@@ -76,7 +72,6 @@ exports.getContentByContentType = async (req, res) => {
                 }
             }
 
-            // Use data from first item for content type info
             const contentTypeInfo = {
                 contentTypeName: results[0].contentTypeName,
                 contentTypeDescription: results[0].contentTypeDescription,
@@ -88,7 +83,6 @@ exports.getContentByContentType = async (req, res) => {
                 user: req.session.user || null
             });
         } else {
-            // No content, but still try to get content_type info for banner, etc.
             const catSql = 'SELECT * FROM content_type WHERE contentTypeID = ?';
             db.query(catSql, [contentTypeID], async (catError, catRows) => {
                 if (catError || catRows.length === 0) {
@@ -98,7 +92,6 @@ exports.getContentByContentType = async (req, res) => {
                 let contentTypeName = catRows[0].contentTypeName;
                 let contentTypeDescription = catRows[0].contentTypeDescription;
 
-                // Translate if not English
                 if (currentLang !== 'en') {
                     contentTypeName = await translateText(contentTypeName, currentLang);
                     contentTypeDescription = await translateText(contentTypeDescription, currentLang);
@@ -119,9 +112,6 @@ exports.getContentByContentType = async (req, res) => {
     });
 };
 
-// ============================
-// TOGGLE LIKE (Correct Version)
-// ============================
 exports.toggleLike = (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ success: false, notLoggedIn: true });
@@ -219,56 +209,59 @@ exports.toggleLike = (req, res) => {
 };
 
 
-// ============================
-// POSTING OF COMMENT 
-// ============================
 
 exports.postComment = async (req, res) => {
     const contentID = req.params.id;
     const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
+    console.log('📝 Post Comment Request:', { contentID, userID, commentText });
+
     const profanityRegex = /\b(f+[\W_]*u+[\W_]*c+[\W_]*k+|s+[\W_]*h+[\W_]*i+[\W_]*t+|b+[\W_]*i+[\W_]*t+[\W_]*c+[\W_]*h+|a+[\W_]*s+[\W_]*s+[\W_]*h+[\W_]*o+[\W_]*l+e+)\b/gi;
 
     if (profanityRegex.test(commentText)) {
+        console.log('🚫 Comment failed profanity check');
         return res.redirect(`/content/${contentID}?error=inappropriate`);
     }
 
     try {
-        const OpenAI = require("openai");   
-        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        // ============================
-        // Hugging Face Moderation
-        // ============================
+        console.log('🤖 Starting AI moderation...');
         const flagged = await isUnsafeComment(commentText);
+        console.log('✅ AI moderation result:', flagged);
 
         if (flagged) {
+            console.log('🚫 Comment flagged as inappropriate');
             return res.redirect(`/content/${contentID}?error=inappropriate`);
         }
 
-        // =================================
-        // Inserting of Clean Comment to DB
-        // =================================
+        console.log('💾 Inserting comment to database...');
         const sql = `
             INSERT INTO engagement (userID, contentID, comments, share) 
             VALUES (?, ?, ?, ?)
         `;
 
         db.query(sql, [userID, contentID, commentText, 0], (err) => {
-            if (err) return res.status(500).send("Failed to post comment");
+            if (err) {
+                console.error('❌ Database insertion error:', err);
+                console.error('❌ Error code:', err.code);
+                console.error('❌ Error message:', err.message);
+                console.error('❌ Error SQL:', err.sql);
+                return res.status(500).send("Failed to post comment");
+            }
+            console.log('✅ Comment posted successfully');
             res.redirect(`/content/${contentID}?success=posted`);
         });
 
     } catch (error) {
-        console.error("AI moderation error:", error);
+        console.error("❌ AI moderation error:", error);
+        console.error("❌ Error type:", error.constructor.name);
+        console.error("❌ Error message:", error.message);
+        console.error("❌ Full error stack:", error.stack);
         return res.redirect(`/content/${contentID}?error=moderation_fail`);
     }
 };
 
 
-// ============================
-// SHARE BUTTON
-// ============================
 exports.trackShare = (req, res) => {
   if (!req.session.user) {
         return res.status(401).json({ success: false });
@@ -308,10 +301,9 @@ exports.getContent = (req, res) => {
     const userID = req.session.user ? req.session.user.userID : 0;
     const userRole = req.session.user ? req.session.user.userType : 'User';
 
-    // ✅ SORT LOGIC MUST LIVE HERE
     const sort = req.query.sort || "newest";
 
-    let orderBy = "e.createdAt DESC"; // default
+    let orderBy = "e.createdAt DESC"; 
 
     if (sort === "oldest") {
         orderBy = "e.createdAt ASC";
@@ -355,6 +347,8 @@ exports.getContent = (req, res) => {
         WHERE contentID = ? AND likes = 1
     `;
 
+    const currentLang = req.session.language || req.cookies.language || 'en';
+
     db.query(contentSql, [contentID], async (err, contentRows) => {
         if (err) return res.status(500).send("Error loading content");
 
@@ -362,7 +356,15 @@ exports.getContent = (req, res) => {
             return res.status(404).send("Content not found");
         }
 
-        const content = contentRows[0];
+        let content = contentRows[0];
+
+        if (currentLang !== 'en') {
+            console.log('🔄 Translating content to:', currentLang);
+            content.contentTitle = await translateText(content.contentTitle, currentLang);
+            content.contentDescription = await translateText(content.contentDescription, currentLang);
+            content.contentTypeName = await translateText(content.contentTypeName, currentLang);
+            content.contentTypeDescription = await translateText(content.contentTypeDescription, currentLang);
+        }
 
         const viewerUserID = req.session.user ? req.session.user.userID : 0;
         const viewerRole = req.session.user ? req.session.user.userType : 'User';
@@ -375,10 +377,19 @@ exports.getContent = (req, res) => {
         db.query(
             commentSql,
             [contentID, viewerUserID, viewerRole],
-            (err2, comments) => {
+            async (err2, comments) => {
                 if (err2) { 
                     console.log("🔥 COMMENT SQL ERROR:", err2);
                     return res.status(500).send("Error loading comments");
+                }
+
+                if (currentLang !== 'en' && comments && comments.length > 0) {
+                    console.log('🔄 Translating comments to:', currentLang);
+                    for (let comment of comments) {
+                        if (comment.commentText && !comment.isBlocked) {
+                            comment.commentText = await translateText(comment.commentText, currentLang);
+                        }
+                    }
                 }
 
                 db.query(likeSql, [contentID], (err3, likeRows) => {
@@ -400,9 +411,6 @@ exports.getContent = (req, res) => {
 };
 
 
-// ======================================
-// BLOCKED COMMENT - ADMIN/MANAGER ONLY
-// ======================================
 exports.blockComment = (req, res) => {
   const commentID = req.params.id;
   const contentID = req.body.contentID;
@@ -424,13 +432,10 @@ exports.blockComment = (req, res) => {
 };
 
 
-// ======================================
-// UNBLOCK COMMENT - ADMIN / MANAGER ONLY
-// ======================================
 exports.unblockComment = (req, res) => {
   const commentID = req.params.commentID;
   const userType = req.session.user.userType;
-  const contentID = req.body.contentID; // 👈 IMPORTANT
+  const contentID = req.body.contentID; 
 
   if (!['Admin', 'Manager'].includes(userType)) {
     return res.status(403).send('Forbidden');
@@ -448,7 +453,6 @@ exports.unblockComment = (req, res) => {
       return res.status(500).send("Failed to unblock comment");
     }
 
-    // ✅ Redirect properly
     res.redirect(`/content/${contentID}?moderation=unblocked`);
   });
 };
@@ -463,7 +467,6 @@ exports.editComment = (req, res) => {
         return res.redirect("back");
     }
 
-    // First get the contentID of this comment
     const getSQL = `
         SELECT contentID
         FROM engagement 
@@ -477,7 +480,6 @@ exports.editComment = (req, res) => {
 
         const contentID = rows[0].contentID;
 
-        // Update the comment
         const updateSQL = `
             UPDATE engagement 
             SET comments = ?
@@ -487,7 +489,6 @@ exports.editComment = (req, res) => {
         db.query(updateSQL, [updatedText.trim(), commentID, userID], (err2) => {
             if (err2) return res.status(500).send("Failed to update");
 
-            // Redirect back to the SAME content page
             res.redirect(`/content/${contentID}?success=edited`);
         });
     });
@@ -498,7 +499,6 @@ exports.deleteComment = (req, res) => {
     const commentID = req.params.commentID;
     const userID = req.session.user.userID;
 
-    // 1) Get contentID first
     const sqlGet = `
         SELECT contentID
         FROM engagement 
@@ -512,7 +512,6 @@ exports.deleteComment = (req, res) => {
 
         const contentID = rows[0].contentID;
 
-        // 2) Delete the comment
         const sqlDelete = `
             DELETE FROM engagement 
             WHERE engagementID = ? AND userID = ?
@@ -523,7 +522,6 @@ exports.deleteComment = (req, res) => {
                 return res.status(500).send('Failed to delete comment');
             }
 
-            // 3) Redirect user back to content page
             res.redirect(`/content/${contentID}`);
         });
     });
@@ -538,7 +536,6 @@ exports.addContentForm = (req, res) => {
             console.error("Error fetching categories:", error);
             res.status(500).send('Error loading page');
         } else {
-            // pass the categories to the EJS template
             res.render('addContent', { user, categories: results });
         }
     });
@@ -694,16 +691,15 @@ function sendContentNotificationEmail(contentTitle, contentDescription, contentI
 const getAllCategories = (db, callback) => {
     const sql = 'SELECT * FROM content_type';
 
-    // Fetch data from MySQL
     db.query(sql, (error, results) => {
         if (error) {
-            return callback(error, null); // Call callback with error
+            return callback(error, null); 
         }
 
         if (results.length > 0) {
             return callback(null, results);
         } else {
-            return callback(null, []); // No categories found, return empty array
+            return callback(null, []); 
         }
     });
 };
@@ -711,14 +707,12 @@ const getAllCategories = (db, callback) => {
 
 exports.editContentForm = async (req, res) => {
     const contentID = req.params.id;
-    // First, fetch the categories
     getAllCategories(db, (categoriesError, categories) => {
         if (categoriesError) {
             console.error('Error retrieving categories:', categoriesError.message);
             return res.status(500).send('Error retrieving categories');
         }
 
-        // Once categories are fetched, fetch the product by ID
         const sql = 'SELECT * FROM content WHERE contentID = ?';
         db.query(sql, [contentID], (contentError, results) => {
             if (contentError) {
@@ -726,12 +720,9 @@ exports.editContentForm = async (req, res) => {
                 return res.status(500).send('Error retrieving content by ID');
             }
 
-            // Check if any product with the given ID was found
             if (results.length > 0) {
-                // Render HTML page with the product and categories data
                 res.render('editContent', { content: results[0], categories: categories });
             } else {
-                // If no product with the given ID was found, handle accordingly
                 res.status(404).send('Content not found');
             }
         });
@@ -739,39 +730,76 @@ exports.editContentForm = async (req, res) => {
 
 };
 
-
 exports.editContent = (req, res) => {
+  const contentID = req.params.id;
+  const { contentTypeID, contentTitle, contentDescription } = req.body;
+  
+  const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    const contentID = req.params.id;
-    const { contentTypeID, contentTitle, contentDescription } = req.body;
-    let contentFile = req.body.currentFile; //retrieve current image filename
-    if (req.file) { //if new image is uploaded
-        contentFile = req.file.filename; // set image to be new image filename
+  if (req.file) {
+    const fileName = req.file.originalname.toLowerCase();
+    const ext = fileName.split('.').pop();
+
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      req.flash('error', `File type ".${ext}" not allowed.`);
+      return res.redirect(`/editContent/${contentID}`);
     }
-    console.log("new file: " + contentFile);
-    const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
 
-    // Updated the content into the database
-    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error, results) => {
-        if (error) {
-            // Handle any error that occurs during the database operation
-            console.error("Error updating content:", error);
-            res.status(500).send('Error updating content');
-        } else {
-            // Send a success response
-            req.flash('success', 'Content updated successfully!');
-            res.redirect(`/manageContent`);
+    if (req.file.size > MAX_FILE_SIZE) {
+      req.flash('error', 'File size exceeds 10MB limit.');
+      return res.redirect(`/editContent/${contentID}`);
+    }
+  }
 
+  db.query('SELECT contentFile FROM content WHERE contentID = ?', [contentID], async (err, rows) => {
+    if (err) {
+      req.flash('error', 'Error updating content');
+      return res.redirect(`/editContent/${contentID}`);
+    }
+
+    const oldFile = rows[0]?.contentFile;
+
+    if (req.file && oldFile) {
+      const publicIdMatch = oldFile.match(/\/(?:image|raw|video)\/upload\/v\d+\/(.*)$/);
+      if (publicIdMatch) {
+        const publicId = publicIdMatch[1];
+        try {
+          await new Promise((resolve, reject) => {
+            cloudinary.uploader.destroy(publicId, { invalidate: true }, (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            });
+          });
+          console.log(`✅ Deleted old file: ${publicId}`);
+        } catch (deleteError) {
+          console.error('⚠️  Error deleting old file:', deleteError.message);
+          
         }
-    });
-};
+      }
+    }
 
+    const contentFile = req.file ? req.file.path : oldFile;
+    
+    const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
+    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error) => {
+      if (error) {
+        console.error("Error updating:", error);
+        req.flash('error', 'Error updating content');
+        res.redirect(`/editContent/${contentID}`);
+      } else {
+        req.flash('success', 'Content updated successfully!');
+        res.redirect('/manageContent');
+      }
+    });
+  });
+};
 
 exports.deleteContent = async (req, res) => {
     const contentID = req.params.id;
     
     try {
-        const getContentSql = 'SELECT contentFile, contentTypeID FROM content WHERE contentID = ?';
+        const getContentSql = 'SELECT contentFile FROM content WHERE contentID = ?';
         const [getResults] = await db.promise().query(getContentSql, [contentID]);
         
         if (getResults.length === 0) {
@@ -780,46 +808,32 @@ exports.deleteContent = async (req, res) => {
         }
         
         const contentFile = getResults[0].contentFile;
-        const contentTypeID = getResults[0].contentTypeID;
         
         const publicIdMatch = contentFile.match(/\/(?:image|raw|video)\/upload\/v\d+\/(.*)$/);
-        if (!publicIdMatch) {
-            console.error('Could not extract public_id from:', contentFile);
-        } else {
-            const publicId = publicIdMatch[1]; // "uploads/filename.docx"
+        
+        if (publicIdMatch) {
+            const publicId = publicIdMatch[1];
             
             try {
                 await new Promise((resolve, reject) => {
                     cloudinary.uploader.destroy(publicId, { 
-                        invalidate: true 
-                    }, (error, result) => {
-                        if (error) reject(error);
-                        else resolve(result);
-                    });
-                });
-                console.log(`Deleted original file: ${publicId}`);
-            } catch (deleteError) {
-                console.error('Error deleting original file:', deleteError);
-            }
-            
-            const pdfPublicId = publicId.endsWith('.pdf') ? publicId : publicId + '.pdf';
-            try {
-                await new Promise((resolve, reject) => {
-                    cloudinary.uploader.destroy(pdfPublicId, { 
-                        resource_type: "image",
-                        invalidate: true 
+                        invalidate: true,
+                        resource_type: 'auto'
                     }, (error, result) => {
                         if (error) {
-                            if (error.http_code !== 404) reject(error); // Ignore "not found"
+                            console.error('❌ Error deleting file:', error);
+                            reject(error);
                         } else {
-                            console.log(`Deleted derived PDF: ${pdfPublicId}`);
+                            console.log(`✅ Deleted from Cloudinary: ${publicId}`);
+                            resolve(result);
                         }
-                        resolve(result);
                     });
                 });
-            } catch (pdfError) {
-                console.error('Error deleting PDF (might not exist):', pdfError.message);
+            } catch (deleteError) {
+                console.error('⚠️  Error deleting from Cloudinary:', deleteError.message);
             }
+        } else {
+            console.warn('⚠️  Could not extract public_id from URL:', contentFile);
         }
         
         const deleteSql = 'DELETE FROM content WHERE contentID = ?';
@@ -829,13 +843,12 @@ exports.deleteContent = async (req, res) => {
         res.redirect('/manageContent');
         
     } catch (error) {
-        console.error("Error deleting content:", error);
+        console.error("❌ Error deleting content:", error);
         req.flash('error', 'Error deleting content');
         res.redirect('/manageContent');
     }
 };
 
-// contentController.js
 exports.manageContent = (req, res) => {
     const sql = `
         SELECT *

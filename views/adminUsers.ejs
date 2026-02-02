@@ -96,6 +96,21 @@
             font-size: 15px;
         }
 
+        .back-link {
+            display: inline-block;
+            margin-top: 50px;
+            text-decoration: none;
+            color: #256b45;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+            color: #1a4b32;
+        }
+
         .alert-danger {
             background-color: #ffebee;
             color: #c62828;
@@ -310,6 +325,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="container text-center mb-5">
+        <a href="/adminDashboard" class="back-link" id="backLink">← Back to Admin Dashboard</a>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
