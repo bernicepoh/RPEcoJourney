@@ -30,7 +30,6 @@ exports.login = (req, res) => {
       req.session.user = user;
       req.flash('loginSuccess', 'Login successful');
       
-      // ⭐ Automatically create progress row if missing
     const initProgress = `
         INSERT IGNORE INTO user (userID, totalXP, level, streak, CheckInDate)
         VALUES (?, 0, 1, 0, NULL)
@@ -53,7 +52,6 @@ exports.login = (req, res) => {
 
 
 exports.getRegister = (req, res) => {
-  // Read flashes into variables first so we can log and ensure they are passed correctly
   const errors = req.flash('error');
   const messages = req.flash('success');
   const formData = req.flash('formData')[0] || {};
@@ -112,7 +110,6 @@ exports.postForgotPassword = (req, res) => {
         db.query('UPDATE user SET password = SHA(?) WHERE email = ?', [tempPassword, email], (err) => {
             if (err) throw err;
 
-            // Configure mail
             const transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
@@ -128,7 +125,6 @@ exports.postForgotPassword = (req, res) => {
                 text: `Your One-time password is: ${tempPassword}\nPlease use this to log in and reset your password.`
             };
 
-            // Send email
             transporter.sendMail(mailOptions, (error) => {
                 if (error) {
                     console.log(error);
@@ -136,7 +132,6 @@ exports.postForgotPassword = (req, res) => {
                     return res.redirect('/forgot-password');
                 }
 
-                // Render page showing step 2
                 res.render('forgot_password', { 
                     step: 2,
                     email: email,
@@ -281,7 +276,6 @@ exports.register = (req, res) => {
       return res.redirect('/register');
     }
 
-    // Check username duplicate
     const checkUsernameSql = 'SELECT * FROM user WHERE userName = ?';
     console.log('Checking for duplicate username');
     db.query(checkUsernameSql, [userName], (err, results) => {
@@ -327,16 +321,6 @@ exports.register = (req, res) => {
           return res.redirect('/register');
         }
 
-        // ⭐ NEW: auto creates user_progress for new user
-        // const getUserIDSql = 'SELECT userID FROM user WHERE email = ?';
-        // db.query(getUserIDSql, [email], (err2, resultUser) => {
-        //   if (!err2 && resultUser.length > 0) {
-        //     const insertProgress = `
-        //       INSERT INTO user (userID)
-        //       VALUES (?)
-        //     `;
-        //     db.query(insertProgress, [resultUser[0].userID]);
-        //   }
 
           console.log('User registered successfully:', userName);
           req.flash('success', 'Registration successful. You can now log in.');
@@ -375,14 +359,12 @@ exports.getAdminDashboard = (req,res) => {
 
 exports.getAllUsers = (req, res) => {
   const user = req.session.user;
-  // Trim whitespace from query parameters
   let email = req.query.email ? req.query.email.trim() : '';
   let contactNo = req.query.contactNo ? req.query.contactNo.trim() : '';
   let userType = req.query.userType ? req.query.userType.trim() : '';
 
   console.log('Search parameters received:', { email, contactNo, userType });
 
-  // Build dynamic SQL query based on provided filters
   let conditions = [];
   let params = [];
 
@@ -403,7 +385,6 @@ exports.getAllUsers = (req, res) => {
     params.push(userType);
   }
 
-  // Build SQL query
   let sql = 'SELECT * FROM user';
   if (conditions.length > 0) {
     sql += ' WHERE ' + conditions.join(' AND ');
@@ -437,13 +418,11 @@ exports.deleteUser = (req, res) => {
 
   console.log('Attempting to delete user with UserID:', userID);
 
-  // Prevent admin from deleting themselves
   if (currentUser && currentUser.userID == userID) {
     req.flash('error', 'You cannot delete your own account.');
     return res.redirect('/adminUsers');
   }
 
-  // First, check if the user exists
   const checkSql = 'SELECT userName FROM user WHERE UserID = ?';
   db.query(checkSql, [userID], (error, results) => {
     if (error) {
@@ -459,7 +438,6 @@ exports.deleteUser = (req, res) => {
 
     const userName = results[0].userName;
 
-    // Try to delete the user directly - the database should handle cascading deletes
     const deleteSql = 'DELETE FROM user WHERE UserID = ?';
     db.query(deleteSql, [userID], (error, result) => {
       if (error) {

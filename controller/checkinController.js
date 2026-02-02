@@ -2,9 +2,7 @@ const db = require('../db');
 const missionController = require('./missionController');
 const getXPRequirement = (level) => (level + 1) * 500;
 
-// =======================
-// GET CHECK-IN DASHBOARD
-// =======================
+
 exports.getCheckInBoard = (req, res) => {
     const userID = req.session.user.userID;
 
@@ -17,7 +15,7 @@ exports.getCheckInBoard = (req, res) => {
             if (err) return res.send("DB error");
             let progress = rows[0];
 
-            // --- DYNAMIC SAFETY CHECK ---
+ 
             let xpNeeded = getXPRequirement(progress.level);
 
             if (progress.xp >= xpNeeded && progress.level < 10) {
@@ -34,7 +32,6 @@ exports.getCheckInBoard = (req, res) => {
                 });
                 return;
             }
-            // -----------------------------
 
             const titles = ["Eco Novice", "Eco Learner", "Eco Seeker", "Eco Explorer", "Eco Defender", "Eco Guardian", "Eco Warrior", "Eco Champion", "Eco Hero", "Eco Master", "Eco Legend"];
             const badges = ["eco-novice.png", "eco-defender.png", "eco-seeker.png", "eco-explorer.png", "activist.png", "eco-guardian.png", "eco-warrior.png", "eco-champion.png", "eco-hero.png", "eco-master.png", "eco-legend.png"];
@@ -42,14 +39,13 @@ exports.getCheckInBoard = (req, res) => {
             progress.levelTitle = titles[Math.min(progress.level - 1, 10)];
             progress.levelBadge = badges[Math.min(progress.level - 1, 10)];
 
-            // Pass the dynamic xpNeeded to the frontend
             const currentXPNeeded = getXPRequirement(progress.level);
             const xpPercent = Math.min((progress.xp / currentXPNeeded) * 100, 100);
 
             return res.render("checkinBoard", {
                 progress,
                 xpPercent,
-                xpNeeded: currentXPNeeded, // Send the dynamic value!
+                xpNeeded: currentXPNeeded, 
                 missions: userMissions,
                 user: { ...req.session.user, profilePhoto: progress.profilePhoto }, 
                 streakMissed: req.query.miss === "true",
@@ -59,9 +55,6 @@ exports.getCheckInBoard = (req, res) => {
     });
 };
 
-// =======================
-// DO CHECK-IN
-// =======================
 exports.doCheckIn = (req, res) => {
     const userID = req.session.user.userID;
     const today = new Date().toLocaleDateString('en-CA');
@@ -93,7 +86,6 @@ exports.doCheckIn = (req, res) => {
                 finalLevel = p.level;
             }
 
-            // DYNAMIC LEVEL UP CHECK
             while (finalXP >= getXPRequirement(finalLevel) && finalLevel < 10) {
                 finalXP -= getXPRequirement(finalLevel);
                 finalLevel++;
@@ -110,9 +102,6 @@ exports.doCheckIn = (req, res) => {
     });
 };
 
-// =======================
-// UPDATE PHOTO
-// =======================
 exports.updatePhoto = (req, res) => {
     const userID = req.session.user.userID;
     if (!req.file) return res.redirect("/profile?error=no-file");

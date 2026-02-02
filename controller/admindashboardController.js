@@ -3,7 +3,7 @@ const { BetaAnalyticsDataClient } = require('@google-analytics/data');
 let client;
 try {
   client = new BetaAnalyticsDataClient({
-    keyFilename: 'ga-key.json' // must be in project root
+    keyFilename: 'ga-key.json' 
   });
   console.log('✅ Google Analytics Client Initialized');
 } catch (err) {
@@ -12,9 +12,6 @@ try {
 
 const PROPERTY_ID = 'properties/521725143';
 
-// ===============================
-// PAGE RENDER (NO GA HERE)
-// ===============================
 exports.getAdminDashboardPage = (req, res) => {
   res.render('admindashboard', {
     userName: req.session.userName,
@@ -22,9 +19,6 @@ exports.getAdminDashboardPage = (req, res) => {
   });
 };
 
-// ===============================
-// DEBUG ENDPOINT
-// ===============================
 exports.debugGAResponse = async (req, res) => {
   try {
     const todayVisitors = await client.runReport({
@@ -45,14 +39,10 @@ exports.debugGAResponse = async (req, res) => {
   }
 };
 
-// ===============================
-// GA DATA API (FOR FETCH)
-// ===============================
 exports.getAdminDashboardStats = async (req, res) => {
   try {
     console.log('🚀 getAdminDashboardStats called');
 
-    // Return GA data (from your screenshot: 5 active users, 208 events, 4 new users)
     res.json({
       visitorsToday: 5,
       weeklyUsers: 5,
@@ -81,6 +71,3 @@ exports.getAdminDashboardStats = async (req, res) => {
     });
   }
 };
-
-
-

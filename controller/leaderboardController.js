@@ -18,7 +18,7 @@ exports.getLeaderboard = (req, res) => {
         const titles = ["Eco Novice", "Eco Learner", "Eco Seeker", "Eco Explorer", "Eco Defender", "Eco Guardian", "Eco Warrior", "Eco Champion", "Eco Hero", "Eco Master", "Eco Legend"];
         const badges = ["eco-novice.png", "eco-defender.png", "eco-seeker.png", "eco-explorer.png", "activist.png", "eco-guardian.png", "eco-warrior.png", "eco-champion.png", "eco-hero.png", "eco-master.png", "eco-legend.png"];
 
-        // Add badge and title to each user
+
         const usersWithBadges = rows.map(user => ({
             ...user,
             levelTitle: titles[Math.min(user.level - 1, 10)],
