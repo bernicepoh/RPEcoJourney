@@ -164,7 +164,7 @@
 </div>
 
 <!-- REQUESTS OVERVIEW -->
-<% if (userType === 'Admin' || userType === 'Manager') { %>
+<% if (userType === 'Admin' || userType === 'Manager' || userType === 'Writer') { %>
 <div class="card p-4 mb-5">
   <h5 class="card-title">👜 Requests Overview</h5>
 
@@ -175,9 +175,17 @@
     <li>📨 Feedback Tickets — <b>0</b></li>
   </ul>
 
-  <a href="/content-requests" class="btn btn-success mt-2" onclick="console.log('Button clicked!'); return true;">
-    Go to Requests Page
-  </a>
+  <% if (userType === 'Admin' || userType === 'Manager') { %>
+    <a href="/content-requests" class="btn btn-success mt-2">
+      📋 Go to Requests Page
+    </a>
+  <% } %>
+  
+  <% if (userType === 'Writer') { %>
+    <a href="/manageContent" class="btn btn-success mt-2">
+      📋 View My Content Status
+    </a>
+  <% } %>
 </div>
 <% } %>
 

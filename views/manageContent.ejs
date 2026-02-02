@@ -167,6 +167,17 @@
 
                         <h5 class="content-title"><%= c.contentTitle %></h5>
 
+                        <!-- STATUS BADGE -->
+                        <div class="text-center mb-2">
+                            <% if (c.approvalStatus === 'pending') { %>
+                                <span class="badge bg-warning text-dark">⏳ Pending Approval</span>
+                            <% } else if (c.approvalStatus === 'rejected') { %>
+                                <span class="badge bg-danger">❌ Rejected</span>
+                            <% } else { %>
+                                <span class="badge bg-success">✅ Approved</span>
+                            <% } %>
+                        </div>
+
                         <div class="content-actions">
                             <a href="/editContent/<%= c.contentID %>" class="btn btn-primary btn-sm">✏ Edit</a>
 

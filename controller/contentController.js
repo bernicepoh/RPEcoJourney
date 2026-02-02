@@ -52,9 +52,10 @@ exports.getContentByContentType = async (req, res) => {
                     WHERE e.contentID = c.contentID) AS totalShares
 
                 FROM content c
-                JOIN content_type cat
-                ON c.contentTypeID = cat.contentTypeID
+                JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
+                LEFT JOIN content_request cr ON c.contentID = cr.contentID
                 WHERE cat.contentTypeID = ?
+                AND (cr.status = 'approved' OR cr.contentRequestID IS NULL)
             `;
 
     db.query(sql, [userID, contentTypeID], async (error, results) => {
@@ -325,7 +326,9 @@ exports.getContent = (req, res) => {
         SELECT c.*, cat.contentTypeName, cat.contentTypeDescription, cat.contentTypeImage
         FROM content c
         JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
+        LEFT JOIN content_request cr ON c.contentID = cr.contentID
         WHERE c.contentID = ?
+        AND (cr.status = 'approved' OR cr.contentRequestID IS NULL)
     `;
 
     const commentSql = `
@@ -832,9 +835,14 @@ exports.deleteContent = async (req, res) => {
 // contentController.js
 exports.manageContent = (req, res) => {
     const sql = `
-        SELECT *
+        SELECT 
+            c.*,
+            cat.contentTypeName,
+            COALESCE(cr.status, 'approved') as approvalStatus
         FROM content c
         JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
+        LEFT JOIN content_request cr ON c.contentID = cr.contentID
+        ORDER BY c.contentID DESC
     `;
 
     db.query(sql, (error, results) => {
