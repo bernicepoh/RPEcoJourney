@@ -249,7 +249,11 @@ app.post("/ai/insights", aiQuizController.generateInsights);
 
 app.post("/ai/word-meaning", aiQuizController.getWordMeaning);
 
-app.get('/admin/dashboard/stats',admindashboardController.getDashboardStats);
+app.get('/adminDashboard', checkAdmin, admindashboardController.getAdminDashboardPage);
+// DATA - Google Analytics Stats API (NO AUTH NEEDED FOR TESTING)
+app.get('/admin/dashboard/stats', admindashboardController.getAdminDashboardStats);
+// DEBUG - Raw GA Response
+app.get('/admin/dashboard/debug', admindashboardController.debugGAResponse);
 
 
 //CHECK IN DASHBOARD ROUTES
