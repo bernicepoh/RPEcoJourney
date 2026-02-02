@@ -3,8 +3,8 @@ const db = require('../db'); // Your existing connection to rpecojourney
 const signageController = {
     // 1. Get the Editor and load your EXISTING project content
     getEditor: (req, res) => {
-        // CHANGED FROM 'contents' TO 'content'
-        const sql = "SELECT * FROM content"; 
+        // CHANGED FROM 'contents' TO 'content' - Only show approved content
+        const sql = "SELECT * FROM content WHERE contentStatus = 'approved'"; 
         db.query(sql, (err, results) => {
             if (err) {
                 console.error("❌ SQL Error in getEditor:", err);

@@ -118,9 +118,17 @@
     <div class="container mt-4">
         <h2 class="mb-4 text-center fw-bold">Manage Contents</h2>
 
+        <% if (user && user.userType === 'Writer') { %>
         <div class="text-center mb-3">
             <a href="/addContent" class="add-content-btn">+ Add New Content</a>
         </div>
+        <% } %>
+
+        <% if (user && (user.userType === 'Admin' || user.userType === 'Manager')) { %>
+        <div class="alert alert-info text-center" role="alert">
+            <strong>ℹ️ Note:</strong> As a <%= user.userType %>, you can view and approve/reject content, but only Writers can publish new content.
+        </div>
+        <% } %>
 
         <div class="row">
             <% if (content && content.length > 0) { %>

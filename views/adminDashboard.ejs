@@ -163,7 +163,8 @@
   </div>
 </div>
 
-<!-- REQUESTS OVERVIEW (THIS WAS MISSING BEFORE – NOW FIXED) -->
+<!-- REQUESTS OVERVIEW -->
+<% if (userType === 'Admin' || userType === 'Manager') { %>
 <div class="card p-4 mb-5">
   <h5 class="card-title">👜 Requests Overview</h5>
 
@@ -174,16 +175,31 @@
     <li>📨 Feedback Tickets — <b>0</b></li>
   </ul>
 
-  <a href="/content-requests" class="btn btn-success mt-2">
+  <a href="/content-requests" class="btn btn-success mt-2" onclick="console.log('Button clicked!'); return true;">
     Go to Requests Page
   </a>
 </div>
+<% } %>
 
 </div>
 </div>
 
 <!-- GA FETCH -->
 <script>
+console.log('📋 Admin Dashboard loaded');
+console.log('User Type:', '<%= userType %>');
+
+// Test if button exists
+document.addEventListener('DOMContentLoaded', function() {
+  const requestBtn = document.querySelector('a[href="/content-requests"]');
+  console.log('Button found:', requestBtn);
+  if (requestBtn) {
+    requestBtn.addEventListener('click', function(e) {
+      console.log('Button CLICKED! Going to /content-requests');
+    });
+  }
+});
+
 fetch('/admin/dashboard/stats')
   .then(res => {
     console.log('📡 Response Status:', res.status);

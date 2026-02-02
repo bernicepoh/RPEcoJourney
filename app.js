@@ -165,8 +165,8 @@ function simpleHash(str) {
 // Content Routes
 app.get('/contentType/:id/content', contentController.getContentByContentType);
 app.get('/content/:id', contentController.getContent);
-app.get('/addContent', allowAdminOrWriter, contentController.addContentForm);
-app.post('/addContent', allowAdminOrWriter, upload.single('contentFile'), contentController.addContent);
+app.get('/addContent', checkWriter, contentController.addContentForm);
+app.post('/addContent', checkWriter, upload.single('contentFile'), contentController.addContent);
 app.get('/editContent/:id', checkAdmin, contentController.editContentForm);
 app.post('/editContent/:id', checkAdmin, upload.single('contentFile'), contentController.editContent);
 app.post('/deleteContent/:id', checkAdmin, contentController.deleteContent);
@@ -186,9 +186,9 @@ app.post("/comment/unblock/:commentID", checkAuthenticated, contentController.un
 app.post('/comment/block/:id', contentController.blockComment);
 
 // Content Requests Routes
-// app.get('/content-requests', checkAdmin, contentController.getContentRequests);
-// app.post('/admin/content-requests/approve/:id', checkAdmin, contentController.approveContentRequest);
-// app.post('/admin/content-requests/reject/:id', checkAdmin, contentController.rejectContentRequest);
+app.get('/content-requests', allowAdminOrManager, contentController.getContentRequests);
+app.post('/admin/content-requests/approve/:id', allowAdminOrManager, contentController.approveContentRequest);
+app.post('/admin/content-requests/reject/:id', allowAdminOrManager, contentController.rejectContentRequest);
 
 // Category routes
 app.get('/categories', categoryController.getCategories);       // List all categories 
