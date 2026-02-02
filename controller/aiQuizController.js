@@ -68,12 +68,7 @@ exports.showQuizResult = (req, res) => {
                 db.query(updateXP, [totalXPEarned, user.userID], (err) => {
                     if (err) {
                         console.log("Error updating user XP:", err);
-                        // Even if XP update fails, we should still try to show the result page
                     } 
-                    
-                    // ==========================================
-                    // MISSION TRIGGERS
-                    // ==========================================
                     missionController.completeMission(user.userID, 'Complete 1 AI Quiz');
                     
                     if (totalXPEarned >= 30) {
@@ -88,7 +83,6 @@ exports.showQuizResult = (req, res) => {
                         missionController.completeMission(user.userID, 'Play a Hard-difficulty Quiz');
                     }
 
-                    // FINAL RENDER - This is what stops the "stuck" loading
                     return res.render("aiQuizResult", {
                         user,
                         score,
@@ -103,15 +97,10 @@ exports.showQuizResult = (req, res) => {
         });
     }
 };
-
-/* ======================================================
-   3. AI INSIGHTS & WORD MEANING
-====================================================== */
 exports.generateInsights = async (req, res) => {
     const { questions, userAnswers } = req.body;
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    // Overall feedback (optional summary)
     const overallPrompt = `
 You are an eco-education assistant.
 Give short, encouraging feedback based on the quiz performance.
@@ -121,7 +110,6 @@ Keep it student-friendly.
     const overallResult = await model.generateContent(overallPrompt);
     const feedback = overallResult.response.text();
 
-    // Per-question explanations
     const explanations = [];
 
     for (let i = 0; i < questions.length; i++) {
@@ -159,8 +147,3 @@ exports.getWordMeaning = async (req, res) => {
     missionController.completeMission(req.session.user.userID, 'Learn a New Eco Word');
     res.json({ meaning: result.response.text() });
 };
-
-
-
-
-

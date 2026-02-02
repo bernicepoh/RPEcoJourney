@@ -280,6 +280,40 @@ app.get('/leaderboard', leaderboardController.getLeaderboard);
 app.get('/xphistory', checkAuthenticated, xpController.getXPHistory);
 
 
+// Multer Error Handling Middleware
+app.use((err, req, res, next) => {
+  if (err instanceof multer.MulterError) {
+    // Multer-specific errors
+    if (err.code === 'FILE_TOO_LARGE') {
+      req.flash('error', 'File size exceeds 10MB limit.');
+    } else if (err.code === 'LIMIT_FILE_SIZE') {
+      req.flash('error', 'File size exceeds 10MB limit.');
+    } else {
+      console.error('Multer Error:', err.message);
+      req.flash('error', 'File upload failed: ' + err.message);
+    }
+  } else if (err && err.message && err.message.includes('not allowed')) {
+    // Custom file type error
+    console.error('File validation error:', err.message);
+    req.flash('error', err.message);
+  } else if (err) {
+    // Other errors
+    console.error('Upload error:', err.message);
+    req.flash('error', 'Upload failed. Please try again.');
+  }
+  
+  // Determine redirect path
+  const referer = req.get('referer');
+  if (referer && referer.includes('/editContent')) {
+    const match = referer.match(/\/editContent\/(\d+)/);
+    if (match) {
+      return res.redirect(`/editContent/${match[1]}`);
+    }
+  }
+  
+  res.redirect('/addContent');
+});
+
 // Error route
 app.get('/401', (req, res) => {
     res.render('401', { errors: req.flash('error') });

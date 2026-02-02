@@ -22,15 +22,12 @@ const storage = new CloudinaryStorage({
         'pdf', 'doc', 'docx', 'ppt', 'pptx',
         'mp4', 'mov', 'avi'
       ],
-      resource_type: 'auto',
-      // For Office files: use Aspose for conversion
-      ...(isOfficeFile && { 
-        flags: 'attachment',
-        resource_type: 'raw'
-      }),
-      // For PDFs: ensure they're treated as raw files
-      ...(isPdf && {
-        resource_type: 'raw'
+      // For Office files and PDFs: use raw resource type
+      ...(isOfficeFile || isPdf ? {
+        resource_type: 'raw',
+        type: 'upload'
+      } : {
+        resource_type: 'auto'
       })
     };
   }
@@ -41,14 +38,16 @@ const parser = multer({
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB
   },
-  fileFilter: async (req, file, cb) => {
+  fileFilter: (req, file, cb) => {
     const ext = file.originalname.split('.').pop().toLowerCase();
     const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
     
     if (!ALLOWED_EXTENSIONS.includes(ext)) {
-      return cb(new Error(`File type .${ext} is not allowed`));
+      console.error(`❌ File rejected: ${ext}`);
+      return cb(new Error(`File type .${ext} is not allowed`), false);
     }
     
+    console.log(`✅ File accepted: ${ext}`);
     cb(null, true);
   }
 });
