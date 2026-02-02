@@ -248,14 +248,14 @@
 
   <% } else if (['doc','docx'].includes(ext)) { %>
     <!-- Word docs: use Office Web Viewer -->
-    <iframe src="<%= content.contentFile %>" 
-        style="width:100%; height:100%; border:none;"></iframe>
-
+    <iframe 
+      src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent(content.contentFile) %>" 
+      style="width:100%; height:100%; border:none;"></iframe>
 
   <% } else if (['ppt','pptx'].includes(ext)) { %>
     <!-- PowerPoint: use Office Web Viewer -->
     <iframe
-      src="<%= content.contentFile %>"
+      src="https://view.officeapps.live.com/op/embed.aspx?src=<%= encodeURIComponent(content.contentFile) %>"
       style="width:100%; height:100%; border:none;"
     ></iframe>
 

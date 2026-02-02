@@ -129,31 +129,45 @@
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-sm content-card">
 
-                        <div class="file-box">
+                        <div class="file-box" style="position: relative;">
                             <% const ext = c.contentFile?.split('.').pop().toLowerCase(); %>
 
                             <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
-                                <img src="<%= c.contentFile %>">
-                            <% } else if (ext === 'pdf') { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
-                                </a>
-                            <% } else if (['doc','docx'].includes(ext)) { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
-                                </a>
-                            <% } else if (['ppt','pptx'].includes(ext)) { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
-                                </a>
+                                <!-- Image preview -->
+                                <img src="<%= c.contentFile %>?w=250&h=180&c=fill" alt="<%= c.contentTitle %>">
+                            
                             <% } else if (['mp4','mov','avi'].includes(ext)) { %>
-                                <video autoplay loop muted playsinline>
+                                <!-- Video preview with play button -->
+                                <video style="width:100%; height:100%; object-fit:cover;" muted>
                                     <source src="<%= c.contentFile %>">
                                 </video>
+                                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:35px;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;">▶️</div>
+                            
+                            <% } else if (ext === 'pdf') { %>
+                                <!-- PDF preview: first page -->
+                                <img src="<%= c.contentFile %>.jpg?page=1&w=250&h=180&c=fill" 
+                                     alt="PDF Preview"
+                                     onerror="this.src='/images/pdf-icon.png';">
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;">PDF</div>
+                            
+                            <% } else if (['doc','docx'].includes(ext)) { %>
+                                <!-- Word document preview -->
+                                <img src="<%= c.contentFile %>.jpg?page=1&w=250&h=180&c=fill" 
+                                     alt="Document Preview"
+                                     onerror="this.src='/images/word-icon.png';">
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;">DOC</div>
+                            
+                            <% } else if (['ppt','pptx'].includes(ext)) { %>
+                                <!-- PowerPoint preview -->
+                                <img src="<%= c.contentFile %>.jpg?page=1&w=250&h=180&c=fill" 
+                                     alt="Presentation Preview"
+                                     onerror="this.src='/images/ppt-icon.png';">
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;">PPT</div>
+                            
                             <% } else { %>
-                                <a href="<%= c.contentFile %>" target="_blank">
-                                    <img src="<%= c.contentFile %>" style="width:150px;">
-                                </a>
+                                <!-- Fallback generic file -->
+                                <img src="/images/file-icon.png" alt="File" style="width:80px; height:80px; opacity:0.5;">
+                                <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:white;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:bold;"><%= ext?.toUpperCase() || 'FILE' %></div>
                             <% } %>
                         </div>
 
