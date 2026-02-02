@@ -9,6 +9,7 @@ const profileController = require('./controller/profileController');
 const leaderboardController = require('./controller/leaderboardController');
 const aiQuizController = require('./controller/aiQuizController');
 const xpController = require('./controller/xpcontroller');
+const admindashboardController = require('./controller/admindashboardController');
 const db = require('./db'); 
 
 const multer = require('multer');
@@ -247,6 +248,8 @@ app.get("/aiQuizResult", aiQuizController.showQuizResult);
 app.post("/ai/insights", aiQuizController.generateInsights);
 
 app.post("/ai/word-meaning", aiQuizController.getWordMeaning);
+
+app.get('/admin/dashboard/stats',admindashboardController.getDashboardStats);
 
 
 //CHECK IN DASHBOARD ROUTES
