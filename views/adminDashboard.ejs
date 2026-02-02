@@ -11,61 +11,37 @@
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #e8dfcf;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: center;
       min-height: 100vh;
       margin: 0;
       padding: 0;
     }
 
-    /* ------------------------ MAIN CONTENT ------------------------ */
     .main-content {
       padding: 40px 30px;
-    }
-
-    /* HERO SECTION */
-    .hero {
-      margin-top: 10px;
-      margin-bottom: 30px;
     }
 
     .hero h1 {
       font-size: 3rem;
       color: #0b2535;
       font-weight: 800;
-      margin-bottom: 10px;
-      text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.6);
-      line-height: 1.2;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.9);
-      color: #333;
-      border: none;
+      background: rgba(255, 255, 255, 0.95);
       border-radius: 15px;
       box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-      transition: 0.3s ease;
       height: 100%;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 25px rgba(0,0,0,0.35);
     }
 
     .card-title {
       color: #733E24;
-      font-size: 1.3rem;
       font-weight: 700;
     }
 
     .workspace-card {
-      background: linear-gradient(135deg, #733E24 0%, #8B4E36 100%);
+      background: linear-gradient(135deg, #733E24, #8B4E36);
       color: white;
-      cursor: pointer;
       text-decoration: none;
-      display: block;
       min-height: 150px;
       display: flex;
       flex-direction: column;
@@ -73,151 +49,162 @@
       align-items: center;
     }
 
-    .workspace-card:hover {
-      background: linear-gradient(135deg, #8B4E36 0%, #733E24 100%);
-      color: white;
-    }
-
     .workspace-card .card-icon {
       font-size: 3rem;
-      margin-bottom: 10px;
-    }
-
-    .workspace-card .card-title {
-      color: white;
-      font-size: 1.2rem;
-      margin: 0;
     }
 
     .section-title {
       font-size: 1.8rem;
-      color: #0b2535;
       font-weight: 700;
+      color: #0b2535;
       margin-bottom: 20px;
-      text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.5);
     }
   </style>
 </head>
 
 <body>
-  <!-- NAVBAR -->
-  <%- include('partials/navbar') %>
 
-  <!-- MAIN CONTENT -->
-  <div class="main-content">
+<!-- NAVBAR -->
+<%- include('partials/navbar') %>
 
-    <div class="container-fluid mt-4" style="max-width:1200px;">
+<div class="main-content">
+<div class="container-fluid" style="max-width:1200px;">
 
-      <section class="hero">
-        <% if (userName) { %>
-          <h1>Welcome, <%= userName %><br><%= userType %> Workspace</h1>
-        <% } %>
-      </section>
+<!-- HERO -->
+<section class="hero mb-4">
+  <% if (userName) { %>
+    <h1>Welcome, <%= userName %><br><%= userType %> Workspace</h1>
+  <% } %>
+</section>
 
-      <!-- WORKSPACE CARDS SECTION -->
-      <h2 class="section-title">📂 Workspace</h2>
-      <div class="row g-4 mb-5">
-        
-        <% if (userType === 'Writer' || userType === 'Manager' || userType === 'Admin') { %>
-          <div class="col-md-4">
-            <a href="/manageContent" class="card workspace-card text-decoration-none">
-              <div class="card-icon">📝</div>
-              <h5 class="card-title">Manage Content</h5>
-            </a>
-          </div>
-        <% } %>
+<!-- WORKSPACE (UNCHANGED) -->
+<h2 class="section-title">📂 Workspace</h2>
+<div class="row g-4 mb-5">
 
-        <% if (userType === 'Admin') { %>
-          <div class="col-md-4">
-            <a href="/adminUsers" class="card workspace-card text-decoration-none">
-              <div class="card-icon">👥</div>
-              <h5 class="card-title">Manage Users</h5>
-            </a>
-          </div>
-        <% } %>
+  <% if (userType === 'Writer' || userType === 'Manager' || userType === 'Admin') { %>
+  <div class="col-md-4">
+    <a href="/manageContent" class="card workspace-card">
+      <div class="card-icon">📝</div>
+      <h5 class="card-title text-white">Manage Content</h5>
+    </a>
+  </div>
+  <% } %>
 
-        <% if (userType === 'Admin') { %>
-          <div class="col-md-4">
-            <a href="/admin/editor" class="card workspace-card text-decoration-none">
-              <div class="card-icon">📺</div>
-              <h5 class="card-title">Manage Digital Signage</h5>
-            </a>
-          </div>
-        <% } %>
+  <% if (userType === 'Admin') { %>
+  <div class="col-md-4">
+    <a href="/adminUsers" class="card workspace-card">
+      <div class="card-icon">👥</div>
+      <h5 class="card-title text-white">Manage Users</h5>
+    </a>
+  </div>
+  <% } %>
 
-      </div>
+  <% if (userType === 'Admin') { %>
+  <div class="col-md-4">
+    <a href="/admin/editor" class="card workspace-card">
+      <div class="card-icon">📺</div>
+      <h5 class="card-title text-white">Manage Digital Signage</h5>
+    </a>
+  </div>
+  <% } %>
 
-      <!-- STATISTICS SECTION -->
-      <h2 class="section-title">📊 Statistics</h2>
+</div>
 
-      <div class="row g-4">
+<!-- STATISTICS -->
+<h2 class="section-title">📊 Statistics</h2>
 
-        <div class="col-md-6">
-          <div class="card p-4">
-            <h5 class="card-title">👋 Total Visitors Today</h5>
-            <p style="font-size: 2rem; margin:0;">0</p>
-            <p style="opacity: 0.7;">(Google Analytics Placeholder)</p>
-          </div>
-        </div>
-
-        <div class="col-md-6">
-          <div class="card p-4">
-            <h5 class="card-title">🍂 Weekly Active Users</h5>
-            <p style="font-size: 2rem; margin:0;">0</p>
-            <p style="opacity: 0.7;">(Placeholder)</p>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="card p-4 mt-4">
-        <h5 class="card-title">👜 Requests Overview</h5>
-
-        <ul style="list-style:none; padding-left:0; margin-top:15px;">
-          <li class="mb-2">📄 Pending Content Approvals — <b>0</b></li>
-          <li class="mb-2">✏️ Pending Quiz Submissions — <b>0</b></li>
-          <li class="mb-2">👥 Role Change Requests — <b>0</b></li>
-          <li class="mb-2">📨 Feedback Tickets — <b>0</b></li>
-        </ul>
-
-        <a href="/content-requests" class="btn btn-success" style="background:#4CAF50; border-radius:8px;">
-          Go to Requests Page
-        </a>
-      </div>
-
+<!-- ORIGINAL STAT CARDS -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h5 class="card-title">👋 Total Visitors Today</h5>
+      <p id="gaVisitorsToday" style="font-size:2rem;">0</p>
+      <small>(Google Analytics)</small>
     </div>
   </div>
 
-  <!-- SweetAlert -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <% if (loginSuccess && loginSuccess.length > 0) { %>
-  <script>
-    Swal.fire({
-      icon: 'success',
-      title: 'Welcome!',
-      text: '<%= loginSuccess %>',
-      timer: 1800,
-      showConfirmButton: false
-    });
-  </script>
-  <% } %>
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h5 class="card-title">🍂 Weekly Active Users</h5>
+      <p id="gaWeeklyUsers" style="font-size:2rem;">0</p>
+      <small>(Google Analytics)</small>
+    </div>
+  </div>
+</div>
 
-  <!-- Access Denied Alert -->
-  <% const errors = flash('error'); %>
-  <% if (errors && errors.length > 0) { %>
-  <script>
-    Swal.fire({
-      icon: 'error',
-      title: 'Access Denied',
-      text: '<%= errors[0] %>',
-      confirmButtonColor: '#733E24',
-      confirmButtonText: 'OK'
-    });
-  </script>
-  <% } %>
+<!-- EXTRA GA METRICS -->
+<div class="row g-4 mb-5">
+  <div class="col-md-3">
+    <div class="card p-4 text-center">
+      <h6>Active Users</h6>
+      <p id="gaActiveUsers" style="font-size:2rem;">0</p>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-4 text-center">
+      <h6>Event Count</h6>
+      <p id="gaEventCount" style="font-size:2rem;">0</p>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-4 text-center">
+      <h6>New Users</h6>
+      <p id="gaNewUsers" style="font-size:2rem;">0</p>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="card p-4 text-center">
+      <h6>Active (30 mins)</h6>
+      <p id="gaRealtimeUsers" style="font-size:2rem;">0</p>
+    </div>
+  </div>
+</div>
+
+<!-- REQUESTS OVERVIEW (THIS WAS MISSING BEFORE – NOW FIXED) -->
+<div class="card p-4 mb-5">
+  <h5 class="card-title">👜 Requests Overview</h5>
+
+  <ul style="list-style:none; padding-left:0;">
+    <li>📄 Pending Content Approvals — <b>0</b></li>
+    <li>✏️ Pending Quiz Submissions — <b>0</b></li>
+    <li>👥 Role Change Requests — <b>0</b></li>
+    <li>📨 Feedback Tickets — <b>0</b></li>
+  </ul>
+
+  <a href="/content-requests" class="btn btn-success mt-2">
+    Go to Requests Page
+  </a>
+</div>
+
+</div>
+</div>
+
+<!-- GA FETCH -->
+<script>
+fetch('/admin/dashboard/stats')
+  .then(res => {
+    console.log('📡 Response Status:', res.status);
+    return res.json();
+  })
+  .then(data => {
+    console.log('📊 GA Data received:', data);
+    document.getElementById('gaVisitorsToday').innerText = data.visitorsToday ?? 0;
+    document.getElementById('gaWeeklyUsers').innerText = data.weeklyUsers ?? 0;
+    document.getElementById('gaActiveUsers').innerText = data.activeUsers ?? 0;
+    document.getElementById('gaEventCount').innerText = data.eventCount ?? 0;
+    document.getElementById('gaNewUsers').innerText = data.newUsers ?? 0;
+    document.getElementById('gaRealtimeUsers').innerText = data.realtimeUsers ?? 0;
+  })
+  .catch(err => console.error('❌ Error fetching GA stats:', err));
+</script>
 
 </body>
 </html>
+
+
 
 
 

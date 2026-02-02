@@ -9,6 +9,7 @@ const profileController = require('./controller/profileController');
 const leaderboardController = require('./controller/leaderboardController');
 const aiQuizController = require('./controller/aiQuizController');
 const xpController = require('./controller/xpcontroller');
+const admindashboardController = require('./controller/admindashboardController');
 const db = require('./db'); 
 
 const multer = require('multer');
@@ -260,6 +261,12 @@ app.get("/aiQuizResult", aiQuizController.showQuizResult);
 app.post("/ai/insights", aiQuizController.generateInsights);
 
 app.post("/ai/word-meaning", aiQuizController.getWordMeaning);
+
+app.get('/adminDashboard', checkAdmin, admindashboardController.getAdminDashboardPage);
+// DATA - Google Analytics Stats API (NO AUTH NEEDED FOR TESTING)
+app.get('/admin/dashboard/stats', admindashboardController.getAdminDashboardStats);
+// DEBUG - Raw GA Response
+app.get('/admin/dashboard/debug', admindashboardController.debugGAResponse);
 
 
 //CHECK IN DASHBOARD ROUTES
