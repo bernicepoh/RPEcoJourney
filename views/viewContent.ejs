@@ -224,10 +224,11 @@
 </head>
 <body>
   <%- include ('partials/navbar.ejs') %>
+  <script src="/translations.js"></script>
  
   <div class="container mt-3 mb-5">
     <% if (content) { %>
-      <h3 class="text-center mt-2" style="font-style:italic;">
+      <h3 class="text-center mt-2" style="font-style:italic;" id="contentPageTitle">
         <%= content.contentTitle %>
       </h3>
  
@@ -275,22 +276,22 @@
  
       <hr class="desc-divider">
  
-      <div class="desc-text">
+      <div class="desc-text" id="contentDescription">
         <%= content.contentDescription %>
       </div>
  
       <hr class="desc-divider" style="margin-top:45px;">
  
 <div style="display:flex; justify-content:space-between; align-items:center; max-width:750px; margin:auto;">
-  <h4 style="font-weight:600; color:#145a32;">Comments</h4>
+  <h4 style="font-weight:600; color:#145a32;" id="commentsHeading">Comments</h4>
  
   <!-- SORT DROPDOWN -->
   <form method="GET" style="margin:0;">
-    <select name="sort" onchange="this.form.submit()" class="form-select form-select-sm">
-      <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
-      <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
-      <option value="az" <%= sort === 'az' ? 'selected' : '' %>>A → Z</option>
-      <option value="za" <%= sort === 'za' ? 'selected' : '' %>>Z → A</option>
+    <select name="sort" id="sortDropdown" onchange="this.form.submit()" class="form-select form-select-sm">
+      <option value="newest" <%= sort === 'newest' ? 'selected' : '' %> id="sortNewest">Newest</option>
+      <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %> id="sortOldest">Oldest</option>
+      <option value="az" <%= sort === 'az' ? 'selected' : '' %> id="sortAZ">A → Z</option>
+      <option value="za" <%= sort === 'za' ? 'selected' : '' %> id="sortZA">Z → A</option>
     </select>
   </form>
 </div>
@@ -316,7 +317,7 @@
 
   <div class="comment-box blocked" style="display:flex; gap:12px;">
     <img
-      src="<%= c.userImage || 'default-avatar.png' %>"
+      src="<%= c.userImage || 'https://res.cloudinary.com/dmyv7fbha/image/upload/v1769968875/defaultUser_rgp4og.png' %>"
       class="comment-avatar"
     >
 
@@ -361,7 +362,7 @@
 
       <!-- ✅ AVATAR IS BACK -->
       <img
-        src="<%= c.userImage || 'default-avatar.png' %>"
+        src="<%= c.userImage || 'https://res.cloudinary.com/dmyv7fbha/image/upload/v1769968875/defaultUser_rgp4og.png' %>"
         class="comment-avatar"
       >
 
@@ -449,19 +450,20 @@
         method="POST" 
         class="comment-form">
 
-    <label class="form-label">Write a comment:</label>
+    <label class="form-label" id="commentLabel">Write a comment:</label>
 
     <textarea 
       name="commentText" 
       class="comment-area" 
+      id="commentPlaceholder"
       placeholder="Share your thoughts respectfully 🌱"
       required></textarea>
 
     <div class="comment-actions">
-      <button type="submit" class="publish-btn">Publish</button>
+      <button type="submit" class="publish-btn" id="publishBtn">Publish</button>
     </div>
  
-      <a href="/contentType/<%= content.contentTypeID %>/content" class="back-link">← Back to <%= content.contentTypeName %></a>
+      <a href="/contentType/<%= content.contentTypeID %>/content" class="back-link" id="backLink">← Back to <%= content.contentTypeName %></a>
  
     <% } else { %>
       <p>No content found.</p>
@@ -645,6 +647,28 @@ if (moderation === "unblocked") {
         showConfirmButton: false
       });
     }
+
+    // ✅ Translate view content page elements
+    document.addEventListener('DOMContentLoaded', () => {
+      const commentsHeading = document.getElementById('commentsHeading');
+      const commentLabel = document.getElementById('commentLabel');
+      const commentPlaceholder = document.getElementById('commentPlaceholder');
+      const publishBtn = document.getElementById('publishBtn');
+      const backLink = document.getElementById('backLink');
+      const sortNewest = document.getElementById('sortNewest');
+      const sortOldest = document.getElementById('sortOldest');
+      const sortAZ = document.getElementById('sortAZ');
+      const sortZA = document.getElementById('sortZA');
+
+      if (commentsHeading) commentsHeading.textContent = t('commentsHeading');
+      if (commentLabel) commentLabel.textContent = t('commentLabel');
+      if (commentPlaceholder) commentPlaceholder.placeholder = t('commentLabel');
+      if (publishBtn) publishBtn.textContent = t('publishBtn');
+      if (sortNewest) sortNewest.textContent = t('sortNewest');
+      if (sortOldest) sortOldest.textContent = t('sortOldest');
+      if (sortAZ) sortAZ.textContent = t('sortAZ');
+      if (sortZA) sortZA.textContent = t('sortZA');
+    });
 </script>
  
 </body>

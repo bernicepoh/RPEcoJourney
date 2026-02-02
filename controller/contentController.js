@@ -353,14 +353,25 @@ exports.getContent = (req, res) => {
         WHERE contentID = ? AND likes = 1
     `;
 
-    db.query(contentSql, [contentID], (err, contentRows) => {
+    const currentLang = req.session.language || req.cookies.language || 'en';
+
+    db.query(contentSql, [contentID], async (err, contentRows) => {
         if (err) return res.status(500).send("Error loading content");
 
         if (contentRows.length === 0) {
             return res.status(404).send("Content not found");
         }
 
-        const content = contentRows[0];
+        let content = contentRows[0];
+
+        // Translate content if not English
+        if (currentLang !== 'en') {
+            console.log('🔄 Translating content to:', currentLang);
+            content.contentTitle = await translateText(content.contentTitle, currentLang);
+            content.contentDescription = await translateText(content.contentDescription, currentLang);
+            content.contentTypeName = await translateText(content.contentTypeName, currentLang);
+            content.contentTypeDescription = await translateText(content.contentTypeDescription, currentLang);
+        }
 
         const viewerUserID = req.session.user ? req.session.user.userID : 0;
         const viewerRole = req.session.user ? req.session.user.userType : 'User';
@@ -373,10 +384,20 @@ exports.getContent = (req, res) => {
         db.query(
             commentSql,
             [contentID, viewerUserID, viewerRole],
-            (err2, comments) => {
+            async (err2, comments) => {
                 if (err2) { 
                     console.log("🔥 COMMENT SQL ERROR:", err2);
                     return res.status(500).send("Error loading comments");
+                }
+
+                // Translate comments if not English
+                if (currentLang !== 'en' && comments && comments.length > 0) {
+                    console.log('🔄 Translating comments to:', currentLang);
+                    for (let comment of comments) {
+                        if (comment.commentText && !comment.isBlocked) {
+                            comment.commentText = await translateText(comment.commentText, currentLang);
+                        }
+                    }
                 }
 
                 db.query(likeSql, [contentID], (err3, likeRows) => {
@@ -544,24 +565,21 @@ exports.addContentForm = (req, res) => {
 
 
 exports.addContent = (req, res) => {
-    const { contentTypeID, contentTitle, contentDescription } = req.body;
-    const contentFile = req.file ? req.file.path : null;
-
-    const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
-   
-    // Insert the new content into the database
-    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
-        if (error) {
-            // Handle any error that occurs during the database operation
-            console.error("Error adding content:", error);
-            res.status(500).send('Error adding content');
-        } else {
-            // Send a success response
-            res.redirect('manageContent');
-        }
-    });
+  const { contentTypeID, contentTitle, contentDescription } = req.body;
+  
+  // 🚀 req.file.path = FULL Cloudinary URL!
+  const contentFile = req.file ? req.file.path : null;
+  
+  const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
+  db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error) => {
+    if (error) {
+      console.error("Error adding content:", error);
+      res.status(500).send('Error adding content');
+    } else {
+      res.redirect('manageContent');
+    }
+  });
 };
-
 
 const getAllCategories = (db, callback) => {
     const sql = 'SELECT * FROM content_type';
@@ -611,33 +629,34 @@ exports.editContentForm = async (req, res) => {
 
 };
 
-
 exports.editContent = (req, res) => {
-
-    const contentID = req.params.id;
-    const { contentTypeID, contentTitle, contentDescription } = req.body;
-    let contentFile = req.body.currentFile; //retrieve current image filename
-    if (req.file) { //if new image is uploaded
-        contentFile = req.file.filename; // set image to be new image filename
+  const contentID = req.params.id;
+  const { contentTypeID, contentTitle, contentDescription } = req.body;
+  
+  // Delete old file from Cloudinary
+  db.query('SELECT contentFile FROM content WHERE contentID = ?', [contentID], async (err, rows) => {
+    if (rows[0]?.contentFile) {
+      const publicId = rows[0].contentFile.match(/\/upload\/v\d+\/(.*)\./)?.[1];
+      if (publicId) {
+        await new Promise(resolve => cloudinary.uploader.destroy(publicId, resolve));
+      }
     }
-    console.log("new file: " + contentFile);
+    
+    // New file URL
+    const contentFile = req.file ? req.file.path : req.body.currentFile;
+    
     const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
-
-    // Updated the content into the database
-    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error, results) => {
-        if (error) {
-            // Handle any error that occurs during the database operation
-            console.error("Error updating content:", error);
-            res.status(500).send('Error updating content');
-        } else {
-            // Send a success response
-            req.flash('success', 'Content updated successfully!');
-            res.redirect(`/manageContent`);
-
-        }
+    db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error) => {
+      if (error) {
+        console.error("Error updating:", error);
+        res.status(500).send('Error');
+      } else {
+        req.flash('success', 'Updated!');
+        res.redirect('/manageContent');
+      }
     });
+  });
 };
-
 
 exports.deleteContent = async (req, res) => {
     const contentID = req.params.id;

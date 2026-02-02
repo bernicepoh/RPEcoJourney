@@ -197,5 +197,102 @@
     "shareText": "Check out this sustainability content!",
     "linkCopied": "Link copied!",
     "loginToLike": "Please log in to like posts."
+  },
+  "contentManagement": {
+    "publishContent": "Publish Content",
+    "updateContent": "Update Content",
+    "category": "Category",
+    "selectCategory": "Select category",
+    "title": "Title",
+    "inputTitle": "Input Title",
+    "description": "Description",
+    "inputDescription": "Input Description",
+    "contentTitle": "Content Title",
+    "contentDescription": "Content Description",
+    "fileUpload": "File Upload",
+    "newFile": "New File",
+    "currentFile": "Current File",
+    "selectFile": "Select File",
+    "submit": "Submit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "publishBtn": "Publish Content",
+    "updateBtn": "Update Content",
+    "addContent": "Add Content",
+    "editContent": "Edit Content",
+    "deleteContent": "Delete Content",
+    "viewContent": "View Content"
+  },
+  "forms": {
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "contactNumber": "Contact Number",
+    "newPassword": "New Password",
+    "registerBtn": "Register",
+    "loginBtn": "Log In",
+    "forgotPasswordBtn": "Forgot Password?",
+    "createAccount": "Create an account",
+    "continueAsGuest": "Continue as Guest"
+  },
+  "admin": {
+    "adminDashboard": "Admin Dashboard",
+    "manageUsers": "Manage Users",
+    "manageContent": "Manage Content",
+    "addCategory": "Add Category",
+    "editCategory": "Edit Category",
+    "deleteCategory": "Delete Category",
+    "categoryName": "Category Name",
+    "dashboard": "Dashboard",
+    "totalUsers": "Total Users",
+    "totalContent": "Total Content",
+    "totalCategories": "Total Categories"
+  },
+  "roles": {
+    "admin": "Admin",
+    "manager": "Manager",
+    "writer": "Writer",
+    "user": "User",
+    "role": "Role",
+    "editRole": "Edit Role",
+    "changeRole": "Change Role"
+  },
+  "requests": {
+    "contentRequests": "Content Requests",
+    "managerRequests": "Manager Requests",
+    "requests": "Requests",
+    "pending": "Pending",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "actions": {
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "close": "Close",
+    "noResults": "No results found",
+    "loading": "Loading...",
+    "errorMessage": "An error occurred. Please try again.",
+    "successMessage": "Operation completed successfully."
+  },
+  "editor": {
+    "editor": "Editor",
+    "screenID": "Screen ID",
+    "layoutName": "Layout Name",
+    "dailySpecial": "Daily Special",
+    "startTime": "Start Time",
+    "endTime": "End Time",
+    "saveLayout": "Save Layout"
+  },
+  "xpAndMissions": {
+    "xpHistory": "XP History",
+    "missions": "Missions",
+    "completedMissions": "Completed Missions",
+    "activeMissions": "Active Missions",
+    "totalXP": "Total XP"
   }
 }

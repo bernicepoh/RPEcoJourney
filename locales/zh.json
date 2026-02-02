@@ -195,5 +195,103 @@
     "shareTitle": "RPEcoJourney内容",
     "shareText": "查看此可持续发展内容！",
     "linkCopied": "链接已复制！",
-    "loginToLike": "请登录以点赞帖子。"  }
+    "loginToLike": "请登录以点赞帖子。"
+  },
+  "contentManagement": {
+    "publishContent": "发布内容",
+    "updateContent": "更新内容",
+    "category": "类别",
+    "selectCategory": "选择类别",
+    "title": "标题",
+    "inputTitle": "输入标题",
+    "description": "描述",
+    "inputDescription": "输入描述",
+    "contentTitle": "内容标题",
+    "contentDescription": "内容描述",
+    "fileUpload": "文件上传",
+    "newFile": "新文件",
+    "currentFile": "当前文件",
+    "selectFile": "选择文件",
+    "submit": "提交",
+    "save": "保存",
+    "cancel": "取消",
+    "publishBtn": "发布内容",
+    "updateBtn": "更新内容",
+    "addContent": "添加内容",
+    "editContent": "编辑内容",
+    "deleteContent": "删除内容",
+    "viewContent": "查看内容"
+  },
+  "forms": {
+    "username": "用户名",
+    "email": "电子邮件",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "contactNumber": "联系电话",
+    "newPassword": "新密码",
+    "registerBtn": "注册",
+    "loginBtn": "登录",
+    "forgotPasswordBtn": "忘记密码？",
+    "createAccount": "创建帐户",
+    "continueAsGuest": "继续作为访客"
+  },
+  "admin": {
+    "adminDashboard": "管理员仪表板",
+    "manageUsers": "管理用户",
+    "manageContent": "管理内容",
+    "addCategory": "添加类别",
+    "editCategory": "编辑类别",
+    "deleteCategory": "删除类别",
+    "categoryName": "类别名称",
+    "dashboard": "仪表板",
+    "totalUsers": "总用户",
+    "totalContent": "总内容",
+    "totalCategories": "总类别"
+  },
+  "roles": {
+    "admin": "管理员",
+    "manager": "经理",
+    "writer": "作者",
+    "user": "用户",
+    "role": "角色",
+    "editRole": "编辑角色",
+    "changeRole": "更改角色"
+  },
+  "requests": {
+    "contentRequests": "内容请求",
+    "managerRequests": "经理请求",
+    "requests": "请求",
+    "pending": "待中",
+    "approved": "已批准",
+    "rejected": "已拒绝",
+    "approve": "批准",
+    "reject": "拒绝"
+  },
+  "actions": {
+    "view": "查看",
+    "edit": "编辑",
+    "delete": "删除",
+    "confirm": "确认",
+    "close": "关闭",
+    "noResults": "未找到结果",
+    "loading": "加载中...",
+    "errorMessage": "发生错误。请重试。",
+    "successMessage": "操作成功完成。"
+  },
+  "editor": {
+    "editor": "编辑器",
+    "screenID": "屏幕ID",
+    "layoutName": "布局名称",
+    "dailySpecial": "每日特价",
+    "startTime": "开始时间",
+    "endTime": "结束时间",
+    "saveLayout": "保存布局"
+  },
+  "xpAndMissions": {
+    "xpHistory": "经验值历史",
+    "missions": "任务",
+    "completedMissions": "已完成的任务",
+    "activeMissions": "活跃任务",
+    "totalXP": "总经验值"
+  }
 }

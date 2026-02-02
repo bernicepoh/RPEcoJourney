@@ -376,44 +376,44 @@
     </a>
 
     <ul>
-      <li><a href="/guest">Home</a></li>
-      <li><a href="/categories">Browse Content</a></li>
-      <li><a href="#" onclick="showLoginPrompt('quiz'); return false;">Quiz Me!</a></li>
+      <li><a href="/guest" id="navHome">Home</a></li>
+      <li><a href="/categories" id="navBrowse">Browse Content</a></li>
+      <li><a href="#" id="navQuiz" onclick="showLoginPrompt('quiz'); return false;">Quiz Me!</a></li>
     </ul>
 
     <ul>
-      <li><a href="/">Login</a></li>
-      <li><a href="/register">Register</a></li>
+      <li><a href="/" id="navLogin">Login</a></li>
+      <li><a href="/register" id="navRegister">Register</a></li>
     </ul>
   </nav>
 
   <section class="hero">
-    <h1>Welcome to RPEcoJourney 🌿</h1>
-    <p>Empowering green living through awareness and fun quizzes.</p>
-    <a href="/register" class="btn">Join Now</a>
+    <h1 id="heroTitle">Welcome to RPEcoJourney 🌿</h1>
+    <p id="heroSubtitle">Empowering green living through awareness and fun quizzes.</p>
+    <a href="/register" class="btn" id="joinBtn">Join Now</a>
   </section>
 
   <section class="features">
     <div class="feature-card" style="cursor: pointer;" onclick="showLoginPrompt('leaderboard')">
       <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769954382/leaderboard_icari6.png" alt="leaderboard">
-      <h3>🌍 Join the Journey</h3>
-      <p>Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
+      <h3 id="feature1Title">🌍 Join the Journey</h3>
+      <p id="feature1Desc">Compete on the leaderboard and be part of a community driving positive change for our planet.</p>
     </div>
 
     <div class="feature-card" style="cursor: pointer;" onclick="showLoginPrompt('quiz')">
       <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769654854/quiz_qgidrs.png" alt="Take Quizzes">
-      <h3>🎯 Challenge Yourself</h3>
-      <p>Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
+      <h3 id="feature2Title">🎯 Challenge Yourself</h3>
+      <p id="feature2Desc">Test your knowledge in fun, interactive quizzes designed to inspire greener living habits.</p>
     </div>
 
     <div class="feature-card">
       <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1769655538/dashboard_vz0x2m.png" alt="Dashboard">
-      <h3>🧭 Your Sustainability Dashboard</h3>
-      <p>Track your personal growth in sustainability</p>
+      <h3 id="feature3Title">🧭 Your Sustainability Dashboard</h3>
+      <p id="feature3Desc">Track your personal growth in sustainability</p>
     </div>
   </section>
 
-  <footer>
+  <footer id="footerText">
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
 
@@ -424,12 +424,12 @@
 
   <div class="chatbot-container" id="chatbotContainer">
     <div class="chatbot-header">
-      <h3>🌿 RPEco Assistant</h3>
+      <h3 id="chatbotTitle">🌿 RPEco Assistant</h3>
       <button class="chatbot-close" id="chatbotClose">×</button>
     </div>
     <div class="chatbot-messages" id="chatbotMessages">
       <div class="chat-message bot">
-        <div class="message-bubble">
+        <div class="message-bubble" id="chatbotWelcomeMsg">
           Hi! I'm your RPEcoJourney assistant. How can I help you today? 🌱
         </div>
       </div>
@@ -449,11 +449,66 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <script>
+    // Translate page elements on load
+    document.addEventListener('DOMContentLoaded', () => {
+      // Navbar
+      const navHome = document.getElementById('navHome');
+      const navBrowse = document.getElementById('navBrowse');
+      const navQuiz = document.getElementById('navQuiz');
+      const navLogin = document.getElementById('navLogin');
+      const navRegister = document.getElementById('navRegister');
+      
+      if (navHome) navHome.textContent = t('home');
+      if (navBrowse) navBrowse.textContent = t('browseContent');
+      if (navQuiz) navQuiz.textContent = t('quizMe');
+      if (navLogin) navLogin.textContent = t('loginBtn');
+      if (navRegister) navRegister.textContent = t('registerBtn');
+      
+      // Hero Section
+      const heroTitle = document.getElementById('heroTitle');
+      const heroSubtitle = document.getElementById('heroSubtitle');
+      const joinBtn = document.getElementById('joinBtn');
+      
+      if (heroTitle) heroTitle.textContent = t('heroTitle');
+      if (heroSubtitle) heroSubtitle.textContent = t('heroSubtitle');
+      if (joinBtn) joinBtn.textContent = 'Join Now'; // Could use a translation key
+      
+      // Features
+      const feature1Title = document.getElementById('feature1Title');
+      const feature1Desc = document.getElementById('feature1Desc');
+      const feature2Title = document.getElementById('feature2Title');
+      const feature2Desc = document.getElementById('feature2Desc');
+      const feature3Title = document.getElementById('feature3Title');
+      const feature3Desc = document.getElementById('feature3Desc');
+      
+      if (feature1Title) feature1Title.textContent = t('feature1Title');
+      if (feature1Desc) feature1Desc.textContent = t('feature1Description');
+      if (feature2Title) feature2Title.textContent = t('feature2Title');
+      if (feature2Desc) feature2Desc.textContent = t('feature2Description');
+      if (feature3Title) feature3Title.textContent = t('feature3Title');
+      if (feature3Desc) feature3Desc.textContent = t('feature3Description');
+      
+      // Footer
+      const footerText = document.getElementById('footerText');
+      if (footerText) footerText.innerHTML = t('footer');
+      
+      // Chatbot
+      const chatbotTitle = document.getElementById('chatbotTitle');
+      const chatbotWelcomeMsg = document.getElementById('chatbotWelcomeMsg');
+      const chatbotInput = document.getElementById('chatbotInput');
+      const chatbotSend = document.getElementById('chatbotSend');
+      
+      if (chatbotTitle) chatbotTitle.textContent = t('chatbotTitle');
+      if (chatbotWelcomeMsg) chatbotWelcomeMsg.textContent = t('chatbotWelcome');
+      if (chatbotInput) chatbotInput.placeholder = t('chatbotPlaceholder');
+      if (chatbotSend) chatbotSend.textContent = t('chatbotSend');
+    });
+
     // Show login prompt for restricted features
     function showLoginPrompt(feature) {
       const featureNames = {
-        'quiz': 'Quiz',
-        'leaderboard': 'Leaderboard',
+        'quiz': t('quizMe') || 'Quiz',
+        'leaderboard': t('leaderboardTitle') || 'Leaderboard',
         'dashboard': 'Dashboard'
       };
       
@@ -464,8 +519,8 @@
         showCancelButton: true,
         confirmButtonColor: '#2e7d32',
         cancelButtonColor: '#757575',
-        confirmButtonText: 'Login',
-        cancelButtonText: 'Register'
+        confirmButtonText: t('loginBtn') || 'Login',
+        cancelButtonText: t('registerBtn') || 'Register'
       }).then((result) => {
         if (result.isConfirmed) {
           window.location.href = '/';
