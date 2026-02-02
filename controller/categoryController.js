@@ -178,8 +178,12 @@ exports.deleteCategory = (req, res) => {
         return res.redirect('/manageCategories');
     }
 
-    
-    const contentSql = 'SELECT * FROM content WHERE contentTypeID = ?';
+    const contentSql = `
+        SELECT c.* FROM content c
+        LEFT JOIN content_request cr ON c.contentID = cr.contentID
+        WHERE c.contentTypeID = ?
+        AND (cr.status = 'approved' OR cr.contentRequestID IS NULL)
+    `;
     db.query(contentSql, [contentTypeID], (err, contentResults) => {
         if (err) {
             console.error('Content check error:', err.message);

@@ -35,11 +35,19 @@ const checkManager = (req, res, next) => {
 const allowAdminOrManager = (req, res, next) => {
     const role = req.session.user?.userType;
 
+    console.log("🔐 allowAdminOrManager check - User:", req.session.user?.userName, "Role:", role);
+
+    if (!req.session.user) {
+        console.log("❌ No user in session - redirecting to login");
+        req.flash('error', 'Please log in first');
+        return res.redirect('/');
+    }
+
     if (role === 'Admin' || role === 'Manager') {
-        console.log("Access granted: Admin/Manager");
+        console.log("✅ Access granted: Admin/Manager");
         return next();
     } else {
-        console.log("Access denied: Not Admin/Manager");
+        console.log("❌ Access denied: Not Admin/Manager, Role is:", role);
         req.flash('error', 'Only Admin or Manager can perform this action');
         return res.redirect('/401');
     }
@@ -60,13 +68,12 @@ const checkUser = (req, res, next) => {
 
 const checkWriter = (req, res, next) => {
     if (req.session.user && req.session.user.userType === 'Writer') {
-        console.log("Access denied: Not Writer");
+        console.log("Access granted: Writer");
         return next();
     } else {
-        console.log("Access denied: Not Admin/Manager");
-        req.flash('error', 'Only Admin or Manager can perform this action');
-        return res.redirect('/401');
-
+        console.log("Access denied: Not Writer");
+        req.flash('error', 'Only Writers can publish content');
+        return res.redirect('/manageContent');
     }
 };
 
@@ -86,12 +93,12 @@ const allowAdminManagerWriter = (req, res, next) => {
 const allowAdminOrWriter = (req, res, next) => {
     const role = req.session.user?.userType;
 
-    if (role === 'Admin' || role === 'Writer') {
-        console.log("Access granted: Admin/Manager");
+    if (role === 'Admin' || role === 'Writer' || role === 'Manager') {
+        console.log("Access granted: Admin/Writer/Manager");
         return next();
     } else {
-        console.log("Access denied: Not Admin/Manager");
-        req.flash('error', 'Only Admin or Manager can perform this action');
+        console.log("Access denied: Not Admin/Writer/Manager");
+        req.flash('error', 'Only Admin, Writer or Manager can perform this action');
         return res.redirect('/401');
     }
 };

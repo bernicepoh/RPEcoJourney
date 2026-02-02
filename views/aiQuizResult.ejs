@@ -10,6 +10,7 @@
         * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         body {
@@ -17,181 +18,349 @@
             background-color: #e8dfcf;
             background-size: cover;
             margin: 0;
-            padding: 40px;
+            padding: 40px 20px;
         }
 
         /* ============================
            2-COLUMN MAIN LAYOUT
         =============================*/
         .results-container {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1.4fr;
             gap: 30px;
             width: 100%;
             max-width: 1400px;
             margin: auto;
         }
 
-        /* LEFT PANEL (40%) */
+        /* LEFT PANEL - Quiz Completion Card */
         .left-panel {
-            flex: 0 0 40%;
-            background: white;
-            padding: 30px;
+            background: linear-gradient(135deg, #fff9f0 0%, #ffffff 100%);
+            padding: 40px;
             border-radius: 25px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
             text-align: center;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
         }
 
-        /* RIGHT PANEL (60%) */
+        /* RIGHT PANEL - Review & Feedback */
         .right-panel {
-            flex: 1;
             display: flex;
             flex-direction: column;
             gap: 25px;
         }
 
         /* ============================
-           SCORE BOXES
+           TYPOGRAPHY
         =============================*/
-        h1 { color: #1b5e20; font-size: 30px; margin-bottom: 25px; }
+        h1 {
+            color: #1b5e20;
+            font-size: 28px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
 
+        h3 {
+            color: #1b5e20;
+            font-size: 20px;
+            margin-bottom: 12px;
+        }
+
+        /* ============================
+           SCORE & XP BOXES
+        =============================*/
         .score-box {
-            background: #d9e8f5;
-            padding: 30px 20px;
+            background: linear-gradient(135deg, #d9e8f5 0%, #b3d9ff 100%);
+            padding: 35px 25px;
             border-radius: 18px;
-            font-size: 40px;
-            font-weight: bold;
-            margin-bottom: 15px;
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #1b5e20;
+            box-shadow: 0 4px 15px rgba(27, 94, 32, 0.15);
+        }
+
+        .score-box div {
+            font-size: 14px;
+            color: #555;
+            margin-top: 8px;
+            font-weight: 500;
         }
 
         .xp-box {
-            background: #fff7c2;
-            padding: 15px 25px;
-            border-radius: 20px;
+            background: linear-gradient(135deg, #fff7c2 0%, #fffde7 100%);
+            padding: 18px 25px;
+            border-radius: 16px;
             display: inline-block;
-            font-size: 18px;
+            font-size: 17px;
             font-weight: 600;
             margin-bottom: 30px;
             border: 2px dashed #fbc02d;
+            color: #f57f17;
+            line-height: 1.6;
         }
 
+        .xp-box span {
+            color: #795548;
+        }
+
+        /* ============================
+           STAT BOXES
+        =============================*/
         .stat-box {
             background: #f1f8e9;
-            padding: 15px 20px;
-            border-radius: 15px;
-            margin-bottom: 12px;
-            font-size: 16px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            font-size: 15px;
             text-align: left;
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid #66bb6a;
+            transition: all 0.3s ease;
         }
 
-        .btn-area { margin-top: 30px; }
+        .stat-box:hover {
+            background: #dcedc8;
+            transform: translateX(5px);
+        }
+
+        .stat-box span {
+            color: #666;
+        }
+
+        .stat-box b {
+            color: #1b5e20;
+            font-weight: 600;
+        }
+
+        /* ============================
+           BUTTONS
+        =============================*/
+        .btn-area {
+            margin-top: 35px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
         .btn {
-            padding: 12px 25px;
-            border-radius: 30px;
-            font-size: 16px;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-size: 15px;
             border: none;
             cursor: pointer;
-            margin: 0 10px;
-            font-weight: bold;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
-        .home-btn { background: #1b5e20; color: white; transition: 0.3s; }
-        .home-btn:hover { background: #2e7d32; }
+
+        .home-btn {
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .home-btn:hover {
+            background: linear-gradient(135deg, #2e7d32 0%, #388e3c 100%);
+            box-shadow: 0 6px 20px rgba(30, 124, 50, 0.3);
+            transform: translateY(-2px);
+        }
 
         /* ============================
            QUESTION REVIEW CARD
         =============================*/
         .review-card {
-            padding: 25px;
+            padding: 28px;
             border-radius: 20px;
             background: white;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
             text-align: left;
+            border-top: 5px solid #1b5e20;
         }
 
         .correct-card {
-            background: #eaffea;
-            border-left: 10px solid #2e7d32;
+            background: linear-gradient(135deg, #f1f8e9 0%, #eaffea 100%);
+            border-left: 6px solid #2e7d32;
         }
 
         .wrong-card {
-            background: #ffecec;
-            border-left: 10px solid #d9534f;
+            background: linear-gradient(135deg, #ffebee 0%, #ffecec 100%);
+            border-left: 6px solid #d9534f;
         }
 
-        .karaoke { padding: 2px 3px; border-radius: 4px; cursor: pointer; }
-        .highlight-word {
-            background: linear-gradient(90deg, #4caf50, #a8ff78);
+        .review-card p {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #555;
         }
 
+        .review-card b {
+            color: #1b5e20;
+        }
+
+        /* ============================
+           EXPLANATION BOX
+        =============================*/
         #reviewExplanation {
-            margin-top: 15px;
-            padding: 15px;
+            margin: 18px 0;
+            padding: 16px;
             border-radius: 12px;
             background: #f7f7f7;
-            border-left: 6px solid #777;
-            line-height: 1.5;
+            border-left: 5px solid #66bb6a;
+            line-height: 1.7;
+            font-size: 15px;
+            color: #444;
         }
 
-        #playPauseBtn {
-            background: #ffd65a;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 12px;
+        /* ============================
+           KARAOKE & HIGHLIGHT
+        =============================*/
+        .karaoke {
+            padding: 2px 4px;
+            border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
-            margin-top: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .karaoke:hover {
+            background: #e8f5e9;
+        }
+
+        .highlight-word {
+            background: linear-gradient(90deg, #4caf50, #a8ff78);
+            font-weight: 600;
+            padding: 3px 6px;
+            border-radius: 6px;
+        }
+
+        /* ============================
+           CONTROLS
+        =============================*/
+        #playPauseBtn {
+            background: linear-gradient(135deg, #ffd65a 0%, #ffca28 100%);
+            padding: 10px 18px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        #playPauseBtn:hover {
+            box-shadow: 0 4px 12px rgba(255, 202, 40, 0.3);
+            transform: translateY(-2px);
         }
 
         .speed-control {
-            margin-top: 12px;
+            margin-top: 15px;
             display: flex;
             align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 12px;
+        }
+
+        .speed-control label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .speed-control input {
+            width: 150px;
+            height: 6px;
+            cursor: pointer;
+        }
+
+        .speed-control span {
+            font-weight: 600;
+            color: #1b5e20;
+            min-width: 45px;
+        }
+
+        /* ============================
+           NAVIGATION
+        =============================*/
+        .nav-arrows {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 18px;
             gap: 10px;
         }
-        .speed-control input { width: 150px; }
 
-        .nav-arrows { display: flex; justify-content: space-between; margin-top: 15px; }
         .arrow-btn {
-            background: #66bb6a;
-            padding: 10px 20px;
+            flex: 1;
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            padding: 12px 18px;
             border: none;
-            border-radius: 15px;
+            border-radius: 12px;
             color: white;
             cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .arrow-btn:hover {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .arrow-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* ============================
            AI FEEDBACK BOX
         =============================*/
         .ai-box {
-            padding: 20px;
+            padding: 28px;
             border-radius: 20px;
-            background: #eef7ea;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            background: linear-gradient(135deg, #e8f5e9 0%, #eef7ea 100%);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
             text-align: left;
+            border-top: 5px solid #2e7d32;
         }
 
         .ai-title {
-            font-size: 22px;
-            font-weight: bold;
-            color: #2e7d32;
-            margin-bottom: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1b5e20;
+            margin-bottom: 15px;
         }
 
-        @media (max-width: 1024px) {
+        #aiFeedback {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #555;
+        }
+
+        /* ============================
+           RESPONSIVE DESIGN
+        =============================*/
+        @media (max-width: 1200px) {
             .results-container {
-                flex-direction: column;
+                grid-template-columns: 1fr;
             }
 
             .left-panel {
-                flex: 0 0 auto;
+                position: static;
             }
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: 30px 15px;
+            body {
+                padding: 20px 15px;
             }
 
             .results-container {
@@ -208,7 +377,16 @@
             }
 
             .score-box {
-                font-size: 32px;
+                font-size: 36px;
+                padding: 25px 20px;
+            }
+
+            .nav-arrows {
+                flex-direction: column;
+            }
+
+            .arrow-btn {
+                width: 100%;
             }
         }
     </style>
@@ -219,12 +397,8 @@
 
 <div class="results-container">
 
-    <h1>Sustainability Quiz</h1>
-    <p class="subtitle">Test your knowledge about sustainability!</p>
-
     <div class="left-panel">
-
-        <h1 id="quizCompletedTitle">🎉 Quiz Completed!</h1>
+        <h1>🎉 Quiz Completed!</h1>
 
         <div class="score-box">
             <%= score %> / 50
@@ -238,18 +412,16 @@
             </span>
         </div>
 
-        <div class="stat-box"><span id="completedOnLabel">📅 Completed On:</span> <b><%= completedAt %></b></div>
-        <div class="stat-box"><span id="userLabel">⏳ User:</span> <b><%= user.userName %></b></div>
-        <div class="stat-box"><span id="difficultyLabel">🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
+        <div class="stat-box"><span>📅 Completed On:</span> <b><%= completedAt %></b></div>
+        <div class="stat-box"><span>👤 User:</span> <b><%= user.userName %></b></div>
+        <div class="stat-box"><span>🔥 Difficulty Level:</span> <b><%= difficulty %></b></div>
 
         <div class="btn-area">
             <button class="btn home-btn" id="backToQuizBtn" onclick="window.location.href='/ai/select'">Back to Quiz Selection</button>
         </div>
-
     </div>
 
     <div class="right-panel">
-
         <div id="reviewCard" class="review-card">
             <h3 id="reviewQuestion">Question Review</h3>
             <p id="reviewStatus"></p>
@@ -276,10 +448,8 @@
             <div class="ai-title" id="aiTitle">🤖 AI Feedback & Eco Tips</div>
             <div id="aiFeedback">Loading AI insights...</div>
         </div>
-
     </div>
 
-</div>
 </div>
 
 <script>
@@ -469,7 +639,7 @@ async function showWordMeaning(word) {
     });
 }
 
-// Translate page content on load
+
 document.addEventListener('DOMContentLoaded', () => {
     const quizCompletedTitle = document.getElementById('quizCompletedTitle');
     const totalPointsText = document.getElementById('totalPointsText');

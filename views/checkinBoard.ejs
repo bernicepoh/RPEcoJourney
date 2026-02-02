@@ -280,7 +280,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Translate page elements
             const sustainabilityJourney = document.getElementById('sustainabilityJourney');
             const keepGrowingMsg = document.getElementById('keepGrowingMsg');
             const viewXPHistory = document.getElementById('viewXPHistory');
@@ -309,7 +308,7 @@
             if (missionsSubtitle) missionsSubtitle.textContent = t('missionsSubtitle');
             if (noMissionsMsg) noMissionsMsg.textContent = t('noMissions');
             
-            // Translate mission status badges
+
             document.querySelectorAll('.mission-completed').forEach(el => {
                 el.textContent = t('missionCompleted');
             });

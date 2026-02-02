@@ -298,6 +298,8 @@ exports.trackShare = (req, res) => {
 
 exports.getContent = (req, res) => {
     const contentID = req.params.id;
+    const userID = req.session.user ? req.session.user.userID : 0;
+    const userRole = req.session.user ? req.session.user.userType : 'User';
 
     const sort = req.query.sort || "newest";
 
@@ -541,47 +543,150 @@ exports.addContentForm = (req, res) => {
 
 
 exports.addContent = (req, res) => {
-  const { contentTypeID, contentTitle, contentDescription } = req.body;
-  
+    const { contentTypeID, contentTitle, contentDescription, publishNow } = req.body;
+    const contentFile = req.file ? req.file.path : null;
+    const userType = req.session.user?.userType;
 
-  if (!req.file) {
-    req.flash('error', 'Please upload a file');
-    return res.redirect('/addContent');
-  }
-
-
-  const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; 
-
-  const fileName = req.file.originalname.toLowerCase();
-  const ext = fileName.split('.').pop();
-
-
-  if (!ALLOWED_EXTENSIONS.includes(ext)) {
-    req.flash('error', `File type ".${ext}" not allowed. Please use: Images, Videos, PDF, Word, or PowerPoint.`);
-    return res.redirect('/addContent');
-  }
-
- 
-  if (req.file.size > MAX_FILE_SIZE) {
-    req.flash('error', `File size exceeds 10MB limit.`);
-    return res.redirect('/addContent');
-  }
-
-  const contentFile = req.file.path;
-  
-  const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
-  db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error) => {
-    if (error) {
-      console.error("Error adding content:", error);
-      req.flash('error', 'Error adding content');
-      res.redirect('/addContent');
-    } else {
-      req.flash('success', 'Content published successfully!');
-      res.redirect('manageContent');
+    // Only Writer can publish content
+    if (userType !== 'Writer') {
+        req.flash('error', 'Only Writers can publish content. Admins and Managers can only approve/reject.');
+        return res.redirect('/manageContent');
     }
-  });
+
+    // Step 1: Insert content into content table
+    const insertContentSql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
+   
+    db.query(insertContentSql, [contentTypeID, contentTitle, contentDescription, contentFile], (error, results) => {
+        if (error) {
+            console.error("Error adding content:", error);
+            return res.status(500).send('Error adding content');
+        }
+
+        const contentID = results.insertId;
+
+        // If Writer chooses to publish directly (no approval needed)
+        if (publishNow === 'true') {
+            req.flash('success', 'Content published successfully!');
+            return res.redirect('manageContent');
+        }
+
+        // Otherwise, submit for approval
+        // Step 2: Create content request with 'pending' status
+        // Try without created_at first, it may be auto-generated
+        const insertRequestSql = 'INSERT INTO content_request (contentID, status) VALUES (?, ?)';
+        
+        console.log('🔄 Inserting content request for contentID:', contentID);
+        
+        db.query(insertRequestSql, [contentID, 'pending'], (requestError) => {
+            if (requestError) {
+                console.error("❌ Error creating content request:", requestError);
+                console.error("❌ SQL State:", requestError.sqlState);
+                console.error("❌ Error Code:", requestError.code);
+                console.error("❌ Error Message:", requestError.message);
+                req.flash('error', 'Content added but approval request failed. Error: ' + requestError.message);
+                return res.redirect('manageContent');
+            }
+
+            // Step 3: Send notification email to manager (cc admin)
+            sendContentNotificationEmail(contentTitle, contentDescription, contentID, req.session.user?.userName);
+
+            req.flash('success', 'Content submitted successfully! It is now pending manager approval.');
+            res.redirect('manageContent');
+        });
+    });
 };
+
+// Helper function to send content notification email
+function sendContentNotificationEmail(contentTitle, contentDescription, contentID, writerName) {
+    // Get manager and admin emails to send notification
+    const getEmailsSql = `
+        SELECT u.email, u.userName, u.userType
+        FROM user u 
+        WHERE u.userType IN ('Manager', 'Admin')
+        ORDER BY u.userType DESC
+    `;
+
+    db.query(getEmailsSql, async (emailError, emailResults) => {
+        if (!emailError && emailResults.length > 0) {
+            // Separate manager and admin emails
+            const managers = emailResults.filter(u => u.userType === 'Manager');
+            const admins = emailResults.filter(u => u.userType === 'Admin');
+            
+            // Send to all managers, CC all admins
+            const managerEmails = managers.map(m => m.email);
+            const adminEmails = admins.map(a => a.email);
+            
+            // If no managers, send to admins instead
+            const toAddresses = managerEmails.length > 0 ? managerEmails.join(',') : adminEmails.join(',');
+            const ccAddresses = managerEmails.length > 0 && adminEmails.length > 0 ? adminEmails.join(',') : '';
+            
+            if (toAddresses) {
+                // Send email to manager with admin CC'd
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.EMAIL_USER,
+                        pass: process.env.EMAIL_PASSWORD
+                    }
+                });
+
+                const appUrl = process.env.APP_URL || 'http://localhost:3000';
+
+                const mailOptions = {
+                    from: process.env.EMAIL_USER,
+                    to: toAddresses,
+                    cc: ccAddresses,
+                    subject: 'New Content Submission for Approval - RPEcoJourney',
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                            <h2 style="color: #003b2b; border-bottom: 2px solid #28a745; padding-bottom: 10px;">📝 New Content Submission</h2>
+                            
+                            <p style="font-size: 16px; color: #333;">Hello,</p>
+                            
+                            <p style="font-size: 16px; color: #333;">
+                                A new content submission from <strong>${writerName || 'a writer'}</strong> requires your review and approval.
+                            </p>
+                            
+                            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                                <p style="margin: 5px 0;"><strong>📌 Title:</strong> ${contentTitle}</p>
+                                <p style="margin: 5px 0;"><strong>📄 Description:</strong> ${contentDescription}</p>
+                                <p style="margin: 5px 0;"><strong>🆔 Content ID:</strong> #${contentID}</p>
+                            </div>
+                            
+                            <p style="font-size: 16px; color: #666;">
+                                Please log in to the RPEcoJourney portal to review and approve or reject this content submission.
+                            </p>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="${appUrl}/content-requests" 
+                                   style="display: inline-block; padding: 12px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                                    Log In to Review
+                                </a>
+                            </div>
+                            
+                            <p style="font-size: 14px; color: #999; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                                This is an automated notification from RPEcoJourney. Please do not reply to this email.
+                            </p>
+                        </div>
+                    `
+                };
+
+                transporter.sendMail(mailOptions, (emailError, info) => {
+                    if (emailError) {
+                        console.error('❌ Error sending content request email:', emailError);
+                    } else {
+                        console.log('✅ Content request email sent:', info.response);
+                    }
+                });
+            } else {
+                console.error('⚠️ No manager or admin emails found to send notification');
+            }
+        } else {
+            console.error('⚠️ Error fetching manager/admin emails:', emailError);
+        }
+    });
+}
+
 
 const getAllCategories = (db, callback) => {
     const sql = 'SELECT * FROM content_type';
@@ -760,10 +865,129 @@ exports.manageContent = (req, res) => {
         if (results.length > 0) {
             res.render('manageContent', { 
                 content: results,
-            flashSuccess: req.flash("success"),
-            flashError: req.flash("error") });
+                user: req.session.user,
+                flashSuccess: req.flash("success"),
+                flashError: req.flash("error") 
+            });
         } else {
-            res.status(404).send('No content');
+            res.render('manageContent', { 
+                content: [],
+                user: req.session.user,
+                flashSuccess: req.flash("success"),
+                flashError: req.flash("error") 
+            });
         }
     });
+};
+
+// ============================
+// GET CONTENT REQUESTS
+// ============================
+exports.getContentRequests = async (req, res) => {
+    console.log('📋 getContentRequests called');
+    console.log('User:', req.session.user?.userName, 'Type:', req.session.user?.userType);
+    
+    try {
+        // Join with content table to show details
+        const sql = `
+            SELECT 
+                cr.contentRequestID,
+                cr.contentID,
+                cr.status,
+                cr.created_at,
+                c.contentTitle,
+                c.contentDescription,
+                c.contentFile,
+                ct.contentTypeName
+            FROM content_request cr
+            JOIN content c ON cr.contentID = c.contentID
+            LEFT JOIN content_type ct ON c.contentTypeID = ct.contentTypeID
+            WHERE cr.status = 'pending'
+            ORDER BY cr.created_at DESC
+            LIMIT 100
+        `;
+
+        db.query(sql, (error, pendingRequests) => {
+            if (error) {
+                console.error('❌ Query Error:', error.message);
+                console.error('❌ Full Error:', error);
+                // Still render the page even if query fails
+                return res.render('contentRequests', { 
+                    requests: [],
+                    flashSuccess: req.flash('success'),
+                    flashError: req.flash('error')
+                });
+            }
+
+            console.log('✅ Query successful - found', pendingRequests?.length || 0, 'pending requests');
+
+            // Render page with whatever we have
+            res.render('contentRequests', { 
+                requests: pendingRequests || [],
+                flashSuccess: req.flash('success'),
+                flashError: req.flash('error')
+            });
+        });
+    } catch (error) {
+        console.error('❌ Exception in getContentRequests:', error);
+        res.render('contentRequests', { 
+            requests: [],
+            flashSuccess: req.flash('success'),
+            flashError: req.flash('error')
+        });
+    }
+};
+
+// ============================
+// APPROVE CONTENT REQUEST
+// ============================
+exports.approveContentRequest = async (req, res) => {
+    try {
+        const contentRequestID = req.params.id;
+        
+        // Update content_request status to 'approved'
+        const updateSql = `UPDATE content_request SET status = 'approved' WHERE contentRequestID = ?`;
+        
+        db.query(updateSql, [contentRequestID], async (error, result) => {
+            if (error) {
+                console.error('Error approving content:', error);
+                req.flash('error', 'Error approving content');
+                return res.redirect('/content-requests');
+            }
+
+            req.flash('success', 'Content approved successfully!');
+            res.redirect('/content-requests');
+        });
+    } catch (error) {
+        console.error('Error in approveContentRequest:', error);
+        req.flash('error', 'Error approving content');
+        res.redirect('/content-requests');
+    }
+};
+
+// ============================
+// REJECT CONTENT REQUEST
+// ============================
+exports.rejectContentRequest = async (req, res) => {
+    try {
+        const contentRequestID = req.params.id;
+        
+        // Update content_request status to 'rejected'
+        const updateSql = `UPDATE content_request SET status = 'rejected' WHERE contentRequestID = ?`;
+        
+        db.query(updateSql, [contentRequestID], async (error, result) => {
+            if (error) {
+                console.error('Error rejecting content:', error);
+                req.flash('error', 'Error rejecting content');
+                return res.redirect('/content-requests');
+            }
+
+            req.flash('success', 'Content rejected successfully!');
+            res.redirect('/content-requests');
+        });
+    } catch (error) {
+        console.error('Error in rejectContentRequest:', error);
+        req.flash('error', 'Error rejecting content');
+        res.redirect('/content-requests');
+    }
 };

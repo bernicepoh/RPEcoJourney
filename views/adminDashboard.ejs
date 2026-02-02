@@ -162,7 +162,8 @@
   </div>
 </div>
 
-
+<!-- REQUESTS OVERVIEW -->
+<% if (userType === 'Admin' || userType === 'Manager' || userType === 'Writer') { %>
 <div class="card p-4 mb-5">
   <h5 class="card-title">👜 Requests Overview</h5>
 
@@ -173,16 +174,55 @@
     <li>📨 Feedback Tickets — <b>0</b></li>
   </ul>
 
-  <a href="/content-requests" class="btn btn-success mt-2">
-    Go to Requests Page
-  </a>
+  <% if (userType === 'Admin' || userType === 'Manager') { %>
+    <a href="/content-requests" class="btn btn-success mt-2">
+      📋 Go to Requests Page
+    </a>
+  <% } %>
+  
+  <% if (userType === 'Writer') { %>
+    <a href="/manageContent" class="btn btn-success mt-2">
+      📋 View My Content Status
+    </a>
+  <% } %>
 </div>
+<% } %>
+
+<style>
+  .back-link {
+    display: inline-block;
+    margin: 30px auto;
+    text-decoration: none;
+    color: #256b45;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .back-link:hover {
+    text-decoration: underline;
+    color: #1a4b32;
+  }
+</style>
+
 
 </div>
 </div>
 
 
 <script>
+console.log('📋 Admin Dashboard loaded');
+console.log('User Type:', '<%= userType %>');
+
+// Test if button exists
+document.addEventListener('DOMContentLoaded', function() {
+  const requestBtn = document.querySelector('a[href="/content-requests"]');
+  console.log('Button found:', requestBtn);
+  if (requestBtn) {
+    requestBtn.addEventListener('click', function(e) {
+      console.log('Button CLICKED! Going to /content-requests');
+    });
+  }
+});
+
 fetch('/admin/dashboard/stats')
   .then(res => {
     console.log('📡 Response Status:', res.status);
