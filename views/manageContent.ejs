@@ -167,17 +167,6 @@
 
                         <h5 class="content-title"><%= c.contentTitle %></h5>
 
-                        <!-- STATUS BADGE -->
-                        <div class="text-center mb-2">
-                            <% if (c.approvalStatus === 'pending') { %>
-                                <span class="badge bg-warning text-dark">⏳ Pending Approval</span>
-                            <% } else if (c.approvalStatus === 'rejected') { %>
-                                <span class="badge bg-danger">❌ Rejected</span>
-                            <% } else { %>
-                                <span class="badge bg-success">✅ Approved</span>
-                            <% } %>
-                        </div>
-
                         <div class="content-actions">
                             <a href="/editContent/<%= c.contentID %>" class="btn btn-primary btn-sm">✏ Edit</a>
 
@@ -201,25 +190,6 @@
             <% } %>
         </div>
 
-    </div>
-
-    <style>
-      .back-link {
-        display: inline-block;
-        margin: 30px auto;
-        text-decoration: none;
-        color: #256b45;
-        font-weight: 700;
-        font-size: 1rem;
-      }
-      .back-link:hover {
-        text-decoration: underline;
-        color: #1a4b32;
-      }
-    </style>
-
-    <div class="text-center mb-4">
-      <a href="/adminDashboard" class="back-link">← Back to Dashboard</a>
     </div>
 
     <!-- SweetAlert2 -->
