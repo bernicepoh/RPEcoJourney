@@ -12,20 +12,25 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     const ext = file.originalname.split('.').pop().toLowerCase();
-    const isOfficeFile = ['doc','docx','ppt','pptx','xls','xlsx'].includes(ext);
+    const isOfficeFile = ['doc','docx','ppt','pptx'].includes(ext);
+    const isPdf = ext === 'pdf';
     
     return {
       folder: 'uploads',
       allowed_formats: [
         'jpg', 'jpeg', 'png', 'gif', 'webp',
-        'pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx',
+        'pdf', 'doc', 'docx', 'ppt', 'pptx',
         'mp4', 'mov', 'avi'
       ],
       resource_type: 'auto',
-      // ONLY trigger Aspose for Office files
+      // For Office files: use Aspose for conversion
       ...(isOfficeFile && { 
-        raw_convert: "aspose",
-        resource_type: "raw"  // Force raw for Office files
+        flags: 'attachment',
+        resource_type: 'raw'
+      }),
+      // For PDFs: ensure they're treated as raw files
+      ...(isPdf && {
+        resource_type: 'raw'
       })
     };
   }
@@ -35,6 +40,16 @@ const parser = multer({
   storage,
   limits: {
     fileSize: 10 * 1024 * 1024 // 10MB
+  },
+  fileFilter: async (req, file, cb) => {
+    const ext = file.originalname.split('.').pop().toLowerCase();
+    const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
+    
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return cb(new Error(`File type .${ext} is not allowed`));
+    }
+    
+    cb(null, true);
   }
 });
 

@@ -228,39 +228,54 @@ exports.postComment = async (req, res) => {
     const userID = req.session.user.userID;
     const commentText = req.body.commentText;
 
+    console.log('📝 Post Comment Request:', { contentID, userID, commentText });
+
     const profanityRegex = /\b(f+[\W_]*u+[\W_]*c+[\W_]*k+|s+[\W_]*h+[\W_]*i+[\W_]*t+|b+[\W_]*i+[\W_]*t+[\W_]*c+[\W_]*h+|a+[\W_]*s+[\W_]*s+[\W_]*h+[\W_]*o+[\W_]*l+e+)\b/gi;
 
     if (profanityRegex.test(commentText)) {
+        console.log('🚫 Comment failed profanity check');
         return res.redirect(`/content/${contentID}?error=inappropriate`);
     }
 
     try {
-        const OpenAI = require("openai");   
-        const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
         // ============================
         // Hugging Face Moderation
         // ============================
+        console.log('🤖 Starting AI moderation...');
         const flagged = await isUnsafeComment(commentText);
+        console.log('✅ AI moderation result:', flagged);
 
         if (flagged) {
+            console.log('🚫 Comment flagged as inappropriate');
             return res.redirect(`/content/${contentID}?error=inappropriate`);
         }
 
         // =================================
         // Inserting of Clean Comment to DB
         // =================================
+        console.log('💾 Inserting comment to database...');
         const sql = `
             INSERT INTO engagement (userID, contentID, comments, share) 
             VALUES (?, ?, ?, ?)
         `;
 
         db.query(sql, [userID, contentID, commentText, 0], (err) => {
-            if (err) return res.status(500).send("Failed to post comment");
+            if (err) {
+                console.error('❌ Database insertion error:', err);
+                console.error('❌ Error code:', err.code);
+                console.error('❌ Error message:', err.message);
+                console.error('❌ Error SQL:', err.sql);
+                return res.status(500).send("Failed to post comment");
+            }
+            console.log('✅ Comment posted successfully');
             res.redirect(`/content/${contentID}?success=posted`);
         });
 
     } catch (error) {
-        console.error("AI moderation error:", error);
+        console.error("❌ AI moderation error:", error);
+        console.error("❌ Error type:", error.constructor.name);
+        console.error("❌ Error message:", error.message);
+        console.error("❌ Full error stack:", error.stack);
         return res.redirect(`/content/${contentID}?error=moderation_fail`);
     }
 };
@@ -567,15 +582,42 @@ exports.addContentForm = (req, res) => {
 exports.addContent = (req, res) => {
   const { contentTypeID, contentTitle, contentDescription } = req.body;
   
+  // Validate file upload
+  if (!req.file) {
+    req.flash('error', 'Please upload a file');
+    return res.redirect('/addContent');
+  }
+
+  // Server-side file validation
+  const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+  const fileName = req.file.originalname.toLowerCase();
+  const ext = fileName.split('.').pop();
+
+  // Check file extension
+  if (!ALLOWED_EXTENSIONS.includes(ext)) {
+    req.flash('error', `File type ".${ext}" not allowed. Please use: Images, Videos, PDF, Word, or PowerPoint.`);
+    return res.redirect('/addContent');
+  }
+
+  // Check file size
+  if (req.file.size > MAX_FILE_SIZE) {
+    req.flash('error', `File size exceeds 10MB limit.`);
+    return res.redirect('/addContent');
+  }
+
   // 🚀 req.file.path = FULL Cloudinary URL!
-  const contentFile = req.file ? req.file.path : null;
+  const contentFile = req.file.path;
   
   const sql = 'INSERT INTO content (contentTypeID, contentTitle, contentDescription, contentFile) VALUES (?, ?, ?, ?)';
   db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile], (error) => {
     if (error) {
       console.error("Error adding content:", error);
-      res.status(500).send('Error adding content');
+      req.flash('error', 'Error adding content');
+      res.redirect('/addContent');
     } else {
+      req.flash('success', 'Content published successfully!');
       res.redirect('manageContent');
     }
   });
@@ -633,25 +675,65 @@ exports.editContent = (req, res) => {
   const contentID = req.params.id;
   const { contentTypeID, contentTitle, contentDescription } = req.body;
   
-  // Delete old file from Cloudinary
+  const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+  // If new file is uploaded, validate it
+  if (req.file) {
+    const fileName = req.file.originalname.toLowerCase();
+    const ext = fileName.split('.').pop();
+
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      req.flash('error', `File type ".${ext}" not allowed.`);
+      return res.redirect(`/editContent/${contentID}`);
+    }
+
+    if (req.file.size > MAX_FILE_SIZE) {
+      req.flash('error', 'File size exceeds 10MB limit.');
+      return res.redirect(`/editContent/${contentID}`);
+    }
+  }
+
+  // Get old file to delete if new file is being uploaded
   db.query('SELECT contentFile FROM content WHERE contentID = ?', [contentID], async (err, rows) => {
-    if (rows[0]?.contentFile) {
-      const publicId = rows[0].contentFile.match(/\/upload\/v\d+\/(.*)\./)?.[1];
-      if (publicId) {
-        await new Promise(resolve => cloudinary.uploader.destroy(publicId, resolve));
+    if (err) {
+      req.flash('error', 'Error updating content');
+      return res.redirect(`/editContent/${contentID}`);
+    }
+
+    const oldFile = rows[0]?.contentFile;
+
+    // If new file uploaded, delete old one from Cloudinary
+    if (req.file && oldFile) {
+      const publicIdMatch = oldFile.match(/\/(?:image|raw|video)\/upload\/v\d+\/(.*)$/);
+      if (publicIdMatch) {
+        const publicId = publicIdMatch[1];
+        try {
+          await new Promise((resolve, reject) => {
+            cloudinary.uploader.destroy(publicId, { invalidate: true }, (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            });
+          });
+          console.log(`✅ Deleted old file: ${publicId}`);
+        } catch (deleteError) {
+          console.error('⚠️  Error deleting old file:', deleteError.message);
+          // Continue anyway - don't block the update
+        }
       }
     }
-    
-    // New file URL
-    const contentFile = req.file ? req.file.path : req.body.currentFile;
+
+    // Use new file URL if uploaded, otherwise keep old file
+    const contentFile = req.file ? req.file.path : oldFile;
     
     const sql = 'UPDATE content SET contentTypeID = ?, contentTitle = ?, contentDescription = ?, contentFile = ? WHERE contentID = ?';
     db.query(sql, [contentTypeID, contentTitle, contentDescription, contentFile, contentID], (error) => {
       if (error) {
         console.error("Error updating:", error);
-        res.status(500).send('Error');
+        req.flash('error', 'Error updating content');
+        res.redirect(`/editContent/${contentID}`);
       } else {
-        req.flash('success', 'Updated!');
+        req.flash('success', 'Content updated successfully!');
         res.redirect('/manageContent');
       }
     });
@@ -662,7 +744,7 @@ exports.deleteContent = async (req, res) => {
     const contentID = req.params.id;
     
     try {
-        const getContentSql = 'SELECT contentFile, contentTypeID FROM content WHERE contentID = ?';
+        const getContentSql = 'SELECT contentFile FROM content WHERE contentID = ?';
         const [getResults] = await db.promise().query(getContentSql, [contentID]);
         
         if (getResults.length === 0) {
@@ -671,48 +753,38 @@ exports.deleteContent = async (req, res) => {
         }
         
         const contentFile = getResults[0].contentFile;
-        const contentTypeID = getResults[0].contentTypeID;
         
+        // Extract public ID from Cloudinary URL
         const publicIdMatch = contentFile.match(/\/(?:image|raw|video)\/upload\/v\d+\/(.*)$/);
-        if (!publicIdMatch) {
-            console.error('Could not extract public_id from:', contentFile);
-        } else {
-            const publicId = publicIdMatch[1]; // "uploads/filename.docx"
+        
+        if (publicIdMatch) {
+            const publicId = publicIdMatch[1];
             
+            // Delete the file from Cloudinary
             try {
                 await new Promise((resolve, reject) => {
                     cloudinary.uploader.destroy(publicId, { 
-                        invalidate: true 
-                    }, (error, result) => {
-                        if (error) reject(error);
-                        else resolve(result);
-                    });
-                });
-                console.log(`Deleted original file: ${publicId}`);
-            } catch (deleteError) {
-                console.error('Error deleting original file:', deleteError);
-            }
-            
-            const pdfPublicId = publicId.endsWith('.pdf') ? publicId : publicId + '.pdf';
-            try {
-                await new Promise((resolve, reject) => {
-                    cloudinary.uploader.destroy(pdfPublicId, { 
-                        resource_type: "image",
-                        invalidate: true 
+                        invalidate: true,
+                        resource_type: 'auto'
                     }, (error, result) => {
                         if (error) {
-                            if (error.http_code !== 404) reject(error); // Ignore "not found"
+                            console.error('❌ Error deleting file:', error);
+                            reject(error);
                         } else {
-                            console.log(`Deleted derived PDF: ${pdfPublicId}`);
+                            console.log(`✅ Deleted from Cloudinary: ${publicId}`);
+                            resolve(result);
                         }
-                        resolve(result);
                     });
                 });
-            } catch (pdfError) {
-                console.error('Error deleting PDF (might not exist):', pdfError.message);
+            } catch (deleteError) {
+                console.error('⚠️  Error deleting from Cloudinary:', deleteError.message);
+                // Continue with database deletion even if Cloudinary delete fails
             }
+        } else {
+            console.warn('⚠️  Could not extract public_id from URL:', contentFile);
         }
         
+        // Delete from database
         const deleteSql = 'DELETE FROM content WHERE contentID = ?';
         await db.promise().query(deleteSql, [contentID]);
         
@@ -720,7 +792,7 @@ exports.deleteContent = async (req, res) => {
         res.redirect('/manageContent');
         
     } catch (error) {
-        console.error("Error deleting content:", error);
+        console.error("❌ Error deleting content:", error);
         req.flash('error', 'Error deleting content');
         res.redirect('/manageContent');
     }

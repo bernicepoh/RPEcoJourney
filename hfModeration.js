@@ -4,6 +4,11 @@ const HF_API_URL =
   "https://router.huggingface.co/hf-inference/models/unitary/toxic-bert";
 
 async function isUnsafeComment(text) {
+  console.log('🔍 Checking comment with Hugging Face...');
+  console.log('📝 Comment text:', text);
+  console.log('🔑 HF Token exists:', !!process.env.HF_API_TOKEN);
+  console.log('🔑 HF Token preview:', process.env.HF_API_TOKEN ? process.env.HF_API_TOKEN.substring(0, 10) + '...' : 'MISSING');
+  
   const res = await fetch(HF_API_URL, {
     method: "POST",
     headers: {
@@ -14,14 +19,21 @@ async function isUnsafeComment(text) {
     body: JSON.stringify({ inputs: text }),
   });
 
+  console.log('📡 HF Response status:', res.status);
+  
   const data = await res.json();
+  
+  console.log('📡 HF Response data:', JSON.stringify(data).substring(0, 200));
 
   // Handle HF errors or model loading
   if (!res.ok || data.error) {
+    console.error('❌ HF Error response:', data);
     throw new Error(data.error || "Hugging Face inference failed");
   }
 
   const labels = Array.isArray(data[0]) ? data[0] : data;
+
+  console.log('📊 Labels:', JSON.stringify(labels).substring(0, 200));
 
   // Thresholds (match old OpenAI strictness)
   const TOXIC_THRESHOLD = 0.7;
@@ -39,12 +51,16 @@ async function isUnsafeComment(text) {
     if (label === "obscene") obscene = item.score || 0;
   }
 
-  // Same role as OpenAI: unsafe = true / safe = false
-  return (
-    toxic >= TOXIC_THRESHOLD ||
+  console.log('📊 Scores:', { toxic, insult, obscene });
+
+  const isFlagged = toxic >= TOXIC_THRESHOLD ||
     insult >= INSULT_THRESHOLD ||
-    obscene >= OBSCENE_THRESHOLD
-  );
+    obscene >= OBSCENE_THRESHOLD;
+
+  console.log('✅ Is flagged:', isFlagged);
+
+  // Same role as OpenAI: unsafe = true / safe = false
+  return isFlagged;
 }
 
 module.exports = { isUnsafeComment };
