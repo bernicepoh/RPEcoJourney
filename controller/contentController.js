@@ -567,13 +567,7 @@ exports.addContent = (req, res) => {
 
         const contentID = results.insertId;
 
-        // If Writer chooses to publish directly (no approval needed)
-        if (publishNow === 'true') {
-            req.flash('success', 'Content published successfully!');
-            return res.redirect('manageContent');
-        }
-
-        // Otherwise, submit for approval
+        // All content must go through approval process
         // Step 2: Create content request with 'pending' status
         // Try without created_at first, it may be auto-generated
         const insertRequestSql = 'INSERT INTO content_request (contentID, status) VALUES (?, ?)';
