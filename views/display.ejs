@@ -4,23 +4,23 @@
     <title>RPEcoJourney Kiosk</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
-        /* display.ejs */
+       
         body {
             margin: 0;
             padding: 0;
-            background-color: white; /* Force the body to be white */
+            background-color: white;
             overflow: hidden;
         } 
 
         #status-bar {
-            position: fixed; /* Keep it fixed to the screen coordinates */
+            position: fixed; 
             top: 20px;
             right: 20px;
             background: rgba(255, 255, 255, 0.9); 
             padding: 10px 20px;
             border-radius: 12px;
             border: 2px solid #27ae60;
-            /* This is the secret sauce: */
+           
             z-index: 999999 !important; 
             pointer-events: none; /* Allows you to still click things under it if needed */
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);

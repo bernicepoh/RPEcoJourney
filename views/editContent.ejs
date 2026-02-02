@@ -27,11 +27,11 @@
       margin-bottom: 60px;
     }
 
-    /* Form container layout */
+    
     .form-container {
       display: grid;
       grid-template-columns: 180px auto;
-      gap: 25px 40px; /* <-- Increased spacing between label and input */
+      gap: 25px 40px; 
       align-items: center;
       justify-content: center;
       max-width: 750px;
@@ -89,12 +89,12 @@
     }
 
     .file-box {
-  width: 350px;              /* all previews share SAME width */
-  height: 260px;             /* adjust height if needed */
+  width: 350px;             
+  height: 260px;             
   display: flex;
-  align-items: center;       /* center vertically */
-  justify-content: center;   /* center horizontally */
-  margin: 40px auto 16px auto; /* centers horizontally with bottom space */
+  align-items: center;       
+  justify-content: center;   
+  margin: 40px auto 16px auto; 
 }
  
 .file-box img {
@@ -135,7 +135,7 @@
 
             <label for="categoryID" id="categoryLabel">Category:</label>
             <select name="contentTypeID" id="contentTypeID" required class="custom-input">
-              <option value="">Select category</option> <!-- Empty value ensures it's invalid -->
+              <option value="">Select category</option> 
               <option value="1">Environmental</option>
               <option value="2">Social</option>
               <option value="3">Governance</option>
@@ -197,7 +197,7 @@
 
     <script>
         const ALLOWED_EXTENSIONS = ['jpg','jpeg','png','gif','webp','mp4','mov','avi','pdf','doc','docx','ppt','pptx'];
-        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; 
 
         function autoExpand(textarea) {
           textarea.style.height = "auto";
@@ -207,7 +207,7 @@
         window.addEventListener('DOMContentLoaded', function() {
           document.querySelectorAll('textarea').forEach(autoExpand);
           
-          // Translate form labels
+
           const pageTitle = document.getElementById('pageTitle');
           const titleLabel = document.getElementById('titleLabel');
           const descLabel = document.getElementById('descLabel');
@@ -224,7 +224,7 @@
           if (newFileLabel) newFileLabel.textContent = t('newFile') + ':';
           if (submitBtn) submitBtn.textContent = t('updateBtn');
 
-          // File validation
+  
           const fileInput = document.getElementById('contentFile');
           const fileError = document.getElementById('fileError');
           const form = fileInput.closest('form');
@@ -234,9 +234,9 @@
             fileError.style.display = 'none';
             fileError.textContent = '';
 
-            if (!file) return; // Empty is allowed (means keep current file)
+            if (!file) return; 
 
-            // Check file extension
+  
             const fileName = file.name.toLowerCase();
             const ext = fileName.split('.').pop();
 
@@ -247,7 +247,6 @@
               return;
             }
 
-            // Check file size
             if (file.size > MAX_FILE_SIZE) {
               fileError.textContent = `❌ File size exceeds 10MB limit. Current: ${(file.size / 1024 / 1024).toFixed(2)}MB`;
               fileError.style.display = 'block';

@@ -14,7 +14,7 @@
       display: flex;
     }
 
-    /* LEFT SIDE (same as login) */
+    
     .left-panel {
       width: 50%;
       background: url("/uploads/login.png") no-repeat center center;
@@ -26,7 +26,7 @@
       justify-content: center;
     }
 
-    /* DARK OVERLAY */
+    
     .left-panel::before {
       content: "";
       position: absolute;
@@ -53,7 +53,7 @@
       margin-bottom: 15px;
     }
 
-    /* RIGHT SIDE */
+    
     .right-panel {
       width: 50%;
       background: #e8dfcf;
@@ -183,34 +183,34 @@
 
 <body>
 
-  <!-- LEFT PANEL -->
+ 
   <div class="left-panel">
     <h1 id="registerTitle">Join RPEcoJourney</h1>
     <p id="registerSubtitle1">Start your sustainability adventure with XP, badges & missions</p>
     <p id="registerSubtitle2">Create an account to begin your EcoJourney 🌱</p>
   </div>
 
-  <!-- RIGHT PANEL -->
+  
   <div class="right-panel">
     <div class="register-box">
 
       <h1 id="createAccountTitle">Create Account</h1>
 
-      <!-- Display errors -->
+      
       <% if (errors && errors.length > 0) { %>
         <% errors.forEach(err => { %>
           <div class="message error"><%= err %></div>
         <% }) %>
       <% } %>
 
-      <!-- Display success messages -->
+      
       <% if (messages && messages.length > 0) { %>
         <% messages.forEach(msg => { %>
           <div class="message success"><%= msg %></div>
         <% }) %>
       <% } %>
 
-      <!-- ERROR PROCESSING (kept exactly as your original logic) -->
+      
       <%
       const fieldErrors = {};
       if (errors) {
@@ -227,7 +227,7 @@
       }
       %>
 
-      <!-- REGISTRATION FORM -->
+      
       <form action="/register" method="POST">
 
         <div class="field-wrapper <%= (fieldErrors.all || fieldErrors.userName) ? 'error' : '' %>">
@@ -284,11 +284,11 @@
     &copy; 2025 RPEcoJourney. All Rights Reserved.
   </footer>
 
-  <!-- YOUR ORIGINAL JS KEPT EXACTLY SAME -->
+  
   <script>
-    // Translate page elements on load
+    
     document.addEventListener('DOMContentLoaded', () => {
-      // Page titles
+      
       const registerTitle = document.getElementById('registerTitle');
       const createAccountTitle = document.getElementById('createAccountTitle');
       const usernameLbl = document.getElementById('usernameLbl');

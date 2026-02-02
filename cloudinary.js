@@ -22,12 +22,11 @@ const storage = new CloudinaryStorage({
         'pdf', 'doc', 'docx', 'ppt', 'pptx',
         'mp4', 'mov', 'avi'
       ],
-      // For Office files and PDFs: use raw resource type
-      ...(isOfficeFile || isPdf ? {
-        resource_type: 'raw',
-        type: 'upload'
-      } : {
-        resource_type: 'auto'
+      resource_type: 'auto',
+      
+      ...(isOfficeFile && { 
+        raw_convert: "aspose",
+        resource_type: "raw"  
       })
     };
   }
