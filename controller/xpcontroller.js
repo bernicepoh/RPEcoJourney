@@ -1,16 +1,8 @@
 const db = require('../db');
 
 
-/**
- * GET /xp-history
- * Logic:
- * 1. Validates user session.
- * 2. Fetches lifetime summary stats (Total XP, Quizzes, Missions, Streak).
- * 3. Fetches the last 90 days of activity for the heatmap and 3-month filter.
- * 4. Fetches the detailed activity log for the list view.
- */
+
 const getXPHistory = async (req, res) => {
-    // 1. Get the User ID from the session
     const user = req.session.user;
 
     if (!user || !user.userID) {
@@ -20,8 +12,6 @@ const getXPHistory = async (req, res) => {
 
     const userId = user.userID;
 
-    // 2. QUERY: Lifetime Summary Stats
-    // Uses subqueries to get permanent totals from non-expiring tables
     const statsQuery = `
         SELECT 
             (SELECT COUNT(*) FROM quiz WHERE userID = ?) as quizCount,
@@ -30,7 +20,6 @@ const getXPHistory = async (req, res) => {
             (SELECT streak FROM user WHERE userID = ?) as currentStreak
     `;
 
-    // 3. QUERY: Heatmap & Filter Data (Covers the last 3 months)
     const heatmapQuery = `
         SELECT DATE(timestamp) as logDate, SUM(xpEarned) as totalDayXP 
         FROM xp_log 
@@ -38,7 +27,6 @@ const getXPHistory = async (req, res) => {
         GROUP BY DATE(timestamp)
     `;
 
-    // 4. QUERY: Detailed History Logs
     const logQuery = `
         SELECT earnedFrom, xpEarned, DATE_FORMAT(timestamp, '%d %b %Y') as formattedDate 
         FROM xp_log 
@@ -46,7 +34,6 @@ const getXPHistory = async (req, res) => {
         ORDER BY timestamp DESC
     `;
 
-    // Execute database queries in sequence
     db.query(statsQuery, [userId, userId, userId, userId], (err, statsResults) => {
         if (err) {
             console.error("❌ DB Error (Stats):", err.message);
@@ -65,15 +52,12 @@ const getXPHistory = async (req, res) => {
                     return res.status(500).send("Error loading activity logs");
                 }
 
-                // Process heatmap results into a JSON object: { "YYYY-MM-DD": XP_SUM }
                 const heatmapData = {};
                 heatmapResults.forEach(row => {
-                    // Normalize date to YYYY-MM-DD format for frontend JS matching
                     const dateStr = row.logDate.toISOString().split('T')[0];
                     heatmapData[dateStr] = row.totalDayXP;
                 });
 
-                // 5. Final Render: Pass data to EJS
                 res.render('xphistory', { 
                     logs: logs, 
                     stats: statsResults[0],

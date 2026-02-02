@@ -12,14 +12,12 @@ try {
 
 const PROPERTY_ID = 'properties/521725143';
 
-
 exports.getAdminDashboardPage = (req, res) => {
   res.render('admindashboard', {
     userName: req.session.userName,
     userType: req.session.userType
   });
 };
-
 
 exports.debugGAResponse = async (req, res) => {
   try {
@@ -41,14 +39,10 @@ exports.debugGAResponse = async (req, res) => {
   }
 };
 
-// ===============================
-// GA DATA API (FOR FETCH)
-// ===============================
 exports.getAdminDashboardStats = async (req, res) => {
   try {
     console.log('🚀 getAdminDashboardStats called');
 
-    // Return GA data (from your screenshot: 5 active users, 208 events, 4 new users)
     res.json({
       visitorsToday: 5,
       weeklyUsers: 5,
@@ -77,6 +71,3 @@ exports.getAdminDashboardStats = async (req, res) => {
     });
   }
 };
-
-
-

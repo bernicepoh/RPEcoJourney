@@ -1,4 +1,4 @@
-// Controller function for homepage
+
 exports.getHomePage = (req, res) => {
   const username = req.session.user ? req.session.user.userName : null;
   const user = req.session.user 

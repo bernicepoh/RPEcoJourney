@@ -29,18 +29,15 @@ exports.updateProfile = (req, res) => {
 
   const errors = [];
 
-  // Required fields
   if (!userName || !email || !contactNo) {
     errors.push("Username, email and contact number are required.");
   }
 
-  // Email validation
   const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
   if (!emailRegex.test(email)) {
     errors.push("Please enter a valid Gmail address (example@gmail.com).");
   }
 
-  // Contact validation
   const contactRegex = /^[0-9]{8}$/;
   if (!contactRegex.test(contactNo)) {
     errors.push("Please enter a valid 8-digit contact number.");
@@ -52,7 +49,6 @@ exports.updateProfile = (req, res) => {
     return res.redirect("/editProfile/" + userId);
   }
 
-  // Check email duplicate
   const checkEmailSql = "SELECT * FROM user WHERE email = ? AND userID != ?";
   db.query(checkEmailSql, [email, userId], (err, emailResults) => {
     if (err) {
@@ -66,7 +62,7 @@ exports.updateProfile = (req, res) => {
       return res.redirect("/editProfile/" + userId);
     }
 
-    // Check contact duplicate
+
     const checkContactSql = "SELECT * FROM user WHERE contactNo = ? AND userID != ?";
     db.query(checkContactSql, [contactNo, userId], (err, contactResults) => {
       if (err) {
@@ -80,7 +76,7 @@ exports.updateProfile = (req, res) => {
         return res.redirect("/editProfile/" + userId);
       }
 
-      // Get existing image
+
       const getImageSql = "SELECT Image FROM user WHERE userID = ?";
       db.query(getImageSql, [userId], (err, imageResults) => {
         if (err) {
@@ -89,20 +85,18 @@ exports.updateProfile = (req, res) => {
           return res.redirect("/editProfile/" + userId);
         }
 
-        let Image = imageResults[0].Image; // keep old image by default
+        let Image = imageResults[0].Image; 
 
-        // If a new image is uploaded, replace it
         if (req.file) {
-          // Delete old image file
           if (Image) {
             const fs = require("fs");
             const oldPath = "./public/uploads/" + Image;
             if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
           }
-          Image = req.file.filename; // use new image
+          Image = req.file.filename; 
         }
 
-        // Update profile
+        
         const updateSql = `
           UPDATE user 
           SET userName = ?, email = ?, contactNo = ?, Image = ?
@@ -159,7 +153,6 @@ exports.updateUserRole = (req, res) => {
   const userId = req.params.id;
   const { userType } = req.body;
 
-  // First get the user's name
   const getUserSql = "SELECT userName FROM user WHERE userID = ?";
   
   db.query(getUserSql, [userId], (error, userResults) => {
