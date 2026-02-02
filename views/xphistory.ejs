@@ -226,7 +226,7 @@
         }
     }
 
-    // Trigger AI Wrap Fetching
+
     document.getElementById('wrappedBtn').addEventListener('click', async () => {
         try {
             const res = await fetch('/eco-wrapped');
@@ -249,7 +249,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         renderHeatmap();
-        // Setup Filter
         const filter = document.getElementById('logMonthFilter');
         const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         const optAll = document.createElement('option');

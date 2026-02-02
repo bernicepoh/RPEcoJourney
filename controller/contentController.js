@@ -52,10 +52,9 @@ exports.getContentByContentType = async (req, res) => {
                     WHERE e.contentID = c.contentID) AS totalShares
 
                 FROM content c
-                JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
-                LEFT JOIN content_request cr ON c.contentID = cr.contentID
+                JOIN content_type cat
+                ON c.contentTypeID = cat.contentTypeID
                 WHERE cat.contentTypeID = ?
-                AND (cr.status = 'approved' OR cr.contentRequestID IS NULL)
             `;
 
     db.query(sql, [userID, contentTypeID], async (error, results) => {
@@ -326,9 +325,7 @@ exports.getContent = (req, res) => {
         SELECT c.*, cat.contentTypeName, cat.contentTypeDescription, cat.contentTypeImage
         FROM content c
         JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
-        LEFT JOIN content_request cr ON c.contentID = cr.contentID
         WHERE c.contentID = ?
-        AND (cr.status = 'approved' OR cr.contentRequestID IS NULL)
     `;
 
     const commentSql = `
@@ -570,7 +567,13 @@ exports.addContent = (req, res) => {
 
         const contentID = results.insertId;
 
-        // All content must go through approval process
+        // If Writer chooses to publish directly (no approval needed)
+        if (publishNow === 'true') {
+            req.flash('success', 'Content published successfully!');
+            return res.redirect('manageContent');
+        }
+
+        // Otherwise, submit for approval
         // Step 2: Create content request with 'pending' status
         // Try without created_at first, it may be auto-generated
         const insertRequestSql = 'INSERT INTO content_request (contentID, status) VALUES (?, ?)';
@@ -835,14 +838,9 @@ exports.deleteContent = async (req, res) => {
 // contentController.js
 exports.manageContent = (req, res) => {
     const sql = `
-        SELECT 
-            c.*,
-            cat.contentTypeName,
-            COALESCE(cr.status, 'approved') as approvalStatus
+        SELECT *
         FROM content c
         JOIN content_type cat ON c.contentTypeID = cat.contentTypeID
-        LEFT JOIN content_request cr ON c.contentID = cr.contentID
-        ORDER BY c.contentID DESC
     `;
 
     db.query(sql, (error, results) => {
