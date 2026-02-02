@@ -4,16 +4,16 @@
     <title>RPEcoJourney Kiosk</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <style>
-        /* display.ejs */
+
         body {
             margin: 0;
             padding: 0;
-            background-color: white; /* Force the body to be white */
+            background-color: white; 
             overflow: hidden;
         } 
 
         #status-bar {
-            position: fixed; /* Keep it fixed to the screen coordinates */
+            position: fixed; 
             top: 20px;
             right: 20px;
             background: rgba(255, 255, 255, 0.9); 
@@ -51,7 +51,7 @@
     <canvas id="kioskCanvas"></canvas>
 
     <script>
-        // --- Keep your updateClock and updateWeather functions the same ---
+
         function updateClock() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString();
@@ -79,7 +79,6 @@
         setInterval(updateWeather, 1800000);
         updateWeather();
 
-        // --- THE UPDATED DISPLAY LOGIC ---
 
         const canvas = new fabric.Canvas('kioskCanvas', {
             width: window.innerWidth,
@@ -87,26 +86,26 @@
             interactive: false
         });
 
-        // We store the last layout string to avoid constant refreshing if nothing changed
+
         let currentLayoutString = "";
 
         async function updateDisplay() {
             try {
-                console.log("Checking for updates..."); // Debug log
+                console.log("Checking for updates..."); 
                 const response = await fetch('/api/screen/<%= screenId %>');
                 
                 if (response.ok) {
                     const layoutData = await response.json();
                     
-                    // Debug: See what the server is actually sending
+
                     console.log("New data received:", layoutData);
 
-                    // FORCE UPDATE: Clear and reload every time for now to ensure it works
+
                     canvas.clear();
 
                     canvas.loadFromJSON(layoutData, () => {
                         canvas.setBackgroundColor('#ffffff', () => {
-                            // Fix CORS for any images
+
                             canvas.getObjects('image').forEach(img => {
                                 img.set({ crossOrigin: 'anonymous' });
                             });
@@ -114,7 +113,7 @@
                             console.log("✅ Render Complete");
                         });
                     }, (o, object) => {
-                        // Handle image paths
+
                         if (object.type === 'image' && object.src && !object.src.startsWith('http')) {
                             object.src = window.location.origin + object.src;
                         }
@@ -127,7 +126,7 @@
             }
         }
 
-        // Check for schedule changes every 10 seconds
+
         setInterval(updateDisplay, 10000);
         updateDisplay(); 
     </script>

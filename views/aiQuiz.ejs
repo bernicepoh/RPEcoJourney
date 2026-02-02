@@ -177,7 +177,7 @@
 <script>
     let qList = <%- JSON.stringify(quiz.questions) %>;
     
-    // ⭐ THE FIX: Capture the difficulty from EJS so JavaScript knows what it is
+
     let difficulty = "<%= difficulty %>"; 
     
     let current = 0;
@@ -185,12 +185,12 @@
     let timer = 10;
     let interval;
 
-    // ⭐ STREAK SYSTEM
+
     let streak = 0;
     let streakBonus = 0;
     let perfectBonus = 0;
 
-    // ⭐ USER ANSWER STORAGE
+
     let userAnswers = [];
 
     const feedbackBox = document.getElementById("feedback");
@@ -253,7 +253,7 @@
         }
 
         let selectedValue = parseInt(selected.value);
-        userAnswers.push(selectedValue); // ⭐ SAVE ANSWER
+        userAnswers.push(selectedValue); 
 
         let correctIndex = qList[current].answerIndex;
         let correctAnswer = qList[current].options[correctIndex];
@@ -295,7 +295,7 @@
         document.getElementById("submitBtn").disabled = true;
         document.querySelectorAll("input[name='answer']").forEach(r => r.disabled = true);
 
-        // NEXT QUESTION AFTER 4s
+ 
         setTimeout(() => {
             current++;
             if (current < qList.length) {
@@ -314,14 +314,12 @@
                     });
                 }
 
-                // ⭐ SAVE FULL REVIEW BEFORE REDIRECT
                 const reviewData = {
                     questions: qList,
                     userAnswers: userAnswers
                 };
                 localStorage.setItem("aiQuizReview", JSON.stringify(reviewData));
 
-                // 🚀 REDIRECT TO RESULTS PAGE
                 setTimeout(() => {
                     window.location.href =
                         `/aiQuizResult?score=${score}&streakBonus=${streakBonus}&perfectBonus=${perfectBonus}&difficulty=${difficulty}`;
