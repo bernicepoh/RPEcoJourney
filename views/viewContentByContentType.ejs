@@ -116,9 +116,48 @@
         font-size: 14px;
     }
 
+    /* Mission Toast Notification */
+    .mission-toast {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: linear-gradient(135deg, #2e7d32, #4caf50);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      animation: slideIn 0.4s ease-out, fadeOut 0.4s ease-in 2.6s;
+      opacity: 0;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+      }
+    }
+
     .back-link {
-      display: inline-block;
-      margin-top: 50px;
+      display: inline-block;      margin-top: 50px;
       text-decoration: none;
       color: #256b45;
       font-weight: 700;
@@ -270,6 +309,18 @@
       const backLink = document.getElementById('backLink');
       if (backLink) backLink.textContent = t('backToCategories');
 
+      // Mission completion toast
+      function showMissionToast() {
+        const toast = document.createElement('div');
+        toast.className = 'mission-toast';
+        toast.innerHTML = '🎉 <strong>Mission Complete!</strong> +20 XP earned';
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+
       const likeButtons = document.querySelectorAll('.like-btn');
 
       likeButtons.forEach(btn => {
@@ -308,6 +359,11 @@
             // Update count text (number only)
             const countSpan = btn.querySelector('.like-count');
             countSpan.textContent = data.likeCount;
+
+            // Show toast if mission was completed
+            if (data.missionCompleted) {
+              showMissionToast();
+            }
           })
           .catch(err => {
             console.error('Error toggling like:', err);
@@ -386,7 +442,13 @@
               }
 
               // UPDATE BACKEND
-              await fetch(`/share/${contentID}`, { method: "POST" });
+              const response = await fetch(`/share/${contentID}`, { method: "POST" });
+              const data = await response.json();
+              
+              // Show mission toast if completed
+              if (data && data.missionCompleted) {
+                  showMissionToast();
+              }
 
               // 🔥 UPDATE UI COUNTER
               const countSpan = btn.parentElement.querySelector('.count');

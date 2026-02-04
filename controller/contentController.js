@@ -152,24 +152,68 @@ exports.toggleLike = (req, res) => {
 
                 if (updateErr) return res.status(500).json({ success: false });
 
-                const countSql = `
-                    SELECT COUNT(*) AS likeCount
-                    FROM engagement 
-                    WHERE contentID = ? AND likes = 1
-                `;
+                // Check if mission will be completed
+                let missionCompleted = false;
+                if (newLikeValue === 1) {
+                    // Check if mission exists and is not completed
+                    const checkMissionSql = `
+                        SELECT missionID FROM mission 
+                        WHERE userID = ? 
+                        AND missionType = 'Like a Sustainability Post' 
+                        AND xpEarned = 0 
+                        AND completedAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                        LIMIT 1
+                    `;
+                    
+                    db.query(checkMissionSql, [userID], (mErr, mRows) => {
+                        if (!mErr && mRows.length > 0) {
+                            missionCompleted = true;
+                        }
+                        
+                        // Trigger mission completion
+                        missionController.completeMission(userID, 'Like a Sustainability Post');
+                        
+                        const countSql = `
+                            SELECT COUNT(*) AS likeCount
+                            FROM engagement 
+                            WHERE contentID = ? AND likes = 1
+                        `;
 
-                db.query(countSql, [contentID], (countErr, countRows) => {
-                    console.log("❌ Count error:", countErr);
-                    console.log("📌 Count rows:", countRows);
+                        db.query(countSql, [contentID], (countErr, countRows) => {
+                            console.log("❌ Count error:", countErr);
+                            console.log("📌 Count rows:", countRows);
 
-                    if (countErr) return res.status(500).json({ success: false });
+                            if (countErr) return res.status(500).json({ success: false });
 
-                    return res.json({
-                        success: true,
-                        liked: newLikeValue === 1,
-                        likeCount: countRows[0].likeCount
+                            return res.json({
+                                success: true,
+                                liked: newLikeValue === 1,
+                                likeCount: countRows[0].likeCount,
+                                missionCompleted: missionCompleted
+                            });
+                        });
                     });
-                });
+                } else {
+                    const countSql = `
+                        SELECT COUNT(*) AS likeCount
+                        FROM engagement 
+                        WHERE contentID = ? AND likes = 1
+                    `;
+
+                    db.query(countSql, [contentID], (countErr, countRows) => {
+                        console.log("❌ Count error:", countErr);
+                        console.log("📌 Count rows:", countRows);
+
+                        if (countErr) return res.status(500).json({ success: false });
+
+                        return res.json({
+                            success: true,
+                            liked: newLikeValue === 1,
+                            likeCount: countRows[0].likeCount,
+                            missionCompleted: false
+                        });
+                    });
+                }
             });
 
         } else {
@@ -185,22 +229,40 @@ exports.toggleLike = (req, res) => {
 
                 if (insErr) return res.status(500).json({ success: false });
 
-                const countSql = `
-                    SELECT COUNT(*) AS likeCount
-                    FROM engagement 
-                    WHERE contentID = ? AND likes = 1
+                // Check if mission will be completed
+                const checkMissionSql = `
+                    SELECT missionID FROM mission 
+                    WHERE userID = ? 
+                    AND missionType = 'Like a Sustainability Post' 
+                    AND xpEarned = 0 
+                    AND completedAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                    LIMIT 1
                 `;
+                
+                db.query(checkMissionSql, [userID], (mErr, mRows) => {
+                    const missionCompleted = !mErr && mRows.length > 0;
+                    
+                    // Trigger mission completion
+                    missionController.completeMission(userID, 'Like a Sustainability Post');
 
-                db.query(countSql, [contentID], (countErr, countRows) => {
-                    console.log("❌ Count error:", countErr);
-                    console.log("📌 Count rows:", countRows);
+                    const countSql = `
+                        SELECT COUNT(*) AS likeCount
+                        FROM engagement 
+                        WHERE contentID = ? AND likes = 1
+                    `;
 
-                    if (countErr) return res.status(500).json({ success: false });
+                    db.query(countSql, [contentID], (countErr, countRows) => {
+                        console.log("❌ Count error:", countErr);
+                        console.log("📌 Count rows:", countRows);
 
-                    return res.json({
-                        success: true,
-                        liked: true,
-                        likeCount: countRows[0].likeCount
+                        if (countErr) return res.status(500).json({ success: false });
+
+                        return res.json({
+                            success: true,
+                            liked: true,
+                            likeCount: countRows[0].likeCount,
+                            missionCompleted: missionCompleted
+                        });
                     });
                 });
             });
@@ -249,7 +311,30 @@ exports.postComment = async (req, res) => {
                 return res.status(500).send("Failed to post comment");
             }
             console.log('✅ Comment posted successfully');
-            res.redirect(`/content/${contentID}?success=posted`);
+            
+            // Check if mission will be completed
+            const checkMissionSql = `
+                SELECT missionID FROM mission 
+                WHERE userID = ? 
+                AND missionType = 'Comment on any Content' 
+                AND xpEarned = 0 
+                AND completedAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                LIMIT 1
+            `;
+            
+            db.query(checkMissionSql, [userID], (mErr, mRows) => {
+                const missionCompleted = !mErr && mRows.length > 0;
+                
+                // Trigger mission completion for commenting
+                missionController.completeMission(userID, 'Comment on any Content');
+                
+                // Redirect with mission parameter if completed
+                if (missionCompleted) {
+                    res.redirect(`/content/${contentID}?success=posted&mission=complete`);
+                } else {
+                    res.redirect(`/content/${contentID}?success=posted`);
+                }
+            });
         });
 
     } catch (error) {
@@ -287,10 +372,45 @@ exports.trackShare = (req, res) => {
         if (result.affectedRows === 0) {
             db.query(insertSql, [userID, contentID], err2 => {
                 if (err2) return res.status(500).json({ success: false });
-                return res.json({ success: true });
+                
+                // Check if mission exists before completing
+                const checkMissionSql = `
+                    SELECT missionID FROM mission 
+                    WHERE userID = ? 
+                    AND missionType = 'Share 1 Sustainability Post' 
+                    AND xpEarned = 0 
+                    AND completedAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                    LIMIT 1
+                `;
+                
+                db.query(checkMissionSql, [userID], (mErr, mRows) => {
+                    const missionCompleted = !mErr && mRows.length > 0;
+                    
+                    // Trigger mission completion
+                    missionController.completeMission(userID, 'Share 1 Sustainability Post');
+                    
+                    return res.json({ success: true, missionCompleted: missionCompleted });
+                });
             });
         } else {
-            return res.json({ success: true });
+            // Check if mission exists before completing
+            const checkMissionSql = `
+                SELECT missionID FROM mission 
+                WHERE userID = ? 
+                AND missionType = 'Share 1 Sustainability Post' 
+                AND xpEarned = 0 
+                AND completedAt >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+                LIMIT 1
+            `;
+            
+            db.query(checkMissionSql, [userID], (mErr, mRows) => {
+                const missionCompleted = !mErr && mRows.length > 0;
+                
+                // Trigger mission completion
+                missionController.completeMission(userID, 'Share 1 Sustainability Post');
+                
+                return res.json({ success: true, missionCompleted: missionCompleted });
+            });
         }
     });
 };
