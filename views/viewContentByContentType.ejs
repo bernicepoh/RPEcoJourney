@@ -20,7 +20,7 @@
       min-height: 100vh;
     }
 
- 
+    /* Hero banner */
     .hero {
       position: relative;
       width: 100%;
@@ -61,15 +61,17 @@
       font-size:1.05rem;
     }
 
+    /* Fixed column for all previews */
     .file-box {
-      width: 250px;           
-      height: 160px;           
+      width: 250px;              /* all previews share SAME width */
+      height: 160px;             /* adjust height if needed */
       display: flex;
-      align-items: center;      
-      justify-content: center;  
+      align-items: center;       /* center vertically */
+      justify-content: center;   /* center horizontally */
       margin-right: 25px;
     }
 
+    /* Image / video auto-fit inside the box */
     .file-box img,
     .file-box video {
       max-width: 100%;
@@ -146,7 +148,7 @@
       : '/uploads/default.png';
   %>
 
-
+  <!-- HERO -->
   <section class="hero" style="background-image: url('<%= heroBg %>');">
     <div class="cat-card">
       <h2>
@@ -174,38 +176,39 @@
   %>
   
   <% if (['png','jpg','jpeg','gif','webp'].includes(ext)) { %>
+    <!-- Image preview: direct display -->
     <img src="<%= fileUrl %>?w=250&h=160&c=fill" alt="<%= contentList[i].contentTitle %>" style="width:100%; height:100%; object-fit:contain;">
     
   <% } else if (['mp4','mov','avi'].includes(ext)) { %>
- 
+    <!-- Video preview: use poster/thumbnail -->
     <video style="width:100%; height:100%; object-fit:cover;" muted>
       <source src="<%= fileUrl %>">
     </video>
     <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:40px;background:rgba(0,0,0,0.5);border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;">▶️</div>
     
   <% } else if (ext === 'pdf') { %>
-
+    <!-- PDF preview: show document icon -->
     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#d32f2f;">
       <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1770013716/pdf_bnonfy.png" alt="PDF" style="width:80px; height:80px; object-fit:contain;">
     </div>
     <div style="position:absolute;top:8px;right:8px;background:rgba(211,47,47,0.9);color:white;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;">PDF</div>
     
   <% } else if (['doc','docx'].includes(ext)) { %>
-  
+    <!-- Word doc preview: show document icon -->
     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#1976d2;">
       <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1770013716/word_kwqxym.png" alt="Word Document" style="width:80px; height:80px; object-fit:contain;">
     </div>
     <div style="position:absolute;top:8px;right:8px;background:rgba(25,118,210,0.9);color:white;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;">DOC</div>
     
   <% } else if (['ppt','pptx'].includes(ext)) { %>
-  
+    <!-- PowerPoint preview: show presentation icon -->
     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#d84315;">
       <img src="https://res.cloudinary.com/dmyv7fbha/image/upload/v1770013716/ppt_s5awbi.png" alt="PowerPoint Document" style="width:80px; height:80px; object-fit:contain;">
     </div>
     <div style="position:absolute;top:8px;right:8px;background:rgba(216,67,21,0.9);color:white;padding:4px 8px;border-radius:20px;font-size:12px;font-weight:bold;">PPT</div>
     
   <% } else { %>
-
+    <!-- Fallback: generic file icon -->
     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#757575;">
       <div style="font-size:60px;">📃</div>
       <div style="margin-top:10px; font-weight:bold; color:#666;"><%= ext.toUpperCase() %></div>
@@ -227,7 +230,7 @@
 
       <div class="engagement-bar">
         <div class="eng-section">
-        
+          <!-- LIKE BUTTON -->
           <button class="like-btn" data-content-id="<%= contentList[i].contentID %>">
             <span class="heart-icon"><%= contentList[i].userLiked ? "❤️" : "🤍" %></span>
             <span class="like-count"><%= contentList[i].likeCount %></span>
@@ -235,49 +238,32 @@
           </button>
         </div>
 
-        <div style="flex:1">
-          <h5 class="mb-1" style="color:#155f39;font-weight:700;">
-            <a href="/content/<%= contentList[i].contentID %>" style="color:inherit; text-decoration:none;">
-              <%= contentList[i].contentTitle %>
-            </a>
-          </h5>
-
-          <p class="mb-2" style="font-style:italic;color:#155f39;font-size:1.03em;">
-            <%= contentList[i].contentDescription.split('.')[0] + '.' %>
-          </p>
-
-          <div class="engagement-bar">
-            <div class="eng-section">
-              <button class="like-btn" data-content-id="<%= contentList[i].contentID %>">
-                <span class="heart-icon"><%= contentList[i].userLiked ? "❤️" : "🤍" %></span>
-                <span class="like-count"><%= contentList[i].likeCount %></span>
-                <span class="like-text">Like</span>
-              </button>
-            </div>
-
-            <div class="eng-section">
-              <button class="comment-btn" onclick="addComment('<%= contentList[i].contentID %>')">
-                💬 <span class="comment-text">Comment</span>
-              </button>
-              <span class="count"><%= contentList[i].commentCount %></span>
-            </div>
-
-            <div class="eng-section">
-              <button class="share-btn" data-content-id="<%= contentList[i].contentID %>">
-                ↗️ <span class="share-text">Share</span>
-              </button>
-              <span class="count"><%= contentList[i].totalShares || 0 %></span>
-            </div>
-          </div> 
+        <!-- COMMENT BUTTON -->
+        <div class="eng-section">
+          <button class="comment-btn" onclick="addComment('<%= contentList[i].contentID %>')">
+            💬 <span class="comment-text">Comment</span>
+          </button>
+          <span class="count"><%= contentList[i].commentCount %></span>
         </div>
-      </div>
-    <% } %>
+
+        <!-- SHARE BUTTON -->
+        <div class="eng-section">
+          <button class="share-btn" data-content-id="<%= contentList[i].contentID %>">
+            ↗️ <span class="share-text">Share</span>
+          </button>
+          <span class="count"><%= contentList[i].totalShares || 0 %></span>
+        </div>
+      </div> 
+    </div>
+  </div>
+<% } %>
 
     <a href="/categories" class="back-link" id="backLink">← Back to Categories</a>
-  </div>
+</div>
 
-  <script> 
+  <script> //the edit was just the tab/spaces cos i OCD lol
     document.addEventListener('DOMContentLoaded', () => {
+      // Translate UI elements
       document.querySelectorAll('.like-text').forEach(el => el.textContent = t('like'));
       document.querySelectorAll('.comment-text').forEach(el => el.textContent = t('comment'));
       document.querySelectorAll('.share-text').forEach(el => el.textContent = t('share'));
@@ -296,6 +282,7 @@
           })
           .then(res => {
             if (res.status === 401) {
+              // Not logged in
               alert(t('loginToLike'));
               return null;
             }
@@ -310,6 +297,7 @@
               return;
             }
 
+            // Update heart icon
             const heartSpan = btn.querySelector('.heart-icon');
             if (data.liked) {
               heartSpan.textContent = '❤️';
@@ -317,6 +305,7 @@
               heartSpan.textContent = '🤍';
             }
 
+            // Update count text (number only)
             const countSpan = btn.querySelector('.like-count');
             countSpan.textContent = data.likeCount;
           })
@@ -329,41 +318,85 @@
   </script>
 
   <script>
-    function addComment(contentID) {
+  function addComment(contentID) {
       window.location.href = `/content/${contentID}?from=contentType`;
-    }
+  }
   </script>
 
   <script>
-    document.addEventListener("DOMContentLoaded", async () => {
-      const baseURL = window.location.origin;
+  document.addEventListener("DOMContentLoaded", () => {
+
+    const baseURL = window.location.origin;
+
+    document.querySelectorAll('.share-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+
+        const contentID = btn.dataset.contentId;
+        const shareURL = `${baseURL}/content/${contentID}`;
+
+        // PHONE / MOBILE SHARE
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: "RPEcoJourney Content",
+              text: "Check out this sustainability content!",
+              url: shareURL
+            });
+          } catch (err) {}
+        }
+        // DESKTOP FALLBACK
+        else {
+          await navigator.clipboard.writeText(shareURL);
+          alert("Link copied!");
+        }
+
+        // UPDATE BACKEND (will fail silently if not logged in)
+        try {
+          await fetch(`/share/${contentID}`, { method: "POST" });
+        } catch (e) {}
+
+        // UPDATE UI COUNTER  
+        const countSpan = btn.parentElement.querySelector('.count');
+        if (countSpan) {
+          countSpan.textContent = parseInt(countSpan.textContent) + 1;
+        }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+      const baseURL = await getBaseURL();
 
       document.querySelectorAll('.share-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const contentID = btn.dataset.contentId;
-          const shareURL = `${baseURL}/content/${contentID}`;
+          btn.addEventListener('click', async () => {
+              const contentID = btn.dataset.contentId;
+              const shareURL = `${baseURL}/content/${contentID}`;
 
-          if (navigator.share) {
-            try {
-              await navigator.share({
-                title: t('shareTitle'),
-                text: t('shareText'),
-                url: shareURL
-              });
-            } catch (err) {}
-          } else {
-            await navigator.clipboard.writeText(shareURL);
-            alert(t('linkCopied'));
-          }
+              // PHONE SHARE
+              if (navigator.share) {
+                  try {
+                      await navigator.share({
+                          title: t('shareTitle'),
+                          text: t('shareText'),
+                          url: shareURL
+                      });
+                  } catch (err) {}
+              } 
+              // DESKTOP
+              else {
+                  await navigator.clipboard.writeText(shareURL);
+                  alert(t('linkCopied'));
+              }
 
-          await fetch(`/share/${contentID}`, { method: "POST" });
+              // UPDATE BACKEND
+              await fetch(`/share/${contentID}`, { method: "POST" });
 
-          const countSpan = btn.parentElement.querySelector('.count');
-          const current = parseInt(countSpan.textContent);
-          countSpan.textContent = current + 1;
-        });
+              // 🔥 UPDATE UI COUNTER
+              const countSpan = btn.parentElement.querySelector('.count');
+              const current = parseInt(countSpan.textContent);
+              countSpan.textContent = current + 1;
+          });
       });
     });
+
+  });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
