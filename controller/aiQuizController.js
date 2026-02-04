@@ -69,6 +69,23 @@ exports.showQuizResult = (req, res) => {
                     if (err) {
                         console.log("Error updating user XP:", err);
                     } 
+                    
+                    // ==========================================
+                    // LOG XP TO xp_log TABLE FOR HISTORY TRACKING
+                    // ==========================================
+                    const xpLogSql = `INSERT INTO xp_log (userID, timestamp, xpEarned, earnedFrom) VALUES (?, ?, ?, ?)`;
+                    const earnedFromText = `AI Quiz (Difficulty ${difficulty}) - Score: ${score}/5`;
+                    db.query(xpLogSql, [user.userID, now, totalXPEarned, earnedFromText], (err) => {
+                        if (err) {
+                            console.log("❌ Error logging XP to xp_log:", err);
+                        } else {
+                            console.log("✅ XP logged successfully to xp_log table");
+                        }
+                    });
+                    
+                    // ==========================================
+                    // MISSION TRIGGERS
+                    // ==========================================
                     missionController.completeMission(user.userID, 'Complete 1 AI Quiz');
                     
                     if (totalXPEarned >= 30) {
