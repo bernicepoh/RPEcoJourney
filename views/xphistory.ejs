@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sustainability Dashboard | Eco Journey</title>
+    <script src="/translations.js"></script>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -121,8 +122,8 @@
 
 <div class="dashboard-container">
     <header class="mb-5 text-center">
-        <h1 class="fw-bold display-4" style="color: #1b5e20; font-family: 'Poppins', sans-serif;">Sustainability Journey</h1>
-        <p class="lead fw-bold" style="color: #2e7d32;">Track your daily contributions and lifetime milestones.</p>
+        <h1 id="pageTitle" class="fw-bold display-4" style="color: #1b5e20; font-family: 'Poppins', sans-serif;">Sustainability Journey</h1>
+        <p id="pageSubtitle" class="lead fw-bold" style="color: #2e7d32;">Track your daily contributions and lifetime milestones.</p>
     </header>
 
     <div class="text-center my-4">
@@ -133,16 +134,16 @@
     </div>
 
     <div class="stats-grid mb-5">
-        <div class="stat-card glass-panel"><span>⭐</span><p class="fw-bold m-0 text-muted">Total XP</p><h3>+<%= stats.currentXP %></h3></div>
-        <div class="stat-card glass-panel"><span>🧠</span><p class="fw-bold m-0 text-muted">Quizzes</p><h3><%= stats.quizCount %></h3></div>
-        <div class="stat-card glass-panel"><span>🎯</span><p class="fw-bold m-0 text-muted">Missions</p><h3><%= stats.missionCount %></h3></div>
-        <div class="stat-card glass-panel"><span>🔥</span><p class="fw-bold m-0 text-muted">Streak</p><h3><%= stats.currentStreak %> Days</h3></div>
+        <div class="stat-card glass-panel"><span>⭐</span><p id="totalXpLabel" class="fw-bold m-0 text-muted">Total XP</p><h3>+<%= stats.currentXP %></h3></div>
+        <div class="stat-card glass-panel"><span>🧠</span><p id="quizzesLabel" class="fw-bold m-0 text-muted">Quizzes</p><h3><%= stats.quizCount %></h3></div>
+        <div class="stat-card glass-panel"><span>🎯</span><p id="missionsLabel" class="fw-bold m-0 text-muted">Missions</p><h3><%= stats.missionCount %></h3></div>
+        <div class="stat-card glass-panel"><span>🔥</span><p id="streakLabel" class="fw-bold m-0 text-muted">Streak</p><h3 id="streakValue"><%= stats.currentStreak %> Days</h3></div>
     </div>
 
     <div class="viz-card glass-panel p-5 mb-5 text-center">
         <h5 id="month-name" class="fw-bold text-success mb-4" style="font-family: 'Poppins', sans-serif;"></h5>
         <div class="d-flex justify-content-center gap-3 align-items-center">
-            <div class="d-flex flex-column justify-content-between h-100 py-1 small fw-bold text-muted" style="height: 140px;">
+            <div id="day-labels" class="d-flex flex-column justify-content-between h-100 py-1 small fw-bold text-muted" style="height: 140px;">
                 <span>Sun</span><span>Tue</span><span>Thu</span><span>Sat</span>
             </div>
             <div id="month-grid" class="heatmap-wrapper"></div>
@@ -150,9 +151,9 @@
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
-        <h2 class="history-title m-0">Activity History</h2>
+        <h2 id="activityHistoryTitle" class="history-title m-0">Activity History</h2>
         <div class="bg-white p-2 rounded-3 shadow-sm">
-            <label class="me-2 small fw-bold text-muted">Filter Month:</label>
+            <label id="filterMonthLabel" class="me-2 small fw-bold text-muted">Filter Month:</label>
             <select id="logMonthFilter" class="form-select border-0 fw-bold text-success" style="width: auto;" onchange="filterLogsByMonth()"></select>
         </div>
     </div>
@@ -183,7 +184,7 @@
                         <h2 class="fw-bold text-dark mb-4" id="wrap-personality"></h2>
                         <p class="h5 leading-relaxed italic" id="wrap-analysis"></p>
                     </div>
-                    <button class="btn btn-success btn-lg rounded-pill px-5 mt-5 fw-bold" data-bs-dismiss="modal">AWESOME!</button>
+                    <button id="awesomeBtn" class="btn btn-success btn-lg rounded-pill px-5 mt-5 fw-bold" data-bs-dismiss="modal">AWESOME!</button>
                 </div>
             </div>
         </div>
@@ -191,6 +192,43 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // ============= TRANSLATION SUPPORT =============
+    function applyTranslations() {
+        // Header
+        const pageTitle = document.getElementById('pageTitle');
+        const pageSubtitle = document.getElementById('pageSubtitle');
+        const wrappedBtn = document.getElementById('wrappedBtn');
+        
+        // Stats cards
+        const totalXpLabel = document.getElementById('totalXpLabel');
+        const quizzesLabel = document.getElementById('quizzesLabel');
+        const missionsLabel = document.getElementById('missionsLabel');
+        const streakLabel = document.getElementById('streakLabel');
+        const streakValue = document.getElementById('streakValue');
+        
+        // Activity history
+        const activityHistoryTitle = document.getElementById('activityHistoryTitle');
+        const filterMonthLabel = document.getElementById('filterMonthLabel');
+        
+        // Modal
+        const awesomeBtn = document.getElementById('awesomeBtn');
+        
+        if (pageTitle) pageTitle.textContent = t('sustainabilityJourneyTitle');
+        if (pageSubtitle) pageSubtitle.textContent = t('trackContributions');
+        if (wrappedBtn) wrappedBtn.innerHTML = t('viewSeasonWrap');
+        
+        if (totalXpLabel) totalXpLabel.textContent = t('totalXP');
+        if (quizzesLabel) quizzesLabel.textContent = t('quizzes');
+        if (missionsLabel) missionsLabel.textContent = t('missions');
+        if (streakLabel) streakLabel.textContent = t('streak');
+        
+        if (activityHistoryTitle) activityHistoryTitle.textContent = t('activityHistory');
+        if (filterMonthLabel) filterMonthLabel.textContent = t('filterMonth');
+        
+        if (awesomeBtn) awesomeBtn.textContent = t('awesome');
+    }
+
+    // ============= HEATMAP & DATA LOGIC =============
     const hData = <%- heatmapData %>;
     const now = new Date();
 
@@ -199,8 +237,12 @@
         const monthLabel = document.getElementById('month-name');
         const month = now.getMonth();
         const year = now.getFullYear();
-        const mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        monthLabel.innerText = `CURRENT MONTH: ${mNames[month].toUpperCase()} ${year}`;
+        const mNames = [
+            t('january'), t('february'), t('march'), t('april'), 
+            t('may'), t('june'), t('july'), t('august'), 
+            t('september'), t('october'), t('november'), t('december')
+        ];
+        monthLabel.innerText = `${t('currentMonth')}: ${mNames[month].toUpperCase()} ${year}`;
         
         const first = new Date(year, month, 1);
         const last = new Date(year, month + 1, 0);
@@ -218,7 +260,7 @@
                 else if (xp >= 50) lvl = 'level-2';
                 else if (xp > 0) lvl = 'level-1';
                 sq.className = `heatmap-square ${lvl}`;
-                sq.title = `${curr.toDateString()}: ${xp} XP`;
+                sq.title = `${curr.toDateString()}: ${xp} ${t('xp')}`;
             } else { sq.style.visibility = 'hidden'; sq.className = 'heatmap-square'; }
             grid.appendChild(sq);
             curr.setDate(curr.getDate() + 1);
@@ -248,15 +290,36 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+        applyTranslations(); // Apply all translations first
+        
+        // Update day labels
+        const dayLabels = document.getElementById('day-labels');
+        if (dayLabels) {
+            dayLabels.innerHTML = `<span>${t('sunday')}</span><span>${t('tuesday')}</span><span>${t('thursday')}</span><span>${t('saturday')}</span>`;
+        }
+        
+        // Update streak value with translated "Days"
+        const streakValue = document.getElementById('streakValue');
+        if (streakValue) {
+            const streakNum = streakValue.textContent.match(/\d+/)[0];
+            streakValue.innerHTML = `${streakNum} ${t('days')}`;
+        }
+        
         renderHeatmap();
+        
         const filter = document.getElementById('logMonthFilter');
-        const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const mNames = [
+            t('jan'), t('feb'), t('mar'), t('apr'), t('mayShort'), t('jun'), 
+            t('jul'), t('aug'), t('sep'), t('oct'), t('nov'), t('dec')
+        ];
         const optAll = document.createElement('option');
-        optAll.value = 'all'; optAll.innerText = 'All History';
+        optAll.value = 'all'; 
+        optAll.innerText = t('allHistory');
         filter.appendChild(optAll);
         for(let i=0; i<12; i++){
             const opt = document.createElement('option');
-            opt.value = mNames[i]; opt.innerText = mNames[i];
+            opt.value = mNames[i]; 
+            opt.innerText = mNames[i];
             if(i === now.getMonth()) opt.selected = true;
             filter.appendChild(opt);
         }

@@ -381,83 +381,83 @@
 
   <script>
   document.addEventListener("DOMContentLoaded", () => {
-
+    console.log('🔧 Share button script loaded');
     const baseURL = window.location.origin;
+    const shareButtons = document.querySelectorAll('.share-btn');
+    console.log('📱 Found share buttons:', shareButtons.length);
 
-    document.querySelectorAll('.share-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-
+    shareButtons.forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        console.log('🎯 Share button clicked!');
+        
         const contentID = btn.dataset.contentId;
+        console.log('📝 Content ID:', contentID);
+        
+        if (!contentID) {
+          console.error('❌ No content ID found!');
+          alert('Error: Cannot share this content');
+          return;
+        }
+        
         const shareURL = `${baseURL}/content/${contentID}`;
+        console.log('🔗 Share URL:', shareURL);
 
         // PHONE / MOBILE SHARE
         if (navigator.share) {
+          console.log('📲 Using native share...');
           try {
             await navigator.share({
-              title: "RPEcoJourney Content",
-              text: "Check out this sustainability content!",
+              title: t('shareTitle'),
+              text: t('shareText'),
               url: shareURL
             });
-          } catch (err) {}
+            console.log('✅ Share successful');
+          } catch (err) {
+            console.error('❌ Share failed:', err);
+            // User cancelled, that's ok
+            if (err.name !== 'AbortError') {
+              alert('Share failed: ' + err.message);
+            }
+          }
         }
         // DESKTOP FALLBACK
         else {
-          await navigator.clipboard.writeText(shareURL);
-          alert("Link copied!");
+          console.log('💻 Using clipboard fallback...');
+          try {
+            await navigator.clipboard.writeText(shareURL);
+            alert(t('linkCopied'));
+            console.log('✅ Link copied to clipboard');
+          } catch (err) {
+            console.error('❌ Clipboard failed:', err);
+            // Fallback: show prompt
+            prompt('Copy this link:', shareURL);
+          }
         }
 
-        // UPDATE BACKEND (will fail silently if not logged in)
+        // UPDATE BACKEND
         try {
-          await fetch(`/share/${contentID}`, { method: "POST" });
-        } catch (e) {}
+          console.log('🔄 Updating backend...');
+          const response = await fetch(`/share/${contentID}`, { method: "POST" });
+          const data = await response.json();
+          console.log('📊 Backend response:', data);
+          
+          // Show mission toast if completed
+          if (data && data.missionCompleted) {
+            showMissionToast();
+          }
 
-        // UPDATE UI COUNTER  
-        const countSpan = btn.parentElement.querySelector('.count');
-        if (countSpan) {
-          countSpan.textContent = parseInt(countSpan.textContent) + 1;
+          // UPDATE UI COUNTER
+          const countSpan = btn.parentElement.querySelector('.count');
+          if (countSpan) {
+            const current = parseInt(countSpan.textContent) || 0;
+            countSpan.textContent = current + 1;
+          }
+        } catch (e) {
+          console.error('❌ Backend update failed:', e);
         }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-      const baseURL = await getBaseURL();
-
-      document.querySelectorAll('.share-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-              const contentID = btn.dataset.contentId;
-              const shareURL = `${baseURL}/content/${contentID}`;
-
-              // PHONE SHARE
-              if (navigator.share) {
-                  try {
-                      await navigator.share({
-                          title: t('shareTitle'),
-                          text: t('shareText'),
-                          url: shareURL
-                      });
-                  } catch (err) {}
-              } 
-              // DESKTOP
-              else {
-                  await navigator.clipboard.writeText(shareURL);
-                  alert(t('linkCopied'));
-              }
-
-              // UPDATE BACKEND
-              const response = await fetch(`/share/${contentID}`, { method: "POST" });
-              const data = await response.json();
-              
-              // Show mission toast if completed
-              if (data && data.missionCompleted) {
-                  showMissionToast();
-              }
-
-              // 🔥 UPDATE UI COUNTER
-              const countSpan = btn.parentElement.querySelector('.count');
-              const current = parseInt(countSpan.textContent);
-              countSpan.textContent = current + 1;
-          });
       });
     });
-
   });
   </script>
 
