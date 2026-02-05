@@ -51,7 +51,10 @@ exports.getContentByContentType = async (req, res) => {
                 FROM content c
                 JOIN content_type cat
                 ON c.contentTypeID = cat.contentTypeID
+                LEFT JOIN content_request cr
+                ON c.contentID = cr.contentID
                 WHERE cat.contentTypeID = ?
+                AND (cr.contentID IS NULL OR cr.status = 'approved')
             `;
 
     db.query(sql, [userID, contentTypeID], async (error, results) => {
