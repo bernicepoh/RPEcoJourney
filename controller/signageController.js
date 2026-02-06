@@ -3,7 +3,7 @@ const db = require('../db');
 const signageController = {
     getEditor: (req, res) => {
         // CHANGED FROM 'contents' TO 'content' - Only show approved content
-        const sql = "SELECT * FROM content WHERE status = 'Approved'"; 
+        const sql = "SELECT * FROM content c JOIN content_request cr ON c.contentID = cr.contentID WHERE cr.status = 'approved'"; 
         db.query(sql, (err, results) => {
             if (err) {
                 console.error("❌ SQL Error in getEditor:", err);

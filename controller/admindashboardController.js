@@ -41,33 +41,55 @@ exports.debugGAResponse = async (req, res) => {
 
 exports.getAdminDashboardStats = async (req, res) => {
   try {
-    console.log('🚀 getAdminDashboardStats called');
+    console.log('🚀 Fetching live GA4 stats...');
+
+    const [dailyReport] = await client.runReport({
+      property: PROPERTY_ID,
+      dateRanges: [{ startDate: 'today', endDate: 'today' }],
+      metrics: [
+        { name: 'activeUsers' },
+        { name: 'eventCount' },
+        { name: 'newUsers' }
+      ],
+    });
+
+    
+    const [weeklyReport] = await client.runReport({
+      property: PROPERTY_ID,
+      dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }],
+      metrics: [{ name: 'activeUsers' }],
+    });
+
+    const [realtimeReport] = await client.runRealtimeReport({
+      property: PROPERTY_ID,
+      metrics: [{ name: 'activeUsers' }],
+      dimensions: [{ name: 'country' }]
+    });
+
+ 
+    const dailyRow = dailyReport.rows?.[0]?.metricValues || [];
+    const weeklyUsers = weeklyReport.rows?.[0]?.metricValues?.[0]?.value || '0';
+    
+
+    const rtUsers = realtimeReport.rows?.reduce((acc, row) => 
+      acc + parseInt(row.metricValues[0].value), 0) || 0;
+
 
     res.json({
-      visitorsToday: 5,
-      weeklyUsers: 5,
-      activeUsers: 5,
-      eventCount: 208,
-      newUsers: 4,
-      realtimeUsers: 4,
-      countryStats: [
-        {
-          dimensionValues: [{ value: 'Singapore' }],
-          metricValues: [{ value: '4' }]
-        }
-      ]
+      visitorsToday: dailyRow[0]?.value || '0',
+      weeklyUsers: weeklyUsers,
+      activeUsers: dailyRow[0]?.value || '0', 
+      eventCount: dailyRow[1]?.value || '0',
+      newUsers: dailyRow[2]?.value || '0',
+      realtimeUsers: rtUsers.toString(),
+      countryStats: realtimeReport.rows || []
     });
 
   } catch (err) {
-    console.error('❌ Error:', err.message);
-    res.json({
-      visitorsToday: 0,
-      weeklyUsers: 0,
-      activeUsers: 0,
-      eventCount: 0,
-      newUsers: 0,
-      realtimeUsers: 0,
-      countryStats: []
+    console.error('❌ API Error:', err.message);
+    res.status(500).json({ 
+      error: 'Failed to fetch live stats',
+      message: err.message 
     });
   }
 };
